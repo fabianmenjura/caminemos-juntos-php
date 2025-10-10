@@ -598,19 +598,73 @@ Todos los derechos reservados © 2025
 
 ---
 
-## 🚀 Próximos Pasos
+## 🚀 Despliegue a Producción
+
+### Guías Disponibles
+
+1. **`GUIA_RAPIDA_DESPLIEGUE.md`** - Comandos rápidos para desplegar
+2. **`DESPLIEGUE_GIT.md`** - Guía completa paso a paso con SSH
+3. **`deploy-to-production.bat`** - Script automático para Windows
+
+### Despliegue Rápido
+
+```bash
+# Desde Windows, simplemente ejecuta:
+deploy-to-production.bat
+```
+
+El script automáticamente:
+- Agrega tus cambios
+- Hace commit
+- Cambia a rama production
+- Push a GitHub
+
+### Con Webhook Configurado
+
+Los cambios se despliegan **automáticamente** al hacer push.
+
+### Sin Webhook
+
+```bash
+# Conéctate por SSH y ejecuta:
+ssh -p 65002 tu-usuario@tu-servidor
+cd ~/public_html
+bash deploy.sh
+```
+
+Ver documentación completa: [`DESPLIEGUE_GIT.md`](./DESPLIEGUE_GIT.md)
+
+---
+
+## 📦 Próximos Pasos
 
 Después de la instalación:
 
 1. ✅ Verifica que todo funcione correctamente
-2. 🎨 Personaliza colores y textos
-3. 📸 Agrega fotos reales de los abuelos
-4. 💳 Configura PayU en modo producción
-5. 📧 Configura correos de notificación
-6. 📊 Implementa analytics (Google Analytics)
-7. 🔍 Optimiza SEO
+2. 🔐 Configura SSH para despliegue automático
+3. 🎨 Personaliza colores y textos
+4. 📸 Agrega fotos reales de los abuelos
+5. 💳 Configura PayU en modo producción
+6. 📧 Configura correos de notificación
+7. 📊 Implementa analytics (Google Analytics)
+8. 🔍 Optimiza SEO
+
+---
+
+## 📚 Documentación
+
+- [`README.md`](./README.md) - Este archivo (resumen general)
+- [`LEEME_PRIMERO.md`](./LEEME_PRIMERO.md) - Índice de documentación
+- [`INSTALACION_LOCAL.md`](./INSTALACION_LOCAL.md) - Setup en Laragon
+- [`INSTALACION_HOSTINGER.md`](./INSTALACION_HOSTINGER.md) - Deploy en Hostinger
+- [`DESPLIEGUE_GIT.md`](./DESPLIEGUE_GIT.md) - Despliegue con Git + SSH
+- [`GUIA_RAPIDA_DESPLIEGUE.md`](./GUIA_RAPIDA_DESPLIEGUE.md) - Comandos rápidos
+- [`PROYECTO_COMPLETO.md`](./PROYECTO_COMPLETO.md) - Referencia técnica completa
+- [`SOLUCION_PROBLEMAS_COMUNES.md`](./SOLUCION_PROBLEMAS_COMUNES.md) - Troubleshooting
 
 ---
 
 **¡Gracias por usar nuestro sistema!** 🎉
+
+**Repositorio:** https://github.com/fabianmenjura/caminemos-juntos-php.git
 
