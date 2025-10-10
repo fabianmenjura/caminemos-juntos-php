@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Redirigir /api a la carpeta api
+RewriteRule ^api/(.*)$ api/index.php/$1 [L,QSA]
+
+# Vue Router (history mode) - Redirecciones para SPA
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteCond %{REQUEST_URI} !^/donacion/
+RewriteRule ^.*$ index.html [L]
+
+# Prevenir listado de directorios
+Options -Indexes
