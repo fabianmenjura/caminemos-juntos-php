@@ -19,34 +19,60 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// Función para corregir rutas de imágenes
+function fixImagePath(url) {
+    if (!url) return 'assets/images/placeholder.jpg';
+    
+    // Si la URL empieza con /, quitarlo y agregar assets/images/
+    if (url.startsWith('/')) {
+        const filename = url.substring(1);
+        return `assets/images/${filename}`;
+    }
+    
+    // Si ya tiene la ruta completa, devolverla
+    if (url.includes('assets/images/')) {
+        return url;
+    }
+    
+    // Si solo es el nombre del archivo, agregar la ruta
+    return `assets/images/${url}`;
+}
+
 // Cargar abuelos
 async function loadAbuelos() {
     try {
         const response = await api.getAbuelos();
+        console.log('Abuelos cargados:', response);
         const abuelosContainer = document.getElementById('abuelos-container');
         const loadingEl = document.getElementById('abuelos-loading');
 
         if (response.success && response.data.abuelos) {
             const abuelos = response.data.abuelos.slice(0, 6);
             
-            abuelosContainer.innerHTML = abuelos.map(abuelo => `
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
-                    <div class="card grandparent-card h-100">
-                        <img src="${abuelo.foto_url || 'assets/images/placeholder.jpg'}" class="card-img-top" alt="${abuelo.nombre}">
-                        <div class="card-body">
-                            <h5 class="card-title">${abuelo.nombre}</h5>
-                            <p class="text-muted">
-                                <i class="fas fa-map-marker-alt me-1"></i>
-                                ${abuelo.ciudad} • ${abuelo.edad} años
-                            </p>
-                            <p class="card-text">${abuelo.descripcion.substring(0, 120)}...</p>
-                            <a href="donar.html" class="btn btn-outline-primary btn-sm">
-                                Apoyar a ${abuelo.nombre.split(' ')[0]}
-                            </a>
+            abuelosContainer.innerHTML = abuelos.map(abuelo => {
+                const imageUrl = fixImagePath(abuelo.foto_url);
+                return `
+                    <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
+                        <div class="card grandparent-card h-100">
+                            <img src="${imageUrl}" 
+                                 class="card-img-top" 
+                                 alt="${abuelo.nombre}"
+                                 onerror="this.src='assets/images/placeholder.jpg'">
+                            <div class="card-body">
+                                <h5 class="card-title">${abuelo.nombre}</h5>
+                                <p class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    ${abuelo.ciudad} • ${abuelo.edad} años
+                                </p>
+                                <p class="card-text">${abuelo.descripcion.substring(0, 120)}...</p>
+                                <a href="donar.html" class="btn btn-outline-primary btn-sm">
+                                    Apoyar a ${abuelo.nombre.split(' ')[0]}
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             loadingEl.style.display = 'none';
             abuelosContainer.style.display = 'flex';

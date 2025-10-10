@@ -157,24 +157,64 @@ Nombre: APPROVED
 ### Síntomas:
 - Cuadros rojos con X
 - 404 en las imágenes
+- Imágenes de placeholder en lugar de fotos reales
 
 ### Solución:
 
-**1. Verificar que existen:**
+**1. Verificar que las imágenes existen:**
 ```
-assets/images/abuelo-1.jpg
-assets/images/abuelo-2.jpg
-etc.
+assets/images/elderly-colombian-woman-smiling-warm.jpg
+assets/images/elderly-colombian-man-smiling-kind.jpg
+assets/images/elderly-colombian-woman-happy-flowers.jpg
+assets/images/elderly-colombian-man-friendly-wise.jpg
+assets/images/elderly-colombian-woman-cooking-happy.jpg
+assets/images/elderly-colombian-man-dancing-joyful.jpg
 ```
 
-**2. Verificar rutas en el HTML:**
-```html
-<!-- CORRECTO (relativo) -->
-<img src="assets/images/abuelo-1.jpg">
+**2. Verificar rutas en la base de datos:**
 
-<!-- INCORRECTO (absoluto) -->
-<img src="/assets/images/abuelo-1.jpg">
+Las rutas deben ser **relativas**, no absolutas:
+
+```sql
+-- ✅ CORRECTO
+SELECT * FROM abuelos WHERE foto_url LIKE 'assets/images/%';
+
+-- ❌ INCORRECTO
+SELECT * FROM abuelos WHERE foto_url LIKE '/%';
 ```
+
+**3. Corregir rutas en la base de datos:**
+
+Si las rutas están mal, ejecuta:
+```bash
+# En phpMyAdmin o desde terminal
+mysql -u root caminemos_juntos
+```
+
+Luego:
+```sql
+-- Ver rutas actuales
+SELECT id, nombre, foto_url FROM abuelos;
+
+-- Corregir si empiezan con /
+UPDATE abuelos 
+SET foto_url = CONCAT('assets/images/', SUBSTRING(foto_url, 2))
+WHERE foto_url LIKE '/%';
+```
+
+**4. O usa el script de corrección:**
+```
+database/fix-image-paths.sql
+```
+
+**5. Verificar en el navegador:**
+
+El código del frontend ya tiene un sistema de corrección automática que:
+- Detecta si la URL empieza con `/` y la corrige
+- Muestra un placeholder si la imagen no existe
+- Registra las rutas corregidas en la consola
+
+Abre F12 → Consola y verifica que no haya errores 404.
 
 ---
 
