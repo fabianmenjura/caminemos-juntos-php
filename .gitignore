@@ -1,0 +1,61 @@
+# Archivo .gitignore para el proyecto
+
+# Variables de entorno (IMPORTANTE: NO subir al repositorio)
+.env
+api/.env
+*.env
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# Dependencias (si usaras Composer en el futuro)
+vendor/
+node_modules/
+
+# Archivos de caché
+*.cache
+
+# Archivos de base de datos (backups locales)
+*.sql.backup
+*.sql.gz
+*.sql.zip
+
+# Archivos de Windows
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Archivos específicos del proyecto
+database/backups/
+uploads/
+*.old
+*.orig
+
+# NO ignorar estos archivos importantes
+!database/schema.sql
+!database/seed.sql
+!database/fix-image-paths.sql
+
