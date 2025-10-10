@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensajes de Contacto - Panel Administrativo</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: var(--color-accent);"></i>
+            <h3>Adopta un Abuelo</h3>
+            <p>Panel de Administración</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-section-title">Principal</div>
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Gestión</div>
+                <a href="abuelos.html" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Abuelos</span>
+                </a>
+                <a href="donaciones.html" class="menu-item">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Donaciones</span>
+                </a>
+                <a href="mensajes.html" class="menu-item active">
+                    <i class="fas fa-envelope"></i>
+                    <span>Mensajes</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-details">
+                    <h5 id="userName">Usuario</h5>
+                    <p id="userRole">Rol</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-envelope me-2"></i>Mensajes de Contacto</h1>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Filtros -->
+            <div class="table-card mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="filtroLeido" onchange="loadMensajes()">
+                            <option value="">Todos</option>
+                            <option value="false" selected>No leídos</option>
+                            <option value="true">Leídos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success w-100" onclick="marcarTodosLeidos()">
+                            <i class="fas fa-check-double me-2"></i>Marcar Todos Leídos
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lista de Mensajes -->
+            <div class="table-card">
+                <div id="loadingMensajes" class="loading-spinner">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+                
+                <div id="mensajesList" style="display: none;">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    
+    <script>
+        (async function() {
+            const isAuth = await adminAuth.requireAuth();
+            if (!isAuth) return;
+            
+            if (adminAuth.user) {
+                document.getElementById('userName').textContent = adminAuth.user.nombre_completo;
+                document.getElementById('userRole').textContent = getRoleLabel(adminAuth.user.rol);
+            }
+            
+            loadMensajes();
+        })();
+        
+        async function loadMensajes() {
+            const leido = document.getElementById('filtroLeido').value;
+            
+            try {
+                document.getElementById('loadingMensajes').style.display = 'flex';
+                document.getElementById('mensajesList').style.display = 'none';
+                
+                const params = { limite: 50 };
+                if (leido !== '') params.leido = leido;
+                
+                const response = await adminAPI.getMensajes(params);
+                
+                if (response.success) {
+                    renderMensajes(response.data.mensajes);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar mensajes');
+            }
+        }
+        
+        function renderMensajes(mensajes) {
+            const container = document.getElementById('mensajesList');
+            
+            if (mensajes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No hay mensajes</h3>
+                        <p>Los mensajes de contacto aparecerán aquí</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = mensajes.map(m => `
+                    <div class="card mb-3 ${!m.leido ? 'border-primary' : ''}" style="border-left: 4px solid ${!m.leido ? 'var(--color-primary)' : '#dee2e6'};">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        ${!m.leido ? '<i class="fas fa-circle text-primary me-2" style="font-size: 8px;"></i>' : ''}
+                                        ${m.nombre}
+                                    </h5>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-envelope me-1"></i>${m.email}
+                                        ${m.telefono ? `<span class="mx-2">•</span><i class="fas fa-phone me-1"></i>${m.telefono}` : ''}
+                                    </p>
+                                </div>
+                                <small class="text-muted">${formatDate(m.fecha_envio)}</small>
+                            </div>
+                            <p class="card-text">${m.mensaje}</p>
+                            <div class="d-flex gap-2">
+                                ${!m.leido ? `
+                                    <button class="btn btn-sm btn-primary" onclick="marcarLeido(${m.id})">
+                                        <i class="fas fa-check me-1"></i>Marcar como Leído
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarMensaje(${m.id})">
+                                    <i class="fas fa-trash me-1"></i>Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('loadingMensajes').style.display = 'none';
+            document.getElementById('mensajesList').style.display = 'block';
+        }
+        
+        async function marcarLeido(id) {
+            try {
+                const response = await adminAPI.marcarMensajeLeido(id);
+                if (response.success) {
+                    loadMensajes();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function eliminarMensaje(id) {
+            if (!confirm('¿Eliminar este mensaje permanentemente?')) return;
+            
+            try {
+                const response = await adminAPI.deleteMensaje(id);
+                if (response.success) {
+                    loadMensajes();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar mensaje');
+            }
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+        
+        function getEstadoBadge(estado) {
+            const badges = {
+                'pendiente': '<span class="badge badge-warning">Pendiente</span>',
+                'completada': '<span class="badge badge-success">Completada</span>',
+                'rechazada': '<span class="badge badge-danger">Rechazada</span>'
+            };
+            return badges[estado] || estado;
+        }
+        
+        function getRoleLabel(rol) {
+            return { 'super_admin': 'Super Admin', 'admin': 'Admin', 'editor': 'Editor' }[rol] || rol;
+        }
+        
+        async function logout() {
+            if (confirm('¿Cerrar sesión?')) await adminAuth.logout();
+        }
+    </script>
+</body>
+</html>
+

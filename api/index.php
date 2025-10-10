@@ -119,6 +119,92 @@ try {
         exit;
     }
 
+    // Rutas de autenticación
+    if ($segments[0] === 'auth') {
+        require_once __DIR__ . '/controllers/AuthController.php';
+        $controller = new AuthController();
+
+        if ($method === 'POST' && $segments[1] === 'login') {
+            // POST /api/auth/login
+            $controller->login();
+        } elseif ($method === 'POST' && $segments[1] === 'logout') {
+            // POST /api/auth/logout
+            $controller->logout();
+        } elseif ($method === 'GET' && $segments[1] === 'verify') {
+            // GET /api/auth/verify
+            $controller->verify();
+        } elseif ($method === 'GET' && $segments[1] === 'me') {
+            // GET /api/auth/me
+            $controller->me();
+        } elseif ($method === 'POST' && $segments[1] === 'change-password') {
+            // POST /api/auth/change-password
+            $controller->changePassword();
+        }
+        exit;
+    }
+
+    // Rutas de administración
+    if ($segments[0] === 'admin') {
+        require_once __DIR__ . '/controllers/AdminController.php';
+        $controller = new AdminController();
+
+        // Dashboard
+        if ($method === 'GET' && $segments[1] === 'dashboard') {
+            // GET /api/admin/dashboard
+            $controller->getDashboard();
+        }
+        
+        // Abuelos
+        elseif ($segments[1] === 'abuelos') {
+            if ($method === 'GET' && !isset($segments[2])) {
+                // GET /api/admin/abuelos
+                $controller->getAbuelos();
+            } elseif ($method === 'POST') {
+                // POST /api/admin/abuelos
+                $controller->createAbuelo();
+            } elseif ($method === 'PUT' && isset($segments[2])) {
+                // PUT /api/admin/abuelos/{id}
+                $controller->updateAbuelo($segments[2]);
+            } elseif ($method === 'DELETE' && isset($segments[2])) {
+                // DELETE /api/admin/abuelos/{id}
+                $controller->deleteAbuelo($segments[2]);
+            }
+        }
+        
+        // Donaciones
+        elseif ($segments[1] === 'donaciones') {
+            if ($method === 'GET') {
+                // GET /api/admin/donaciones
+                $controller->getDonaciones();
+            } elseif ($method === 'PUT' && isset($segments[2]) && isset($segments[3])) {
+                // PUT /api/admin/donaciones/{tipo}/{id}
+                $controller->updateDonacion($segments[2], $segments[3]);
+            }
+        }
+        
+        // Mensajes
+        elseif ($segments[1] === 'mensajes') {
+            if ($method === 'GET' && !isset($segments[2])) {
+                // GET /api/admin/mensajes
+                $controller->getMensajes();
+            } elseif ($method === 'PUT' && isset($segments[2]) && $segments[3] === 'marcar-leido') {
+                // PUT /api/admin/mensajes/{id}/marcar-leido
+                $controller->marcarMensajeLeido($segments[2]);
+            } elseif ($method === 'DELETE' && isset($segments[2])) {
+                // DELETE /api/admin/mensajes/{id}
+                $controller->deleteMensaje($segments[2]);
+            }
+        }
+        
+        // Logs
+        elseif ($method === 'GET' && $segments[1] === 'logs') {
+            // GET /api/admin/logs
+            $controller->getLogs();
+        }
+        
+        exit;
+    }
+
     // Ruta no encontrada
     Response::notFound('Ruta no encontrada');
 

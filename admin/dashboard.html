@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Panel Administrativo | Adopta un Abuelo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: var(--color-accent);"></i>
+            <h3>Adopta un Abuelo</h3>
+            <p>Panel de Administración</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-section-title">Principal</div>
+                <a href="dashboard.html" class="menu-item active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Gestión</div>
+                <a href="abuelos.html" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Abuelos</span>
+                </a>
+                <a href="donaciones.html" class="menu-item">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Donaciones</span>
+                </a>
+                <a href="mensajes.html" class="menu-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Mensajes</span>
+                    <span class="badge" id="unreadBadge">0</span>
+                </a>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Sistema</div>
+                <a href="logs.html" class="menu-item">
+                    <i class="fas fa-history"></i>
+                    <span>Logs de Actividad</span>
+                </a>
+                <a href="configuracion.html" class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h5 id="userName">Cargando...</h5>
+                    <p id="userRole">...</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1><i class="fas fa-chart-line me-2"></i>Dashboard</h1>
+            </div>
+            <div class="topbar-actions">
+                <span class="text-muted" id="currentTime"></span>
+                <a href="https://caminemosjuntos.org" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt me-1"></i>Ver Sitio
+                </a>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content-wrapper">
+            <!-- Estadísticas Principales -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-card-value" id="totalAbuelos">0</div>
+                                <div class="stat-card-label">Abuelos Activos</div>
+                            </div>
+                            <div class="stat-card-icon primary">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <i class="fas fa-male me-1"></i><span id="totalHombres">0</span> Hombres
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-female me-1"></i><span id="totalMujeres">0</span> Mujeres
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-card-value" id="totalDonaciones">0</div>
+                                <div class="stat-card-label">Total Donaciones</div>
+                            </div>
+                            <div class="stat-card-icon success">
+                                <i class="fas fa-hand-holding-heart"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <i class="fas fa-dollar-sign me-1"></i><span id="montoTotal">$0</span> COP
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-card-value" id="totalMensajes">0</div>
+                                <div class="stat-card-label">Mensajes</div>
+                            </div>
+                            <div class="stat-card-icon warning">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <i class="fas fa-envelope-open-text me-1"></i><span id="mensajesNoLeidos">0</span> sin leer
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-card-value" id="transaccionesExitosas">0</div>
+                                <div class="stat-card-label">Pagos Exitosos</div>
+                            </div>
+                            <div class="stat-card-icon primary">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                        </div>
+                        <div class="stat-card-footer">
+                            <i class="fas fa-clock me-1"></i><span id="transaccionesPendientes">0</span> pendientes
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Donaciones Recientes -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <h2 class="table-card-title">
+                        <i class="fas fa-history me-2"></i>Donaciones Recientes
+                    </h2>
+                    <a href="donaciones.html" class="btn btn-sm btn-primary">
+                        Ver Todas <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                
+                <div id="loadingDonaciones" class="loading-spinner">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+                
+                <div class="table-responsive" id="tablaDonaciones" style="display: none;">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Nombre/Empresa</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donacionesBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyDonaciones" class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No hay donaciones aún</h3>
+                    <p>Las donaciones aparecerán aquí cuando se realicen</p>
+                </div>
+            </div>
+            
+            <!-- Accesos Rápidos -->
+            <div class="row g-4 mt-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h5 class="mb-3">
+                            <i class="fas fa-plus-circle me-2 text-primary"></i>Acciones Rápidas
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <a href="abuelos.html?action=new" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-user-plus me-2"></i>Agregar Abuelo
+                            </a>
+                            <a href="mensajes.html" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-envelope me-2"></i>Ver Mensajes
+                            </a>
+                            <a href="donaciones.html" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-hand-holding-heart me-2"></i>Ver Donaciones
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="stat-card">
+                        <h5 class="mb-3">
+                            <i class="fas fa-info-circle me-2 text-primary"></i>Información del Sistema
+                        </h5>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <strong><i class="fas fa-database me-2"></i>Base de Datos:</strong>
+                                <span class="badge badge-success ms-2">Conectada</span>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <strong><i class="fas fa-credit-card me-2"></i>PayU:</strong>
+                                <span class="badge badge-info ms-2" id="payuMode">Modo Test</span>
+                            </div>
+                            <div class="col-6">
+                                <strong><i class="fas fa-server me-2"></i>Servidor:</strong>
+                                <span class="text-muted">PHP 8.x</span>
+                            </div>
+                            <div class="col-6">
+                                <strong><i class="fas fa-code-branch me-2"></i>Versión:</strong>
+                                <span class="text-muted">1.0.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    
+    <script>
+        // Verificar autenticación
+        (async function() {
+            const isAuth = await adminAuth.requireAuth();
+            if (!isAuth) return;
+            
+            // Mostrar datos del usuario
+            if (adminAuth.user) {
+                document.getElementById('userName').textContent = adminAuth.user.nombre_completo;
+                document.getElementById('userRole').textContent = getRoleLabel(adminAuth.user.rol);
+            }
+            
+            // Cargar datos del dashboard
+            loadDashboard();
+            
+            // Actualizar reloj
+            updateClock();
+            setInterval(updateClock, 1000);
+        })();
+        
+        // Cargar datos del dashboard
+        async function loadDashboard() {
+            try {
+                const response = await adminAPI.getDashboard();
+                
+                if (response.success) {
+                    const stats = response.data;
+                    
+                    // Abuelos
+                    document.getElementById('totalAbuelos').textContent = stats.abuelos.total;
+                    document.getElementById('totalHombres').textContent = stats.abuelos.hombres;
+                    document.getElementById('totalMujeres').textContent = stats.abuelos.mujeres;
+                    
+                    // Donaciones
+                    const totalDonaciones = stats.donaciones.total_personas + stats.donaciones.total_empresas;
+                    const montoTotal = parseFloat(stats.donaciones.monto_total_personas) + parseFloat(stats.donaciones.monto_total_empresas);
+                    
+                    document.getElementById('totalDonaciones').textContent = totalDonaciones;
+                    document.getElementById('montoTotal').textContent = formatCurrency(montoTotal);
+                    
+                    // Mensajes
+                    document.getElementById('totalMensajes').textContent = stats.mensajes.total;
+                    document.getElementById('mensajesNoLeidos').textContent = stats.mensajes.no_leidos;
+                    document.getElementById('unreadBadge').textContent = stats.mensajes.no_leidos;
+                    
+                    if (stats.mensajes.no_leidos === 0) {
+                        document.getElementById('unreadBadge').style.display = 'none';
+                    }
+                    
+                    // Transacciones
+                    document.getElementById('transaccionesExitosas').textContent = stats.transacciones.exitosas;
+                    document.getElementById('transaccionesPendientes').textContent = stats.transacciones.pendientes;
+                    
+                    // Donaciones recientes
+                    if (stats.donaciones_recientes && stats.donaciones_recientes.length > 0) {
+                        renderDonacionesRecientes(stats.donaciones_recientes);
+                    } else {
+                        document.getElementById('loadingDonaciones').style.display = 'none';
+                        document.getElementById('emptyDonaciones').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar dashboard:', error);
+                showAlert('Error al cargar las estadísticas', 'danger');
+            }
+        }
+        
+        // Renderizar donaciones recientes
+        function renderDonacionesRecientes(donaciones) {
+            const tbody = document.getElementById('donacionesBody');
+            
+            tbody.innerHTML = donaciones.map(d => `
+                <tr>
+                    <td>
+                        <span class="badge ${d.tipo === 'persona' ? 'badge-info' : 'badge-primary'}">
+                            <i class="fas fa-${d.tipo === 'persona' ? 'user' : 'building'} me-1"></i>
+                            ${d.tipo === 'persona' ? 'Personal' : 'Empresarial'}
+                        </span>
+                    </td>
+                    <td class="text-truncate" style="max-width: 200px;">${d.nombre}</td>
+                    <td><strong>${formatCurrency(d.monto)}</strong></td>
+                    <td>${getEstadoBadge(d.estado)}</td>
+                    <td><small class="text-muted">${formatDate(d.fecha)}</small></td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('loadingDonaciones').style.display = 'none';
+            document.getElementById('tablaDonaciones').style.display = 'block';
+        }
+        
+        // Formatear moneda
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Formatear fecha
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+        
+        // Badge de estado
+        function getEstadoBadge(estado) {
+            const badges = {
+                'pendiente': '<span class="badge badge-warning">Pendiente</span>',
+                'completada': '<span class="badge badge-success">Completada</span>',
+                'rechazada': '<span class="badge badge-danger">Rechazada</span>',
+                'cancelada': '<span class="badge badge-secondary">Cancelada</span>'
+            };
+            return badges[estado] || `<span class="badge badge-secondary">${estado}</span>`;
+        }
+        
+        // Label de rol
+        function getRoleLabel(rol) {
+            const labels = {
+                'super_admin': 'Super Administrador',
+                'admin': 'Administrador',
+                'editor': 'Editor'
+            };
+            return labels[rol] || rol;
+        }
+        
+        // Actualizar reloj
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentTime').textContent = now.toLocaleDateString('es-CO', options);
+        }
+        
+        // Cerrar sesión
+        async function logout() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                await adminAuth.logout();
+            }
+        }
+        
+        // Toggle sidebar en móvil
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+        
+        // Mostrar alerta
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.content-wrapper').prepend(alert);
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
+

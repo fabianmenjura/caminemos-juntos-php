@@ -67,5 +67,34 @@ class Validator {
     public function errors() {
         return $this->errors;
     }
+    
+    /**
+     * Validación específica para abuelos
+     */
+    public static function validateAbuelo($data) {
+        $errors = [];
+        
+        if (empty($data['nombre']) || strlen($data['nombre']) < 3) {
+            $errors['nombre'] = 'El nombre debe tener al menos 3 caracteres';
+        }
+        
+        if (empty($data['edad']) || !is_numeric($data['edad']) || $data['edad'] < 60 || $data['edad'] > 120) {
+            $errors['edad'] = 'La edad debe estar entre 60 y 120 años';
+        }
+        
+        if (empty($data['ciudad']) || strlen($data['ciudad']) < 3) {
+            $errors['ciudad'] = 'La ciudad es requerida';
+        }
+        
+        if (empty($data['descripcion']) || strlen($data['descripcion']) < 20) {
+            $errors['descripcion'] = 'La descripción debe tener al menos 20 caracteres';
+        }
+        
+        if (isset($data['genero']) && !in_array($data['genero'], ['M', 'F'])) {
+            $errors['genero'] = 'El género debe ser M o F';
+        }
+        
+        return $errors;
+    }
 }
 ?>

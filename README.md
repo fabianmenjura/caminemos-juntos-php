@@ -651,9 +651,41 @@ Después de la instalación:
 
 ---
 
+## 👨‍💼 Panel de Administración
+
+### Acceso
+
+```
+Local: http://localhost/caminemos-juntos-php/admin/login.html
+Producción: https://caminemosjuntos.org/admin/login.html
+```
+
+### Credenciales por Defecto
+
+```
+Usuario: admin
+Contraseña: Admin123!
+```
+
+⚠️ **CAMBIAR INMEDIATAMENTE** después del primer login.
+
+### Funcionalidades
+
+- ✅ Dashboard con estadísticas en tiempo real
+- ✅ Gestión completa de abuelos (crear, editar, eliminar)
+- ✅ Visualización y gestión de donaciones
+- ✅ Mensajes de contacto (leer, marcar, eliminar)
+- ✅ Logs de actividad del sistema
+- ✅ Sistema de roles y permisos (super_admin, admin, editor)
+
+**Documentación completa:** [`PANEL_ADMIN.md`](./PANEL_ADMIN.md)
+
+---
+
 ## 📚 Documentación
 
 - [`README.md`](./README.md) - Este archivo (resumen general)
+- [`PANEL_ADMIN.md`](./PANEL_ADMIN.md) - **NUEVO:** Panel de administración
 - [`LEEME_PRIMERO.md`](./LEEME_PRIMERO.md) - Índice de documentación
 - [`INSTALACION_LOCAL.md`](./INSTALACION_LOCAL.md) - Setup en Laragon
 - [`INSTALACION_HOSTINGER.md`](./INSTALACION_HOSTINGER.md) - Deploy en Hostinger

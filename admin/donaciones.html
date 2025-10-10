@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Donaciones - Panel Administrativo</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar (mismo que dashboard) -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: var(--color-accent);"></i>
+            <h3>Adopta un Abuelo</h3>
+            <p>Panel de Administración</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-section-title">Principal</div>
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Gestión</div>
+                <a href="abuelos.html" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Abuelos</span>
+                </a>
+                <a href="donaciones.html" class="menu-item active">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Donaciones</span>
+                </a>
+                <a href="mensajes.html" class="menu-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Mensajes</span>
+                </a>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Sistema</div>
+                <a href="logs.html" class="menu-item">
+                    <i class="fas fa-history"></i>
+                    <span>Logs de Actividad</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-details">
+                    <h5 id="userName">Usuario</h5>
+                    <p id="userRole">Rol</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-hand-holding-heart me-2"></i>Gestión de Donaciones</h1>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Resumen de Donaciones -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon success">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalPersonas">0</div>
+                        <div class="stat-card-label">Donaciones Personales</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon primary">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-card-value" id="totalEmpresas">0</div>
+                        <div class="stat-card-label">Donaciones Empresariales</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon warning">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-card-value" id="montoPersonas">$0</div>
+                        <div class="stat-card-label">Monto Personas</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-card-value" id="montoEmpresas">$0</div>
+                        <div class="stat-card-label">Monto Empresas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtros -->
+            <div class="table-card mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="filtroTipo" onchange="loadDonaciones()">
+                            <option value="todas">Todas</option>
+                            <option value="personas">Personas</option>
+                            <option value="empresas">Empresas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="filtroEstado" onchange="loadDonaciones()">
+                            <option value="">Todos</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="completada">Completada</option>
+                            <option value="rechazada">Rechazada</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla -->
+            <div class="table-card">
+                <div id="loadingDonaciones" class="loading-spinner">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+                
+                <div class="table-responsive" id="tablaDonaciones" style="display: none;">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Nombre/Empresa</th>
+                                <th>Email</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donacionesBody"></tbody>
+                    </table>
+                </div>
+                
+                <nav id="paginacion" style="display: none;">
+                    <ul class="pagination" id="paginationList"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Detalle -->
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>Detalle de Donación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalleBody">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    
+    <script>
+        let currentPage = 1;
+        let detalleModal;
+        
+        (async function() {
+            const isAuth = await adminAuth.requireAuth();
+            if (!isAuth) return;
+            
+            if (adminAuth.user) {
+                document.getElementById('userName').textContent = adminAuth.user.nombre_completo;
+                document.getElementById('userRole').textContent = getRoleLabel(adminAuth.user.rol);
+            }
+            
+            detalleModal = new bootstrap.Modal(document.getElementById('detalleModal'));
+            loadDonaciones();
+            loadStats();
+        })();
+        
+        async function loadStats() {
+            try {
+                const response = await adminAPI.getDashboard();
+                if (response.success) {
+                    const stats = response.data;
+                    document.getElementById('totalPersonas').textContent = stats.donaciones.total_personas;
+                    document.getElementById('totalEmpresas').textContent = stats.donaciones.total_empresas;
+                    document.getElementById('montoPersonas').textContent = formatCurrency(stats.donaciones.monto_total_personas);
+                    document.getElementById('montoEmpresas').textContent = formatCurrency(stats.donaciones.monto_total_empresas);
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+        
+        async function loadDonaciones(page = 1) {
+            currentPage = page;
+            const tipo = document.getElementById('filtroTipo').value;
+            
+            try {
+                document.getElementById('loadingDonaciones').style.display = 'flex';
+                document.getElementById('tablaDonaciones').style.display = 'none';
+                
+                const response = await adminAPI.getDonaciones({
+                    tipo: tipo,
+                    pagina: page,
+                    limite: 20
+                });
+                
+                if (response.success) {
+                    renderDonaciones(response.data.donaciones);
+                    renderPagination(response.data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar donaciones');
+            }
+        }
+        
+        function renderDonaciones(donaciones) {
+            const tbody = document.getElementById('donacionesBody');
+            
+            if (donaciones.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="8" class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay donaciones</p>
+                    </td></tr>
+                `;
+            } else {
+                tbody.innerHTML = donaciones.map(d => {
+                    const esPersona = d.tipo_categoria === 'persona' || d.nombre_donante;
+                    const nombre = esPersona ? d.nombre_donante || d.nombre : d.nombre_empresa || d.nombre;
+                    const email = esPersona ? d.email : d.contacto_email;
+                    
+                    return `
+                        <tr>
+                            <td><strong>#${d.id}</strong></td>
+                            <td>
+                                <span class="badge ${esPersona ? 'badge-info' : 'badge-primary'}">
+                                    <i class="fas fa-${esPersona ? 'user' : 'building'} me-1"></i>
+                                    ${esPersona ? 'Personal' : 'Empresa'}
+                                </span>
+                            </td>
+                            <td class="text-truncate" style="max-width: 150px;">${nombre}</td>
+                            <td><small>${email || '-'}</small></td>
+                            <td><strong>${formatCurrency(d.monto)}</strong></td>
+                            <td>${getEstadoBadge(d.estado)}</td>
+                            <td><small>${formatDate(d.fecha_donacion)}</small></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" onclick="verDetalle(${d.id}, '${d.tipo_categoria || (esPersona ? 'persona' : 'empresa')}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('loadingDonaciones').style.display = 'none';
+            document.getElementById('tablaDonaciones').style.display = 'block';
+        }
+        
+        function renderPagination(data) {
+            // Similar al de abuelos
+            if (data.totalPaginas <= 1) {
+                document.getElementById('paginacion').style.display = 'none';
+                return;
+            }
+            
+            const list = document.getElementById('paginationList');
+            let html = '';
+            
+            html += `<li class="page-item ${data.pagina === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadDonaciones(${data.pagina - 1}); return false;"><i class="fas fa-chevron-left"></i></a>
+            </li>`;
+            
+            for (let i = 1; i <= data.totalPaginas; i++) {
+                if (i === 1 || i === data.totalPaginas || (i >= data.pagina - 2 && i <= data.pagina + 2)) {
+                    html += `<li class="page-item ${i === data.pagina ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadDonaciones(${i}); return false;">${i}</a>
+                    </li>`;
+                }
+            }
+            
+            html += `<li class="page-item ${data.pagina === data.totalPaginas ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadDonaciones(${data.pagina + 1}); return false;"><i class="fas fa-chevron-right"></i></a>
+            </li>`;
+            
+            list.innerHTML = html;
+            document.getElementById('paginacion').style.display = 'block';
+        }
+        
+        async function verDetalle(id, tipo) {
+            // TODO: Cargar detalle completo de la donación
+            alert(`Ver detalle de donación ${tipo} #${id}`);
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        }
+        
+        function getEstadoBadge(estado) {
+            const badges = {
+                'pendiente': '<span class="badge badge-warning">Pendiente</span>',
+                'completada': '<span class="badge badge-success">Completada</span>',
+                'rechazada': '<span class="badge badge-danger">Rechazada</span>',
+                'cancelada': '<span class="badge badge-secondary">Cancelada</span>'
+            };
+            return badges[estado] || `<span class="badge badge-secondary">${estado}</span>`;
+        }
+        
+        function getRoleLabel(rol) {
+            const labels = {
+                'super_admin': 'Super Administrador',
+                'admin': 'Administrador',
+                'editor': 'Editor'
+            };
+            return labels[rol] || rol;
+        }
+        
+        async function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                await adminAuth.logout();
+            }
+        }
+    </script>
+</body>
+</html>
+
