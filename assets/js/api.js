@@ -1,7 +1,32 @@
 // Cliente API
 class API {
-    constructor(baseURL = '/api') {
-        this.baseURL = baseURL;
+    constructor(baseURL = null) {
+        // Detectar automáticamente la base URL
+        if (baseURL === null) {
+            // Obtener la ruta base del sitio
+            const path = window.location.pathname;
+            const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+            
+            // Si estamos en un subdirectorio (ej: /caminemos-juntos-php/)
+            if (basePath.includes('caminemos-juntos-php')) {
+                this.baseURL = '/caminemos-juntos-php/api';
+            } else if (basePath !== '/' && !basePath.includes('index.html') && !basePath.includes('donar.html')) {
+                // Otro subdirectorio
+                const parts = basePath.split('/').filter(p => p);
+                if (parts.length > 0) {
+                    this.baseURL = `/${parts[0]}/api`;
+                } else {
+                    this.baseURL = '/api';
+                }
+            } else {
+                // Raíz del dominio
+                this.baseURL = '/api';
+            }
+        } else {
+            this.baseURL = baseURL;
+        }
+        
+        console.log('API Base URL:', this.baseURL);
     }
 
     async request(endpoint, options = {}) {

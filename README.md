@@ -534,6 +534,13 @@ caminemos-juntos-php/
 
 ## 🐛 Troubleshooting
 
+### Error: "Not Found" al cargar abuelos
+**Causa**: URL base de API incorrecta cuando el sitio está en subdirectorio  
+**Solución**: El archivo `api.js` ahora detecta automáticamente la ruta correcta. Si el problema persiste:
+1. Abre la consola del navegador (F12)
+2. Verifica que aparezca: `API Base URL: /caminemos-juntos-php/api`
+3. Si no aparece, consulta `SOLUCION_PROBLEMAS_COMUNES.md`
+
 ### Error: "No se puede conectar a la base de datos"
 **Causa**: Credenciales incorrectas en `.env`  
 **Solución**: Verifica `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
