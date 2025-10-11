@@ -49,30 +49,54 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero Section con Slider -->
     <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center min-vh-100">
-                <div class="col-lg-6" data-aos="fade-right">
-                    <h1 class="hero-title">Regala compañía, cariño y esperanza</h1>
-                    <p class="hero-subtitle">
-                        En Colombia, miles de adultos mayores viven en soledad. 
-                        Con tu ayuda, podemos acompañarlos y garantizar que nunca se sientan olvidados.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="#donar" class="btn btn-primary btn-lg me-3">
-                            <i class="fas fa-heart me-2"></i> Haz tu Donación
-                        </a>
-                        <a href="#abuelos" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-users me-2"></i> Conoce los Abuelos
-                        </a>
+        <!-- Carousel -->
+        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+            <div class="carousel-inner">
+                <!-- Loading placeholder -->
+                <div class="carousel-item active">
+                    <div class="hero-slide">
+                        <div class="hero-image-container">
+                            <img src="assets/images/elderly-colombian-man-smiling-kind.jpg" alt="Cargando..." class="hero-bg-image">
+                            <div class="hero-overlay"></div>
+                        </div>
+                        <div class="container">
+                            <div class="row align-items-center min-vh-100">
+                                <div class="col-lg-6" data-aos="fade-right">
+                                    <h1 class="hero-title">Regala compañía, cariño y esperanza</h1>
+                                    <p class="hero-subtitle">
+                                        En Colombia, miles de adultos mayores viven en soledad. 
+                                        Con tu ayuda, podemos acompañarlos y garantizar que nunca se sientan olvidados.
+                                    </p>
+                                    <div class="hero-buttons">
+                                        <a href="#donar" class="btn btn-primary btn-lg me-3">
+                                            <i class="fas fa-heart me-2"></i> Haz tu Donación
+                                        </a>
+                                        <a href="#abuelos" class="btn btn-outline-light btn-lg">
+                                            <i class="fas fa-users me-2"></i> Conoce los Abuelos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-6" data-aos="fade-left">
-                    <div class="hero-image">
-                        <img src="assets/images/elderly-colombian-man-smiling-kind.jpg" alt="Abuelo colombiano" class="img-fluid rounded shadow">
-                    </div>
-                </div>
+            </div>
+            
+            <!-- Controles del carousel -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+            
+            <!-- Indicadores -->
+            <div class="carousel-indicators" id="heroIndicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
             </div>
         </div>
     </section>
@@ -422,8 +446,8 @@
                 <div class="col-lg-4 mb-4">
                     <h6>Contacto</h6>
                     <p class="text-white-50">
-                        <i class="fas fa-envelope me-2"></i> contacto@adoptaunabuelo.com<br>
-                        <i class="fas fa-phone me-2"></i> +57 (1) 234-5678
+                        <i class="fas fa-envelope me-2"></i> contacto@caminemosjuntos.org<br>
+                        <i class="fas fa-phone me-2"></i> +57 321 9951293
                     </p>
                 </div>
             </div>

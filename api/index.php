@@ -122,6 +122,18 @@ try {
         exit;
     }
 
+    // Rutas de hero slider
+    if ($segments[0] === 'hero-slider') {
+        require_once __DIR__ . '/controllers/HeroSliderController.php';
+        $controller = new HeroSliderController();
+
+        if ($method === 'GET') {
+            // GET /api/hero-slider
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -193,9 +205,15 @@ try {
                 $controller->getVoluntarios();
             } elseif ($segments[1] === 'testimonios') {
                 $controller->getTestimonios();
+            } elseif ($segments[1] === 'hero-slider') {
+                $controller->getHeroSlider();
             }
-        } elseif ($method === 'POST' && $segments[1] === 'abuelos') {
-            $controller->createAbuelo();
+        } elseif ($method === 'POST' && isset($segments[1])) {
+            if ($segments[1] === 'abuelos') {
+                $controller->createAbuelo();
+            } elseif ($segments[1] === 'hero-slider') {
+                $controller->createHeroSlide();
+            }
         } elseif ($method === 'PUT' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
                 $controller->updateAbuelo($segments[2]);
@@ -208,6 +226,8 @@ try {
                 $controller->updateVoluntario($segments[2]);
             } elseif ($segments[1] === 'testimonios') {
                 $controller->updateTestimonio($segments[2]);
+            } elseif ($segments[1] === 'hero-slider') {
+                $controller->updateHeroSlide($segments[2]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -218,6 +238,8 @@ try {
                 $controller->deleteVoluntario($segments[2]);
             } elseif ($segments[1] === 'testimonios') {
                 $controller->deleteTestimonio($segments[2]);
+            } elseif ($segments[1] === 'hero-slider') {
+                $controller->deleteHeroSlide($segments[2]);
             }
         }
         exit;

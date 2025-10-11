@@ -549,4 +549,95 @@ class AdminController {
             return Response::error('Error al eliminar', null, 500);
         }
     }
+    
+    // ===== HERO SLIDER =====
+    
+    public function getHeroSlider() {
+        try {
+            $slides = $this->db->fetchAll(
+                "SELECT * FROM hero_slider WHERE deleted = 0 ORDER BY orden ASC, id ASC"
+            );
+            
+            Logger::debug("getHeroSlider: Encontrados " . count($slides) . " slides");
+            return Response::success(['slides' => $slides, 'total' => count($slides)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener slides", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener slides', null, 500);
+        }
+    }
+    
+    public function createHeroSlide() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $this->db->execute(
+                "INSERT INTO hero_slider (titulo, subtitulo, imagen_url, orden, activo, enlace_url) 
+                 VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    $data['titulo'],
+                    $data['subtitulo'] ?? null,
+                    $data['imagen_url'],
+                    $data['orden'] ?? 0,
+                    $data['activo'] ?? 1,
+                    $data['enlace_url'] ?? null
+                ]
+            );
+            
+            $this->authService->logActivity($this->user['id'], 'CREAR_HERO_SLIDE', 'hero_slider', $this->db->lastInsertId());
+            
+            Logger::debug("createHeroSlide: Slide creado");
+            return Response::success(['id' => $this->db->lastInsertId()], 'Slide creado', 201);
+        } catch (Exception $e) {
+            Logger::error("Error al crear slide", ['error' => $e->getMessage()]);
+            return Response::error('Error al crear', null, 500);
+        }
+    }
+    
+    public function updateHeroSlide($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $updates = [];
+            $params = [];
+            
+            foreach (['titulo', 'subtitulo', 'imagen_url', 'orden', 'activo', 'enlace_url'] as $field) {
+                if (isset($data[$field])) {
+                    $updates[] = "$field = ?";
+                    $params[] = $data[$field];
+                }
+            }
+            
+            if (empty($updates)) {
+                return Response::error('No hay datos para actualizar', null, 400);
+            }
+            
+            $params[] = $id;
+            $this->db->execute(
+                "UPDATE hero_slider SET " . implode(", ", $updates) . " WHERE id = ?",
+                $params
+            );
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_HERO_SLIDE', 'hero_slider', $id);
+            
+            Logger::debug("updateHeroSlide: Slide #$id actualizado");
+            return Response::success(null, 'Slide actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar slide", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteHeroSlide($id) {
+        try {
+            // Soft delete
+            $this->db->execute("UPDATE hero_slider SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_HERO_SLIDE', 'hero_slider', $id);
+            
+            Logger::debug("deleteHeroSlide: Slide #$id marcado como eliminado");
+            return Response::success(null, 'Slide eliminado');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar slide", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
 }

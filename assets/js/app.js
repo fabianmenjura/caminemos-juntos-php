@@ -23,19 +23,80 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 function fixImagePath(url) {
     if (!url) return 'assets/images/placeholder.jpg';
     
-    // Si la URL empieza con /, quitarlo y agregar assets/images/
     if (url.startsWith('/')) {
         const filename = url.substring(1);
         return `assets/images/${filename}`;
     }
     
-    // Si ya tiene la ruta completa, devolverla
     if (url.includes('assets/images/')) {
         return url;
     }
     
-    // Si solo es el nombre del archivo, agregar la ruta
     return `assets/images/${url}`;
+}
+
+// Cargar Hero Slider
+async function loadHeroSlider() {
+    try {
+        const response = await api.get('hero-slider');
+        
+        if (response.success && response.data.slides.length > 0) {
+            const slides = response.data.slides;
+            const carouselInner = document.querySelector('#heroCarousel .carousel-inner');
+            const indicators = document.getElementById('heroIndicators');
+            
+            if (!carouselInner || !indicators) return;
+            
+            // Limpiar contenido existente
+            carouselInner.innerHTML = '';
+            indicators.innerHTML = '';
+            
+            // Crear slides
+            slides.forEach((slide, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                
+                const slideHTML = `
+                    <div class="carousel-item ${isActive}">
+                        <div class="hero-slide">
+                            <div class="hero-image-container">
+                                <img src="${slide.imagen_url}" alt="${slide.titulo}" class="hero-bg-image">
+                                <div class="hero-overlay"></div>
+                            </div>
+                            <div class="container">
+                                <div class="row align-items-center min-vh-100">
+                                    <div class="col-lg-6" data-aos="fade-right">
+                                        <h1 class="hero-title">${slide.titulo}</h1>
+                                        <p class="hero-subtitle">${slide.subtitulo || ''}</p>
+                                        <div class="hero-buttons">
+                                            <a href="${slide.enlace_url || '#donar'}" class="btn btn-primary btn-lg me-3">
+                                                <i class="fas fa-heart me-2"></i> Haz tu Donación
+                                            </a>
+                                            <a href="#abuelos" class="btn btn-outline-light btn-lg">
+                                                <i class="fas fa-users me-2"></i> Conoce los Abuelos
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                carouselInner.innerHTML += slideHTML;
+                
+                // Crear indicador
+                const indicatorHTML = `
+                    <button type="button" data-bs-target="#heroCarousel" 
+                            data-bs-slide-to="${index}" ${isActive ? 'class="active"' : ''} 
+                            aria-label="Slide ${index + 1}">
+                    </button>
+                `;
+                indicators.innerHTML += indicatorHTML;
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar hero slider:', error);
+    }
 }
 
 // Cargar abuelos
@@ -181,7 +242,6 @@ async function loadTestimonios() {
 // Cargar patrocinadores
 async function loadPatrocinadores() {
     try {
-        // Patrocinadores de ejemplo (después crear endpoint específico)
         const sponsors = [
             { nombre: 'Fundación', logo: 'assets/images/company-logo-1.jpg' },
             { nombre: 'Empresa', logo: 'assets/images/company-logo-2.jpg' },
@@ -299,6 +359,7 @@ if (testimonioForm) {
 
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
+    loadHeroSlider();
     loadAbuelos();
     loadTestimonios();
     loadPatrocinadores();

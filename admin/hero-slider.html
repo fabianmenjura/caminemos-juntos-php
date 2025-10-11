@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Slider - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: #ff8c42;"></i>
+            <h3>Adopta un Abuelo</h3>
+            <p>Panel de Administración</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <i class="fas fa-chart-line"></i><span>Dashboard</span>
+            </a>
+            <a href="hero-slider.html" class="menu-item active">
+                <i class="fas fa-images"></i><span>Hero Slider</span>
+            </a>
+            <a href="abuelos.html" class="menu-item">
+                <i class="fas fa-users"></i><span>Abuelos</span>
+            </a>
+            <a href="donaciones.html" class="menu-item">
+                <i class="fas fa-hand-holding-heart"></i><span>Donaciones</span>
+            </a>
+            <a href="mensajes.html" class="menu-item">
+                <i class="fas fa-envelope"></i><span>Mensajes</span>
+            </a>
+            <a href="voluntarios.html" class="menu-item">
+                <i class="fas fa-user-friends"></i><span>Voluntarios</span>
+            </a>
+            <a href="testimonios.html" class="menu-item">
+                <i class="fas fa-star"></i><span>Testimonios</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <p class="text-white mb-2"><i class="fas fa-user me-2"></i><span id="userName">Admin</span></p>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-images me-2"></i>Gestión del Hero Slider</h1>
+            <button class="btn btn-primary" onclick="showCreateModal()">
+                <i class="fas fa-plus me-2"></i>Nuevo Slide
+            </button>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Info -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Los slides se mostrarán en la página principal rotando automáticamente. El orden determina la secuencia de aparición.
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="text-muted mt-2">Cargando slides...</p>
+            </div>
+
+            <!-- Grid de slides -->
+            <div id="slides-container" class="row" style="display: none;">
+                <!-- Dinámico -->
+            </div>
+
+            <!-- No data -->
+            <div id="no-data" class="text-center py-5" style="display: none;">
+                <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No hay slides creados</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="slideModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nuevo Slide</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="slideForm">
+                        <input type="hidden" id="slideId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Título *</label>
+                            <input type="text" class="form-control" id="titulo" required placeholder="Ej: Regala Compañía y Esperanza">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Subtítulo</label>
+                            <textarea class="form-control" id="subtitulo" rows="2" placeholder="Descripción breve..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-image me-2"></i>Imagen del Slide</label>
+                            
+                            <!-- Preview -->
+                            <div class="mb-3">
+                                <img id="imagePreview" src="../assets/images/placeholder.jpg" 
+                                     class="rounded" style="max-width: 300px; display: block;" alt="Preview">
+                            </div>
+                            
+                            <!-- Upload -->
+                            <div class="input-group mb-2">
+                                <input type="file" class="form-control" id="imageFile" accept="image/*" onchange="previewImage(this)">
+                                <button class="btn btn-outline-primary" type="button" onclick="uploadImage()">
+                                    <i class="fas fa-upload me-1"></i>Subir
+                                </button>
+                            </div>
+                            
+                            <input type="text" class="form-control" id="imagen_url" placeholder="assets/images/hero-1.jpg" readonly required>
+                            
+                            <div id="uploadProgress" class="mt-2" style="display: none;">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">
+                                        Subiendo...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Orden</label>
+                                <input type="number" class="form-control" id="orden" value="0" min="0">
+                                <small class="text-muted">Menor número = aparece primero</small>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" id="activo">
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Enlace (opcional)</label>
+                                <input type="text" class="form-control" id="enlace_url" placeholder="#donar">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSlide()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let modal;
+        let slides = [];
+
+        // Verificar sesión
+        if (!verifySession()) {
+            window.location.href = 'login.html';
+        }
+
+        (async function() {
+            if (!await adminAuth.requireAuth()) return;
+            modal = new bootstrap.Modal(document.getElementById('slideModal'));
+            loadSlides();
+        })();
+
+        // Cargar slides
+        async function loadSlides() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('slides-container').style.display = 'none';
+                document.getElementById('no-data').style.display = 'none';
+
+                const response = await adminAPI.get('admin/hero-slider');
+
+                if (response.success) {
+                    slides = response.data.slides;
+                    renderSlides();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar slides');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Renderizar slides
+        function renderSlides() {
+            const container = document.getElementById('slides-container');
+
+            if (slides.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'flex';
+            container.innerHTML = slides.map(s => `
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="position-relative">
+                            <img src="../${s.imagen_url}" class="card-img-top" style="max-height: 250px; object-fit: cover;" alt="${s.titulo}">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge ${s.activo ? 'bg-success' : 'bg-secondary'}">
+                                    ${s.activo ? 'Activo' : 'Inactivo'}
+                                </span>
+                                <span class="badge bg-primary ms-1">Orden: ${s.orden}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${s.titulo}</h5>
+                            <p class="card-text text-muted">${s.subtitulo || 'Sin subtítulo'}</p>
+                            ${s.enlace_url ? `<p class="small"><i class="fas fa-link me-1"></i>${s.enlace_url}</p>` : ''}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="btn-group w-100" role="group">
+                                <button class="btn btn-sm btn-primary" onclick="editSlide(${s.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-${s.activo ? 'warning' : 'success'}" 
+                                        onclick="toggleActivo(${s.id}, ${!s.activo})">
+                                    <i class="fas fa-${s.activo ? 'eye-slash' : 'eye'}"></i> ${s.activo ? 'Desactivar' : 'Activar'}
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="eliminar(${s.id})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Mostrar modal de crear
+        function showCreateModal() {
+            document.getElementById('slideForm').reset();
+            document.getElementById('slideId').value = '';
+            document.getElementById('imagePreview').src = '../assets/images/placeholder.jpg';
+            document.getElementById('modalTitle').textContent = 'Nuevo Slide';
+            modal.show();
+        }
+
+        // Editar slide
+        async function editSlide(id) {
+            const slide = slides.find(s => s.id === id);
+            if (!slide) return;
+
+            document.getElementById('slideId').value = slide.id;
+            document.getElementById('titulo').value = slide.titulo;
+            document.getElementById('subtitulo').value = slide.subtitulo || '';
+            document.getElementById('imagen_url').value = slide.imagen_url;
+            document.getElementById('orden').value = slide.orden;
+            document.getElementById('activo').value = slide.activo;
+            document.getElementById('enlace_url').value = slide.enlace_url || '';
+            document.getElementById('imagePreview').src = '../' + slide.imagen_url;
+            document.getElementById('modalTitle').textContent = 'Editar Slide';
+            
+            modal.show();
+        }
+
+        // Guardar slide
+        async function saveSlide() {
+            const id = document.getElementById('slideId').value;
+            const data = {
+                titulo: document.getElementById('titulo').value,
+                subtitulo: document.getElementById('subtitulo').value || null,
+                imagen_url: document.getElementById('imagen_url').value,
+                orden: parseInt(document.getElementById('orden').value) || 0,
+                activo: parseInt(document.getElementById('activo').value),
+                enlace_url: document.getElementById('enlace_url').value || null
+            };
+
+            try {
+                let response;
+                if (id) {
+                    response = await adminAPI.put(`admin/hero-slider/${id}`, data);
+                } else {
+                    response = await adminAPI.post('admin/hero-slider', data);
+                }
+
+                if (response.success) {
+                    modal.hide();
+                    alert(response.message || 'Guardado exitosamente');
+                    loadSlides();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar');
+            }
+        }
+
+        // Toggle activo/inactivo
+        async function toggleActivo(id, nuevoEstado) {
+            try {
+                const response = await adminAPI.put(`admin/hero-slider/${id}`, { activo: nuevoEstado ? 1 : 0 });
+                if (response.success) {
+                    alert(nuevoEstado ? 'Slide activado' : 'Slide desactivado');
+                    loadSlides();
+                }
+            } catch (error) {
+                alert('Error al actualizar');
+            }
+        }
+
+        // Eliminar
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este slide?')) return;
+
+            try {
+                const response = await adminAPI.delete(`admin/hero-slider/${id}`);
+                if (response.success) {
+                    alert('Slide eliminado');
+                    loadSlides();
+                }
+            } catch (error) {
+                alert('Error al eliminar');
+            }
+        }
+
+        // Preview de imagen
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Subir imagen
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageFile');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Selecciona una imagen primero');
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Máximo 5MB');
+                return;
+            }
+
+            try {
+                document.getElementById('uploadProgress').style.display = 'block';
+                
+                const response = await adminAPI.uploadImage(file);
+
+                if (response.success) {
+                    document.getElementById('imagen_url').value = response.data.url;
+                    document.getElementById('imagePreview').src = '../' + response.data.url;
+                    
+                    const sizeKB = Math.round(response.data.size / 1024);
+                    alert(`✅ Imagen subida!\n\nTamaño: ${sizeKB}KB`);
+                    
+                    fileInput.value = '';
+                }
+            } catch (error) {
+                alert('Error al subir imagen');
+            } finally {
+                document.getElementById('uploadProgress').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
