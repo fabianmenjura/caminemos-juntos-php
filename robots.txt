@@ -1,0 +1,19 @@
+# Robots.txt para Caminemos Juntos Chiquinquirá
+# Actualizado: Octubre 2025
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /logs/
+Disallow: /database/
+Disallow: /vendor/
+
+# Permitir recursos para mejor indexación
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /assets/images/
+
+# Sitemap
+Sitemap: https://caminemosjuntos.org/sitemap.xml
+
