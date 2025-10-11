@@ -43,8 +43,19 @@ class Database {
             $stmt->execute($params);
             return $stmt;
         } catch (PDOException $e) {
-            error_log("Error en query: " . $e->getMessage());
-            throw new Exception("Error en la consulta");
+            // Log del error específico de MySQL
+            require_once __DIR__ . '/../helpers/Logger.php';
+            Logger::error("Error en query SQL", [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'sql' => $sql,
+                'params' => $params
+            ]);
+            
+            error_log("Error en query: " . $e->getMessage() . " | SQL: " . $sql);
+            
+            // Lanzar excepción con el mensaje real de MySQL
+            throw new Exception("Error en la consulta: " . $e->getMessage());
         }
     }
 
@@ -58,6 +69,10 @@ class Database {
         return $stmt->fetch();
     }
 
+    public function execute($sql, $params = []) {
+        return $this->query($sql, $params);
+    }
+    
     public function lastInsertId() {
         return $this->connection->lastInsertId();
     }

@@ -23,6 +23,8 @@ desktop.ini
 *.log
 logs/
 *.log.*
+/logs/*
+!/logs/.gitkeep
 
 # Archivos temporales
 tmp/
@@ -59,3 +61,4 @@ uploads/
 !database/seed.sql
 !database/fix-image-paths.sql
 
+/assets/images

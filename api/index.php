@@ -103,17 +103,13 @@ try {
 
         if ($method === 'POST') {
             if ($segments[1] === 'create-payment') {
-                // POST /api/payu/create-payment
                 $controller->createPayment();
             } elseif ($segments[1] === 'response') {
-                // POST /api/payu/response
                 $controller->response();
             } elseif ($segments[1] === 'confirmation') {
-                // POST /api/payu/confirmation
                 $controller->confirmation();
             }
         } elseif ($method === 'GET' && $segments[1] === 'status' && isset($segments[2])) {
-            // GET /api/payu/status/{referenceCode}
             $controller->getStatus($segments[2]);
         }
         exit;
