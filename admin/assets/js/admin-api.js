@@ -99,6 +99,34 @@ class AdminAPI {
     async deleteMensaje(id) {
         return this.request(`admin/mensajes/${id}`, { method: 'DELETE' });
     }
+    
+    // Upload de imágenes
+    async uploadImage(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            const response = await fetch(`${this.baseURL}/upload/image`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${adminAuth.token}`
+                    // NO incluir Content-Type, el navegador lo pone automático para FormData
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al subir imagen');
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Error al subir imagen:', error);
+            throw error;
+        }
+    }
 }
 
 const adminAPI = new AdminAPI();

@@ -134,6 +134,21 @@ try {
         exit;
     }
 
+    // Rutas de upload
+    if ($segments[0] === 'upload') {
+        require_once __DIR__ . '/controllers/UploadController.php';
+        $controller = new UploadController();
+
+        if ($method === 'POST' && $segments[1] === 'image') {
+            // POST /api/upload/image
+            $controller->uploadImage();
+        } elseif ($method === 'DELETE' && $segments[1] === 'image' && isset($segments[2])) {
+            // DELETE /api/upload/image/{filename}
+            $controller->deleteImage($segments[2]);
+        }
+        exit;
+    }
+
     // Rutas de administración
     if ($segments[0] === 'admin') {
         require_once __DIR__ . '/controllers/AdminController.php';

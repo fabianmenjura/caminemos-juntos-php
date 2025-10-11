@@ -131,10 +131,44 @@
                                 <label class="form-label">Fecha Nacimiento</label>
                                 <input type="date" class="form-control" id="fecha_nacimiento">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Foto URL</label>
-                                <input type="text" class="form-control" id="foto_url" placeholder="assets/images/abuelo-x.jpg">
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-image me-2"></i>Foto del Abuelo
+                                </label>
+                                
+                                <!-- Preview de la imagen -->
+                                <div class="mb-3">
+                                    <img id="imagePreview" src="../assets/images/placeholder.jpg" 
+                                         class="rounded" style="max-width: 200px; max-height: 200px; display: block;" alt="Preview">
+                                </div>
+                                
+                                <!-- Input de archivo -->
+                                <div class="input-group mb-2">
+                                    <input type="file" class="form-control" id="imageFile" accept="image/*" onchange="previewImage(this)">
+                                    <button class="btn btn-outline-primary" type="button" onclick="uploadImage()">
+                                        <i class="fas fa-upload me-1"></i>Subir
+                                    </button>
+                                </div>
+                                
+                                <!-- URL manual (hidden por defecto) -->
+                                <div class="collapse" id="manualUrlDiv">
+                                    <input type="text" class="form-control" id="foto_url" placeholder="assets/images/abuelo-x.jpg" readonly>
+                                </div>
+                                
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    La imagen se optimizará automáticamente (max 800x800px, ~100KB)
+                                </small>
+                                
+                                <div id="uploadProgress" class="mt-2" style="display: none;">
+                                    <div class="progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">
+                                            Subiendo y optimizando...
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            
                             <div class="col-12">
                                 <label class="form-label">Descripción *</label>
                                 <textarea class="form-control" id="descripcion" rows="4" required></textarea>
@@ -236,6 +270,11 @@
                 document.getElementById('foto_url').value = abuelo.foto_url || '';
                 document.getElementById('fecha_nacimiento').value = abuelo.fecha_nacimiento || '';
                 
+                // Cargar preview de la imagen existente
+                if (abuelo.foto_url) {
+                    document.getElementById('imagePreview').src = '../' + abuelo.foto_url;
+                }
+                
                 document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Editar Abuelo';
                 modal.show();
             } catch (error) {
@@ -286,6 +325,73 @@
                 }
             } catch (error) {
                 alert('Error al eliminar');
+            }
+        }
+        
+        // Preview de imagen antes de subir
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Subir imagen al servidor
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageFile');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Por favor selecciona una imagen primero');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Validar tamaño (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('La imagen es demasiado grande. Máximo 5MB.');
+                return;
+            }
+            
+            // Validar tipo
+            if (!file.type.startsWith('image/')) {
+                alert('El archivo debe ser una imagen');
+                return;
+            }
+            
+            try {
+                // Mostrar progreso
+                document.getElementById('uploadProgress').style.display = 'block';
+                
+                // Subir imagen
+                const response = await adminAPI.uploadImage(file);
+                
+                if (response.success) {
+                    // Actualizar el campo foto_url
+                    document.getElementById('foto_url').value = response.data.url;
+                    
+                    // Actualizar preview con la imagen subida
+                    document.getElementById('imagePreview').src = '../' + response.data.url;
+                    
+                    // Mostrar éxito
+                    const sizeKB = Math.round(response.data.size / 1024);
+                    alert(`✅ Imagen subida exitosamente!\n\nTamaño optimizado: ${sizeKB}KB\nRuta: ${response.data.url}`);
+                    
+                    // Limpiar input de archivo
+                    fileInput.value = '';
+                } else {
+                    alert('Error: ' + (response.message || 'Error al subir imagen'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al subir la imagen: ' + error.message);
+            } finally {
+                document.getElementById('uploadProgress').style.display = 'none';
             }
         }
         
