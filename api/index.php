@@ -103,18 +103,69 @@ try {
 
         if ($method === 'POST') {
             if ($segments[1] === 'create-payment') {
-                // POST /api/payu/create-payment
                 $controller->createPayment();
             } elseif ($segments[1] === 'response') {
-                // POST /api/payu/response
                 $controller->response();
             } elseif ($segments[1] === 'confirmation') {
-                // POST /api/payu/confirmation
                 $controller->confirmation();
             }
         } elseif ($method === 'GET' && $segments[1] === 'status' && isset($segments[2])) {
-            // GET /api/payu/status/{referenceCode}
             $controller->getStatus($segments[2]);
+        }
+        exit;
+    }
+
+    // Rutas de autenticación
+    if ($segments[0] === 'auth') {
+        require_once __DIR__ . '/controllers/AuthController.php';
+        $controller = new AuthController();
+
+        if ($method === 'POST' && isset($segments[1])) {
+            if ($segments[1] === 'login') {
+                $controller->login();
+            } elseif ($segments[1] === 'logout') {
+                $controller->logout();
+            }
+        } elseif ($method === 'GET' && isset($segments[1])) {
+            if ($segments[1] === 'verify') {
+                $controller->verify();
+            }
+        }
+        exit;
+    }
+
+    // Rutas de administración
+    if ($segments[0] === 'admin') {
+        require_once __DIR__ . '/controllers/AdminController.php';
+        $controller = new AdminController();
+
+        if ($method === 'GET' && isset($segments[1])) {
+            if ($segments[1] === 'dashboard') {
+                $controller->getDashboard();
+            } elseif ($segments[1] === 'abuelos' && !isset($segments[2])) {
+                $controller->getAbuelos();
+            } elseif ($segments[1] === 'donaciones') {
+                $controller->getDonaciones();
+            } elseif ($segments[1] === 'mensajes') {
+                $controller->getMensajes();
+            }
+        } elseif ($method === 'POST' && $segments[1] === 'abuelos') {
+            $controller->createAbuelo();
+        } elseif ($method === 'PUT' && isset($segments[1]) && isset($segments[2])) {
+            if ($segments[1] === 'abuelos') {
+                $controller->updateAbuelo($segments[2]);
+            } elseif ($segments[1] === 'donaciones' && isset($segments[3])) {
+                // PUT /api/admin/donaciones/{tipo}/{id}
+                $controller->updateDonacionEstado($segments[2], $segments[3]);
+            } elseif ($segments[1] === 'mensajes' && isset($segments[3]) && $segments[3] === 'marcar-leido') {
+                $controller->marcarMensajeLeido($segments[2]);
+            }
+        } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
+            if ($segments[1] === 'abuelos') {
+                $controller->deleteAbuelo($segments[2]);
+            } elseif ($segments[1] === 'mensajes') {
+                $controller->deleteMensaje($segments[2]);
+            }
         }
         exit;
     }

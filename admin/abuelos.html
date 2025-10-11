@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Abuelos - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: #ff8c42;"></i>
+            <h3>Adopta un Abuelo</h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <i class="fas fa-chart-line"></i><span>Dashboard</span>
+            </a>
+            <a href="abuelos.html" class="menu-item active">
+                <i class="fas fa-users"></i><span>Abuelos</span>
+            </a>
+            <a href="donaciones.html" class="menu-item">
+                <i class="fas fa-hand-holding-heart"></i><span>Donaciones</span>
+            </a>
+            <a href="mensajes.html" class="menu-item">
+                <i class="fas fa-envelope"></i><span>Mensajes</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <p class="text-white mb-2"><span id="userName">Admin</span></p>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-users me-2"></i>Gestión de Abuelos</h1>
+            <button class="btn btn-primary" onclick="showCreateModal()">
+                <i class="fas fa-plus me-2"></i>Nuevo Abuelo
+            </button>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Filtros -->
+            <div class="table-card mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <select class="form-select" id="filtroEstado" onchange="loadAbuelos()">
+                            <option value="">Todos</option>
+                            <option value="disponible" selected>Disponibles</option>
+                            <option value="adoptado">Adoptados</option>
+                            <option value="eliminado">Eliminados</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla -->
+            <div class="table-card">
+                <div id="loading" class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+                
+                <div class="table-responsive" id="tabla" style="display: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Edad</th>
+                                <th>Ciudad</th>
+                                <th>Género</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="abueloModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nuevo Abuelo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="abueloForm">
+                        <input type="hidden" id="abueloId">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Edad *</label>
+                                <input type="number" class="form-control" id="edad" min="60" max="120" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ciudad *</label>
+                                <input type="text" class="form-control" id="ciudad" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Género *</label>
+                                <select class="form-select" id="genero" required>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Estado *</label>
+                                <select class="form-select" id="estado" required>
+                                    <option value="disponible">Disponible</option>
+                                    <option value="adoptado">Adoptado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha Nacimiento</label>
+                                <input type="date" class="form-control" id="fecha_nacimiento">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Foto URL</label>
+                                <input type="text" class="form-control" id="foto_url" placeholder="assets/images/abuelo-x.jpg">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Descripción *</label>
+                                <textarea class="form-control" id="descripcion" rows="4" required></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAbuelo()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let modal;
+        
+        (async function() {
+            if (!await adminAuth.requireAuth()) return;
+            
+            if (adminAuth.user) {
+                document.getElementById('userName').textContent = adminAuth.user.nombre_completo;
+            }
+            
+            modal = new bootstrap.Modal(document.getElementById('abueloModal'));
+            loadAbuelos();
+        })();
+        
+        async function loadAbuelos() {
+            const estado = document.getElementById('filtroEstado').value;
+            
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('tabla').style.display = 'none';
+                
+                const response = await adminAPI.getAbuelos({ estado, limite: 50 });
+                
+                if (response.success) {
+                    renderAbuelos(response.data.abuelos);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar abuelos');
+            }
+        }
+        
+        function renderAbuelos(abuelos) {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = abuelos.map(a => `
+                <tr>
+                    <td><strong>#${a.id}</strong></td>
+                    <td>
+                        <img src="../${a.foto_url}" width="40" height="40" class="rounded-circle me-2" 
+                             onerror="this.src='../assets/images/placeholder.jpg'">
+                        ${a.nombre}
+                    </td>
+                    <td>${a.edad}</td>
+                    <td>${a.ciudad}</td>
+                    <td><i class="fas fa-${a.genero === 'M' ? 'male' : 'female'}"></i> ${a.genero === 'M' ? 'M' : 'F'}</td>
+                    <td><span class="badge badge-${a.estado === 'disponible' ? 'success' : 'secondary'}">${a.estado}</span></td>
+                    <td>
+                        <button class="btn action-btn-edit" onclick="editAbuelo(${a.id})"><i class="fas fa-edit"></i></button>
+                        ${a.estado !== 'eliminado' ? 
+                            `<button class="btn action-btn-delete" onclick="deleteAbuelo(${a.id}, '${a.nombre}')"><i class="fas fa-trash"></i></button>` 
+                            : ''}
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tabla').style.display = 'block';
+        }
+        
+        function showCreateModal() {
+            document.getElementById('abueloForm').reset();
+            document.getElementById('abueloId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Nuevo Abuelo';
+            modal.show();
+        }
+        
+        async function editAbuelo(id) {
+            try {
+                const response = await adminAPI.getAbuelos({ limite: 1000 });
+                const abuelo = response.data.abuelos.find(a => a.id == id);
+                
+                if (!abuelo) return alert('No encontrado');
+                
+                document.getElementById('abueloId').value = abuelo.id;
+                document.getElementById('nombre').value = abuelo.nombre;
+                document.getElementById('edad').value = abuelo.edad;
+                document.getElementById('ciudad').value = abuelo.ciudad;
+                document.getElementById('genero').value = abuelo.genero || 'M';
+                document.getElementById('estado').value = abuelo.estado;
+                document.getElementById('descripcion').value = abuelo.descripcion || '';
+                document.getElementById('foto_url').value = abuelo.foto_url || '';
+                document.getElementById('fecha_nacimiento').value = abuelo.fecha_nacimiento || '';
+                
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Editar Abuelo';
+                modal.show();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function saveAbuelo() {
+            const id = document.getElementById('abueloId').value;
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                edad: parseInt(document.getElementById('edad').value),
+                ciudad: document.getElementById('ciudad').value,
+                genero: document.getElementById('genero').value,
+                estado: document.getElementById('estado').value,
+                descripcion: document.getElementById('descripcion').value,
+                foto_url: document.getElementById('foto_url').value || 'assets/images/placeholder.jpg',
+                fecha_nacimiento: document.getElementById('fecha_nacimiento').value || null
+            };
+            
+            try {
+                let response;
+                if (id) {
+                    response = await adminAPI.updateAbuelo(id, data);
+                } else {
+                    response = await adminAPI.createAbuelo(data);
+                }
+                
+                if (response.success) {
+                    modal.hide();
+                    alert(response.message);
+                    loadAbuelos();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar');
+            }
+        }
+        
+        async function deleteAbuelo(id, nombre) {
+            if (!confirm(`¿Eliminar a ${nombre}?`)) return;
+            
+            try {
+                const response = await adminAPI.deleteAbuelo(id);
+                if (response.success) {
+                    alert(response.message);
+                    loadAbuelos();
+                }
+            } catch (error) {
+                alert('Error al eliminar');
+            }
+        }
+        
+        async function logout() {
+            if (confirm('¿Cerrar sesión?')) await adminAuth.logout();
+        }
+    </script>
+</body>
+</html>

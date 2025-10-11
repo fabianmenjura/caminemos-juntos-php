@@ -1,9 +1,15 @@
 RewriteEngine On
 
+# Pasar el header Authorization a PHP
+# Múltiples métodos para asegurar compatibilidad
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
 # Redirigir todas las peticiones al index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^(.*)$ index.php [QSA,L,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 # Headers de seguridad
 Header set X-Content-Type-Options "nosniff"

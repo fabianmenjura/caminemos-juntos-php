@@ -23,6 +23,8 @@ desktop.ini
 *.log
 logs/
 *.log.*
+/logs/*
+!/logs/.gitkeep
 
 # Archivos temporales
 tmp/

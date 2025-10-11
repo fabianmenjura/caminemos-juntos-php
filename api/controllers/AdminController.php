@@ -1,0 +1,380 @@
+<?php
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../helpers/Response.php';
+require_once __DIR__ . '/../helpers/Logger.php';
+require_once __DIR__ . '/AuthController.php';
+
+class AdminController {
+    private $db;
+    private $user;
+    private $authService;
+    
+    public function __construct() {
+        try {
+            Logger::debug("AdminController: Inicializando");
+            $this->db = Database::getInstance();
+            Logger::debug("AdminController: Database OK");
+            
+            $this->user = AuthController::requireAuth();
+            Logger::debug("AdminController: Auth OK", ['user_id' => $this->user['id']]);
+            
+            require_once __DIR__ . '/../services/AuthService.php';
+            $this->authService = new AuthService();
+            Logger::debug("AdminController: AuthService OK");
+        } catch (Exception $e) {
+            Logger::error("AdminController construct failed", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            throw $e;
+        }
+    }
+    
+    // DASHBOARD
+    public function getDashboard() {
+        try {
+            Logger::debug("getDashboard: Iniciando");
+            
+            // Obtener counts de forma segura
+            Logger::debug("getDashboard: Consultando abuelos");
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos WHERE estado = 'disponible'");
+            $totalAbuelos = $result ? intval($result['count']) : 0;
+            Logger::debug("getDashboard: Total abuelos = $totalAbuelos");
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos WHERE estado = 'disponible' AND genero = 'M'");
+            $hombres = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos WHERE estado = 'disponible' AND genero = 'F'");
+            $mujeres = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM donaciones_personas");
+            $totalPersonas = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM donaciones_empresas");
+            $totalEmpresas = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COALESCE(SUM(monto), 0) as total FROM donaciones_personas WHERE estado = 'completada'");
+            $montoPersonas = $result ? floatval($result['total']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COALESCE(SUM(monto), 0) as total FROM donaciones_empresas WHERE estado = 'completada'");
+            $montoEmpresas = $result ? floatval($result['total']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM mensajes_contacto");
+            $totalMensajes = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM mensajes_contacto WHERE estado = 'nuevo'");
+            $mensajesNoLeidos = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM transacciones_payu WHERE status = 'APPROVED'");
+            $exitosas = $result ? intval($result['count']) : 0;
+            
+            $result = $this->db->fetchOne("SELECT COUNT(*) as count FROM transacciones_payu WHERE status = 'PENDING'");
+            $pendientes = $result ? intval($result['count']) : 0;
+            
+            $stats = [
+                'abuelos' => [
+                    'total' => $totalAbuelos,
+                    'hombres' => $hombres,
+                    'mujeres' => $mujeres,
+                ],
+                'donaciones' => [
+                    'total_personas' => $totalPersonas,
+                    'total_empresas' => $totalEmpresas,
+                    'monto_total_personas' => $montoPersonas,
+                    'monto_total_empresas' => $montoEmpresas,
+                ],
+                'mensajes' => [
+                    'total' => $totalMensajes,
+                    'no_leidos' => $mensajesNoLeidos,
+                ],
+                'transacciones' => [
+                    'exitosas' => $exitosas,
+                    'pendientes' => $pendientes,
+                ]
+            ];
+            
+            // Donaciones recientes
+            try {
+                $donaciones = $this->db->fetchAll(
+                    "SELECT 'persona' as tipo, nombre_completo as nombre, monto, created_at as fecha, estado
+                     FROM donaciones_personas
+                     UNION ALL
+                     SELECT 'empresa' as tipo, nombre_empresa as nombre, monto, created_at as fecha, estado
+                     FROM donaciones_empresas
+                     ORDER BY fecha DESC LIMIT 10"
+                );
+                $stats['donaciones_recientes'] = $donaciones ?: [];
+            } catch (Exception $e) {
+                Logger::error("Error en donaciones recientes", ['error' => $e->getMessage()]);
+                $stats['donaciones_recientes'] = [];
+            }
+            
+            Logger::debug("getDashboard: Stats completas", $stats);
+            Logger::api('/admin/dashboard', 'GET', 200, ['stats_count' => count($stats)]);
+            
+            return Response::success($stats);
+        } catch (Exception $e) {
+            Logger::error("Error en getDashboard", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Devolver error con detalles para debugging
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al obtener estadísticas',
+                'message' => $e->getMessage(),
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine(),
+                'details' => 500
+            ]);
+            exit;
+        }
+    }
+    
+    // ABUELOS - Listar
+    public function getAbuelos() {
+        try {
+            $pagina = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+            $limite = isset($_GET['limite']) ? min(100, max(1, intval($_GET['limite']))) : 20;
+            $estado = $_GET['estado'] ?? '';
+            
+            $offset = ($pagina - 1) * $limite;
+            $where = $estado ? "WHERE estado = '$estado'" : "";
+            
+            $total = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos $where")['count'];
+            $abuelos = $this->db->fetchAll(
+                "SELECT * FROM abuelos $where ORDER BY created_at DESC LIMIT $limite OFFSET $offset"
+            );
+            
+            return Response::success([
+                'abuelos' => $abuelos,
+                'total' => $total,
+                'pagina' => $pagina,
+                'limite' => $limite,
+                'totalPaginas' => ceil($total / $limite)
+            ]);
+        } catch (Exception $e) {
+            error_log("Error getAbuelos: " . $e->getMessage());
+            return Response::error('Error al obtener abuelos', null, 500);
+        }
+    }
+    
+    // ABUELOS - Crear
+    public function createAbuelo() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $result = $this->db->execute(
+                "INSERT INTO abuelos (nombre, edad, ciudad, descripcion, genero, foto_url, fecha_nacimiento, estado) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $data['nombre'],
+                    $data['edad'],
+                    $data['ciudad'],
+                    $data['descripcion'],
+                    $data['genero'] ?? 'M',
+                    $data['foto_url'] ?? 'assets/images/placeholder.jpg',
+                    $data['fecha_nacimiento'] ?? null,
+                    $data['estado'] ?? 'disponible'
+                ]
+            );
+            
+            $newId = $this->db->lastInsertId();
+            $this->authService->logActivity($this->user['id'], 'CREAR_ABUELO', 'abuelos', $newId, "Creado: {$data['nombre']}");
+            
+            return Response::success(['id' => $newId], 'Abuelo creado exitosamente', 201);
+        } catch (Exception $e) {
+            error_log("Error createAbuelo: " . $e->getMessage());
+            return Response::error('Error al crear abuelo', null, 500);
+        }
+    }
+    
+    // ABUELOS - Actualizar
+    public function updateAbuelo($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $abuelo = $this->db->fetchOne("SELECT id FROM abuelos WHERE id = ?", [$id]);
+            if (!$abuelo) {
+                return Response::error('Abuelo no encontrado', null, 404);
+            }
+            
+            $fields = [];
+            $values = [];
+            $allowedFields = ['nombre', 'edad', 'ciudad', 'descripcion', 'genero', 'foto_url', 'fecha_nacimiento', 'estado'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field])) {
+                    $fields[] = "$field = ?";
+                    $values[] = $data[$field];
+                }
+            }
+            
+            if (empty($fields)) {
+                return Response::error('No hay datos para actualizar', null, 400);
+            }
+            
+            $values[] = $id;
+            $this->db->execute("UPDATE abuelos SET " . implode(', ', $fields) . " WHERE id = ?", $values);
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_ABUELO', 'abuelos', $id);
+            
+            return Response::success(null, 'Abuelo actualizado');
+        } catch (Exception $e) {
+            error_log("Error updateAbuelo: " . $e->getMessage());
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    // ABUELOS - Eliminar
+    public function deleteAbuelo($id) {
+        try {
+            $this->db->execute("UPDATE abuelos SET estado = 'eliminado' WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_ABUELO', 'abuelos', $id);
+            
+            return Response::success(null, 'Abuelo eliminado');
+        } catch (Exception $e) {
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
+    // DONACIONES
+    public function getDonaciones() {
+        try {
+            Logger::debug("getDonaciones: Iniciando");
+            $tipo = $_GET['tipo'] ?? 'todas';
+            $limite = isset($_GET['limite']) ? min(100, intval($_GET['limite'])) : 20;
+            
+            if ($tipo === 'personas') {
+                $donaciones = $this->db->fetchAll(
+                    "SELECT *, 'persona' as tipo_categoria FROM donaciones_personas ORDER BY created_at DESC LIMIT $limite"
+                );
+            } elseif ($tipo === 'empresas') {
+                $donaciones = $this->db->fetchAll(
+                    "SELECT *, 'empresa' as tipo_categoria FROM donaciones_empresas ORDER BY created_at DESC LIMIT $limite"
+                );
+            } else {
+                $donaciones = $this->db->fetchAll(
+                    "SELECT id, nombre_completo as nombre, email, monto, estado, created_at as fecha_donacion, 'persona' as tipo_categoria
+                     FROM donaciones_personas
+                     UNION ALL
+                     SELECT id, nombre_empresa as nombre, email_contacto as email, monto, estado, created_at as fecha_donacion, 'empresa' as tipo_categoria
+                     FROM donaciones_empresas
+                     ORDER BY fecha_donacion DESC LIMIT $limite"
+                );
+            }
+            
+            Logger::debug("getDonaciones: Encontradas " . count($donaciones) . " donaciones");
+            return Response::success(['donaciones' => $donaciones, 'total' => count($donaciones)]);
+        } catch (Exception $e) {
+            Logger::error("Error en getDonaciones", ['error' => $e->getMessage()]);
+            
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al obtener donaciones',
+                'message' => $e->getMessage(),
+                'details' => 500
+            ]);
+            exit;
+        }
+    }
+    
+    // MENSAJES
+    public function getMensajes() {
+        try {
+            Logger::debug("getMensajes: Iniciando");
+            $leido = isset($_GET['leido']) ? $_GET['leido'] : null;
+            
+            // Adaptar al esquema real: estado = 'nuevo', 'leido', 'respondido'
+            $where = "";
+            if ($leido === 'false') {
+                $where = "WHERE estado = 'nuevo'";
+            } elseif ($leido === 'true') {
+                $where = "WHERE estado IN ('leido', 'respondido')";
+            }
+            
+            $mensajes = $this->db->fetchAll(
+                "SELECT * FROM mensajes_contacto $where ORDER BY created_at DESC LIMIT 50"
+            );
+            
+            Logger::debug("getMensajes: Encontrados " . count($mensajes) . " mensajes");
+            return Response::success(['mensajes' => $mensajes, 'total' => count($mensajes)]);
+        } catch (Exception $e) {
+            Logger::error("Error en getMensajes", ['error' => $e->getMessage()]);
+            
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al obtener mensajes',
+                'message' => $e->getMessage(),
+                'details' => 500
+            ]);
+            exit;
+        }
+    }
+    
+    public function marcarMensajeLeido($id) {
+        try {
+            // Cambiar estado de 'nuevo' a 'leido'
+            $this->db->execute("UPDATE mensajes_contacto SET estado = 'leido' WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'MARCAR_MENSAJE_LEIDO', 'mensajes_contacto', $id);
+            
+            Logger::debug("marcarMensajeLeido: Mensaje #$id marcado como leído");
+            return Response::success(null, 'Mensaje marcado como leído');
+        } catch (Exception $e) {
+            Logger::error("Error en marcarMensajeLeido", ['error' => $e->getMessage(), 'id' => $id]);
+            return Response::error('Error al marcar mensaje', null, 500);
+        }
+    }
+    
+    public function deleteMensaje($id) {
+        try {
+            $this->db->execute("DELETE FROM mensajes_contacto WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_MENSAJE', 'mensajes_contacto', $id);
+            
+            return Response::success(null, 'Mensaje eliminado');
+        } catch (Exception $e) {
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
+    // DONACIONES - Actualizar estado
+    public function updateDonacionEstado($tipo, $id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $nuevoEstado = $data['estado'] ?? null;
+            
+            if (!in_array($nuevoEstado, ['pendiente', 'completada', 'cancelada'])) {
+                return Response::error('Estado inválido', null, 400);
+            }
+            
+            $tabla = $tipo === 'persona' ? 'donaciones_personas' : 'donaciones_empresas';
+            
+            $this->db->execute(
+                "UPDATE $tabla SET estado = ? WHERE id = ?",
+                [$nuevoEstado, $id]
+            );
+            
+            $this->authService->logActivity(
+                $this->user['id'], 
+                'ACTUALIZAR_DONACION', 
+                $tabla, 
+                $id, 
+                "Estado cambiado a: $nuevoEstado"
+            );
+            
+            Logger::debug("updateDonacionEstado: Donación $tipo #$id → $nuevoEstado");
+            
+            return Response::success(null, 'Donación actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error en updateDonacionEstado", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar donación', null, 500);
+        }
+    }
+}
