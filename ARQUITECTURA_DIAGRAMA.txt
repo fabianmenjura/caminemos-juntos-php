@@ -1,0 +1,185 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                   ARQUITECTURA FRONTEND - DIAGRAMA                        ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            CAPA DE PRESENTACIÓN                          │
+│                              (Components)                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐    │
+│  │ AbuelosComponent │  │TestimoniosComponent│ │  FormComponent   │    │
+│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤    │
+│  │ + render()       │  │ + render()       │  │ + init()         │    │
+│  │ + renderError()  │  │ + renderCard()   │  │ + setLoading()   │    │
+│  │ + showLoading()  │  │                  │  │ + reset()        │    │
+│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘    │
+│           │                     │                     │                 │
+└───────────┼─────────────────────┼─────────────────────┼─────────────────┘
+            │                     │                     │
+            └─────────────┬───────┴─────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CAPA DE ORQUESTACIÓN                              │
+│                              (App.js)                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  ┌──────────────────────────────────────────────────────────┐          │
+│  │                        App                                │          │
+│  ├──────────────────────────────────────────────────────────┤          │
+│  │ - apiService                                              │          │
+│  │ - abuelosRepo, testimoniosRepo, voluntariosRepo          │          │
+│  │ - abuelosComponent, testimoniosComponent                 │          │
+│  ├──────────────────────────────────────────────────────────┤          │
+│  │ + init()              : Inicializa app                   │          │
+│  │ + loadAbuelos()       : Carga sección abuelos           │          │
+│  │ + loadTestimonios()   : Carga sección testimonios       │          │
+│  │ + initForms()         : Inicializa formularios          │          │
+│  └──────────────┬───────────────────────────────────────────┘          │
+│                 │                                                         │
+└─────────────────┼─────────────────────────────────────────────────────────┘
+                  │
+      ┌───────────┴───────────┐
+      │                       │
+      ▼                       ▼
+┌──────────────┐   ┌──────────────────────────┐
+│   CAPA DE    │   │   CAPA DE UTILIDADES     │
+│   DATOS      │   │      (Utils)             │
+│(Repositories)│   ├──────────────────────────┤
+├──────────────┤   │ NotificationService      │
+│              │   ├──────────────────────────┤
+│ ┌──────────┐│   │ + show()                 │
+│ │Abuelos   ││   │ + success()              │
+│ │Repository││   │ + error()                │
+│ │──────────││   └──────────────────────────┘
+│ │+getAll() ││
+│ │+getById()││
+│ │+search() ││
+│ └────┬─────┘│
+│      │      │
+│ ┌────┴─────┐│
+│ │Testimonios││
+│ │Repository││
+│ │──────────││
+│ │+getPublicos()││
+│ │+create() ││
+│ └────┬─────┘│
+│      │      │
+│ ┌────┴─────┐│
+│ │Voluntarios││
+│ │Repository││
+│ │──────────││
+│ │+create() ││
+│ └────┬─────┘│
+│      │      │
+└──────┼──────┘
+       │
+       ▼
+┌──────────────────────────────────────┐
+│   CAPA DE INFRAESTRUCTURA            │
+│        (Services)                     │
+├──────────────────────────────────────┤
+│                                       │
+│  ┌────────────────────────────────┐ │
+│  │       ApiService               │ │
+│  ├────────────────────────────────┤ │
+│  │ - baseURL                      │ │
+│  ├────────────────────────────────┤ │
+│  │ + request(endpoint, options)   │ │
+│  │ + get(endpoint, params)        │ │
+│  │ + post(endpoint, data)         │ │
+│  │ + put(endpoint, data)          │ │
+│  │ + delete(endpoint)             │ │
+│  └────────────┬───────────────────┘ │
+│               │                      │
+└───────────────┼──────────────────────┘
+                │
+                ▼
+        ┌───────────────┐
+        │   BACKEND     │
+        │     API       │
+        │ (PHP/MySQL)   │
+        └───────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+FLUJO DE DATOS (Ejemplo: Cargar Abuelos)
+
+1. Usuario → Carga index.html
+
+2. index.html → Carga scripts en orden:
+   ├─ ApiService.js
+   ├─ NotificationService.js
+   ├─ Repositories (Abuelos, Testimonios, etc.)
+   ├─ Components (AbuelosComponent, etc.)
+   └─ App.js
+
+3. App.js → DOMContentLoaded
+   └─ app = new App()
+      ├─ apiService = new ApiService()
+      ├─ abuelosRepo = new AbuelosRepository(apiService)
+      └─ abuelosComponent = new AbuelosComponent()
+
+4. app.init()
+   └─ app.loadAbuelos()
+      ├─ abuelosComponent.showLoading()
+      ├─ data = await abuelosRepo.getAll()
+      │   └─ apiService.get('abuelos')
+      │       └─ fetch('/api/abuelos')
+      │           └─ Backend API
+      │               └─ MySQL Database
+      │                   └─ SELECT * FROM abuelos
+      └─ abuelosComponent.render(data)
+          └─ DOM actualizado con HTML
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+PRINCIPIOS SOLID EN ACCIÓN
+
+[S] Single Responsibility
+    ┌──────────────────────────────────────────┐
+    │ ApiService      → Solo HTTP              │
+    │ AbuelosRepo     → Solo datos abuelos     │
+    │ AbuelosComponent→ Solo UI abuelos        │
+    └──────────────────────────────────────────┘
+
+[O] Open/Closed
+    ┌──────────────────────────────────────────┐
+    │ FormComponent puede extenderse           │
+    │ sin modificar el código original         │
+    └──────────────────────────────────────────┘
+
+[L] Liskov Substitution
+    ┌──────────────────────────────────────────┐
+    │ Cualquier Repository puede reemplazar    │
+    │ a otro donde se espere un Repository     │
+    └──────────────────────────────────────────┘
+
+[I] Interface Segregation
+    ┌──────────────────────────────────────────┐
+    │ Repositorios específicos pequeños        │
+    │ en lugar de uno grande                   │
+    └──────────────────────────────────────────┘
+
+[D] Dependency Inversion
+    ┌──────────────────────────────────────────┐
+    │ Components dependen de abstracciones     │
+    │ (reciben repositorios inyectados)        │
+    └──────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+BENEFICIOS
+
+✅ Escalabilidad    : Fácil agregar nuevas funcionalidades
+✅ Mantenibilidad   : Cambios aislados por capa
+✅ Testabilidad     : Unit tests con mocks simples
+✅ Reutilización    : Componentes y servicios reutilizables
+✅ Desacoplamiento  : Bajo acoplamiento entre módulos
+
+═══════════════════════════════════════════════════════════════════════════
+

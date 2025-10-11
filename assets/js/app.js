@@ -242,25 +242,29 @@ async function loadTestimonios() {
 // Cargar patrocinadores
 async function loadPatrocinadores() {
     try {
-        const sponsors = [
-            { nombre: 'Fundación', logo: 'assets/images/company-logo-1.jpg' },
-            { nombre: 'Empresa', logo: 'assets/images/company-logo-2.jpg' },
-            { nombre: 'Grupo', logo: 'assets/images/company-logo-3.jpg' },
-        ];
+        const response = await api.get('patrocinadores');
         
-        const container = document.getElementById('patrocinadores-container');
-        container.innerHTML = sponsors.map(s => `
-            <div class="col-lg-3 col-md-4 col-6 mb-4" data-aos="zoom-in">
-                <div class="p-3 text-center">
-                    <img src="${s.logo}" 
-                         class="img-fluid" 
-                         alt="${s.nombre}"
-                         style="max-height: 80px; object-fit: contain; filter: grayscale(100%); transition: filter 0.3s;"
-                         onmouseover="this.style.filter='grayscale(0%)'"
-                         onmouseout="this.style.filter='grayscale(100%)'">
+        if (response.success && response.data.patrocinadores.length > 0) {
+            const patrocinadores = response.data.patrocinadores;
+            const container = document.getElementById('patrocinadores-container');
+            
+            container.innerHTML = patrocinadores.map(p => `
+                <div class="col-lg-3 col-md-4 col-6 mb-4" data-aos="zoom-in">
+                    <div class="p-3 text-center">
+                        ${p.sitio_web ? `<a href="${p.sitio_web}" target="_blank" rel="noopener">` : ''}
+                            <img src="${p.logo_url}" 
+                                 class="img-fluid" 
+                                 alt="${p.nombre_empresa}"
+                                 title="${p.descripcion || p.nombre_empresa}"
+                                 style="max-height: 80px; object-fit: contain; filter: grayscale(100%); transition: filter 0.3s;"
+                                 onmouseover="this.style.filter='grayscale(0%)'"
+                                 onmouseout="this.style.filter='grayscale(100%)'">
+                        ${p.sitio_web ? '</a>' : ''}
+                        <p class="small text-muted mt-2 mb-0">${p.nombre_empresa}</p>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
+        }
     } catch (error) {
         console.error('Error al cargar patrocinadores:', error);
     }

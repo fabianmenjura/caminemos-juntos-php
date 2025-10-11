@@ -134,6 +134,18 @@ try {
         exit;
     }
 
+    // Rutas de patrocinadores
+    if ($segments[0] === 'patrocinadores') {
+        require_once __DIR__ . '/controllers/PatrocinadoresController.php';
+        $controller = new PatrocinadoresController();
+
+        if ($method === 'GET') {
+            // GET /api/patrocinadores
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -207,12 +219,16 @@ try {
                 $controller->getTestimonios();
             } elseif ($segments[1] === 'hero-slider') {
                 $controller->getHeroSlider();
+            } elseif ($segments[1] === 'patrocinadores') {
+                $controller->getPatrocinadores();
             }
         } elseif ($method === 'POST' && isset($segments[1])) {
             if ($segments[1] === 'abuelos') {
                 $controller->createAbuelo();
             } elseif ($segments[1] === 'hero-slider') {
                 $controller->createHeroSlide();
+            } elseif ($segments[1] === 'patrocinadores') {
+                $controller->createPatrocinador();
             }
         } elseif ($method === 'PUT' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -228,6 +244,8 @@ try {
                 $controller->updateTestimonio($segments[2]);
             } elseif ($segments[1] === 'hero-slider') {
                 $controller->updateHeroSlide($segments[2]);
+            } elseif ($segments[1] === 'patrocinadores') {
+                $controller->updatePatrocinador($segments[2]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -240,6 +258,8 @@ try {
                 $controller->deleteTestimonio($segments[2]);
             } elseif ($segments[1] === 'hero-slider') {
                 $controller->deleteHeroSlide($segments[2]);
+            } elseif ($segments[1] === 'patrocinadores') {
+                $controller->deletePatrocinador($segments[2]);
             }
         }
         exit;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hero Slider - Panel Admin</title>
+    <title>Patrocinadores - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/admin.css">
@@ -13,7 +13,7 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-heart fa-2x mb-2" style="color: #ff8c42;"></i>
-            <h3>Adopta un Abuelo</h3>
+            <h3>Caminemos Juntos</h3>
             <p>Panel de Administración</p>
         </div>
         
@@ -21,7 +21,7 @@
             <a href="dashboard.html" class="menu-item">
                 <i class="fas fa-chart-line"></i><span>Dashboard</span>
             </a>
-            <a href="hero-slider.html" class="menu-item active">
+            <a href="hero-slider.html" class="menu-item">
                 <i class="fas fa-images"></i><span>Hero Slider</span>
             </a>
             <a href="abuelos.html" class="menu-item">
@@ -39,7 +39,7 @@
             <a href="testimonios.html" class="menu-item">
                 <i class="fas fa-star"></i><span>Testimonios</span>
             </a>
-            <a href="patrocinadores.html" class="menu-item">
+            <a href="patrocinadores.html" class="menu-item active">
                 <i class="fas fa-building"></i><span>Patrocinadores</span>
             </a>
         </div>
@@ -55,9 +55,9 @@
     <!-- Main -->
     <div class="main-content">
         <div class="topbar">
-            <h1><i class="fas fa-images me-2"></i>Gestión del Hero Slider</h1>
+            <h1><i class="fas fa-building me-2"></i>Gestión de Patrocinadores</h1>
             <button class="btn btn-primary" onclick="showCreateModal()">
-                <i class="fas fa-plus me-2"></i>Nuevo Slide
+                <i class="fas fa-plus me-2"></i>Nuevo Patrocinador
             </button>
         </div>
         
@@ -65,60 +65,53 @@
             <!-- Info -->
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Los slides se mostrarán en la página principal rotando automáticamente. El orden determina la secuencia de aparición.
+                Los aliados se muestran en la página principal. Todos son igualmente importantes. Usa el campo "Orden" para controlar su posición.
             </div>
 
             <!-- Loading -->
             <div id="loading" class="text-center py-5">
                 <div class="spinner-border text-primary"></div>
-                <p class="text-muted mt-2">Cargando slides...</p>
+                <p class="text-muted mt-2">Cargando patrocinadores...</p>
             </div>
 
-            <!-- Grid de slides -->
-            <div id="slides-container" class="row" style="display: none;">
+            <!-- Grid -->
+            <div id="patrocinadores-container" class="row" style="display: none;">
                 <!-- Dinámico -->
             </div>
 
             <!-- No data -->
             <div id="no-data" class="text-center py-5" style="display: none;">
-                <i class="fas fa-images fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No hay slides creados</p>
+                <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No hay patrocinadores registrados</p>
             </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="slideModal" tabindex="-1">
+    <div class="modal fade" id="patrocinadorModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Nuevo Slide</h5>
+                    <h5 class="modal-title" id="modalTitle">Nuevo Patrocinador</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="slideForm">
-                        <input type="hidden" id="slideId">
+                    <form id="patrocinadorForm">
+                        <input type="hidden" id="patrocinadorId">
                         
                         <div class="mb-3">
-                            <label class="form-label">Título *</label>
-                            <input type="text" class="form-control" id="titulo" required placeholder="Ej: Regala Compañía y Esperanza">
+                            <label class="form-label">Nombre de la Empresa *</label>
+                            <input type="text" class="form-control" id="nombre_empresa" required placeholder="Ej: Fundación Corazón">
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Subtítulo</label>
-                            <textarea class="form-control" id="subtitulo" rows="2" placeholder="Descripción breve..."></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><i class="fas fa-image me-2"></i>Imagen del Slide</label>
+                            <label class="form-label"><i class="fas fa-image me-2"></i>Logo</label>
                             
-                            <!-- Preview -->
                             <div class="mb-3">
-                                <img id="imagePreview" src="../assets/images/placeholder.jpg" 
-                                     class="rounded" style="max-width: 300px; display: block;" alt="Preview">
+                                <img id="imagePreview" src="../assets/images/placeholder-logo.png" 
+                                     class="rounded" style="max-width: 200px; background: #f0f0f0; padding: 10px;" alt="Preview">
                             </div>
                             
-                            <!-- Upload -->
                             <div class="input-group mb-2">
                                 <input type="file" class="form-control" id="imageFile" accept="image/*" onchange="previewImage(this)">
                                 <button class="btn btn-outline-primary" type="button" onclick="uploadImage()">
@@ -126,7 +119,7 @@
                                 </button>
                             </div>
                             
-                            <input type="text" class="form-control" id="imagen_url" placeholder="assets/images/hero-1.jpg" readonly required>
+                            <input type="text" class="form-control" id="logo_url" placeholder="assets/images/logo-empresa.jpg" readonly required>
                             
                             <div id="uploadProgress" class="mt-2" style="display: none;">
                                 <div class="progress">
@@ -137,31 +130,36 @@
                             </div>
                         </div>
                         
+                        <div class="mb-3">
+                            <label class="form-label">Sitio Web</label>
+                            <input type="url" class="form-control" id="sitio_web" placeholder="https://ejemplo.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" rows="2" placeholder="Breve descripción del patrocinio..."></textarea>
+                        </div>
+                        
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Orden</label>
                                 <input type="number" class="form-control" id="orden" value="0" min="0">
                                 <small class="text-muted">Menor número = aparece primero</small>
                             </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Estado</label>
                                 <select class="form-select" id="activo">
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
+                                    <option value="1">Activo (visible en web)</option>
+                                    <option value="0">Inactivo (oculto)</option>
                                 </select>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <label class="form-label">Enlace (opcional)</label>
-                                <input type="text" class="form-control" id="enlace_url" placeholder="#donar">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="saveSlide()">Guardar</button>
+                    <button type="button" class="btn btn-primary" onclick="savePatrocinador()">Guardar</button>
                 </div>
             </div>
         </div>
@@ -172,78 +170,76 @@
     <script src="assets/js/admin-api.js"></script>
     <script>
         let modal;
-        let slides = [];
+        let patrocinadores = [];
 
-        // Verificar sesión
         if (!verifySession()) {
             window.location.href = 'login.html';
         }
 
         (async function() {
             if (!await adminAuth.requireAuth()) return;
-            modal = new bootstrap.Modal(document.getElementById('slideModal'));
-            loadSlides();
+            modal = new bootstrap.Modal(document.getElementById('patrocinadorModal'));
+            loadPatrocinadores();
         })();
 
-        // Cargar slides
-        async function loadSlides() {
+        // Cargar
+        async function loadPatrocinadores() {
             try {
                 document.getElementById('loading').style.display = 'block';
-                document.getElementById('slides-container').style.display = 'none';
+                document.getElementById('patrocinadores-container').style.display = 'none';
                 document.getElementById('no-data').style.display = 'none';
 
-                const response = await adminAPI.get('admin/hero-slider');
+                const response = await adminAPI.get('admin/patrocinadores');
 
                 if (response.success) {
-                    slides = response.data.slides;
-                    renderSlides();
+                    patrocinadores = response.data.patrocinadores;
+                    renderPatrocinadores();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar slides');
+                alert('Error al cargar patrocinadores');
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // Renderizar slides
-        function renderSlides() {
-            const container = document.getElementById('slides-container');
+        // Renderizar
+        function renderPatrocinadores() {
+            const container = document.getElementById('patrocinadores-container');
 
-            if (slides.length === 0) {
+            if (patrocinadores.length === 0) {
                 document.getElementById('no-data').style.display = 'block';
                 return;
             }
 
             container.style.display = 'flex';
-            container.innerHTML = slides.map(s => `
-                <div class="col-lg-6 mb-4">
+            container.innerHTML = patrocinadores.map(p => `
+                <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100">
-                        <div class="position-relative">
-                            <img src="../${s.imagen_url}" class="card-img-top" style="max-height: 250px; object-fit: cover;" alt="${s.titulo}">
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge ${s.activo ? 'bg-success' : 'bg-secondary'}">
-                                    ${s.activo ? 'Activo' : 'Inactivo'}
-                                </span>
-                                <span class="badge bg-primary ms-1">Orden: ${s.orden}</span>
-                            </div>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">Orden: ${p.orden}</span>
+                            <span class="badge ${p.activo ? 'bg-success' : 'bg-secondary'}">
+                                ${p.activo ? 'Activo' : 'Inactivo'}
+                            </span>
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title">${s.titulo}</h5>
-                            <p class="card-text text-muted">${s.subtitulo || 'Sin subtítulo'}</p>
-                            ${s.enlace_url ? `<p class="small"><i class="fas fa-link me-1"></i>${s.enlace_url}</p>` : ''}
+                        <div class="card-body text-center">
+                            <img src="../${p.logo_url}" class="img-fluid mb-3" style="max-height: 100px;" alt="${p.nombre_empresa}">
+                            <h5 class="card-title">${p.nombre_empresa}</h5>
+                            ${p.sitio_web ? `<p class="small"><a href="${p.sitio_web}" target="_blank">${p.sitio_web}</a></p>` : ''}
+                            ${p.descripcion ? `<p class="text-muted small">${p.descripcion}</p>` : ''}
+                            <p class="text-muted small mb-0">Orden: ${p.orden}</p>
                         </div>
                         <div class="card-footer bg-white">
-                            <div class="btn-group w-100" role="group">
-                                <button class="btn btn-sm btn-primary" onclick="editSlide(${s.id})">
+                            <div class="btn-group w-100">
+                                <button class="btn btn-sm btn-primary" onclick="editPatrocinador(${p.id})">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <button class="btn btn-sm btn-${s.activo ? 'warning' : 'success'}" 
-                                        onclick="toggleActivo(${s.id}, ${!s.activo})">
-                                    <i class="fas fa-${s.activo ? 'eye-slash' : 'eye'}"></i> ${s.activo ? 'Desactivar' : 'Activar'}
+                                <button class="btn btn-sm btn-${p.activo ? 'warning' : 'success'}" 
+                                        onclick="toggleActivo(${p.id}, ${!p.activo})">
+                                    <i class="fas fa-${p.activo ? 'eye-slash' : 'eye'}"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="eliminar(${s.id})">
-                                    <i class="fas fa-trash"></i> Eliminar
+                                <button class="btn btn-sm btn-danger" onclick="eliminar(${p.id})">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
@@ -252,57 +248,57 @@
             `).join('');
         }
 
-        // Mostrar modal de crear
+        // Crear
         function showCreateModal() {
-            document.getElementById('slideForm').reset();
-            document.getElementById('slideId').value = '';
-            document.getElementById('imagePreview').src = '../assets/images/placeholder.jpg';
-            document.getElementById('modalTitle').textContent = 'Nuevo Slide';
+            document.getElementById('patrocinadorForm').reset();
+            document.getElementById('patrocinadorId').value = '';
+            document.getElementById('imagePreview').src = '../assets/images/placeholder-logo.png';
+            document.getElementById('modalTitle').textContent = 'Nuevo Patrocinador';
             modal.show();
         }
 
-        // Editar slide
-        async function editSlide(id) {
-            const slide = slides.find(s => s.id === id);
-            if (!slide) return;
+        // Editar
+        function editPatrocinador(id) {
+            const p = patrocinadores.find(pat => pat.id === id);
+            if (!p) return;
 
-            document.getElementById('slideId').value = slide.id;
-            document.getElementById('titulo').value = slide.titulo;
-            document.getElementById('subtitulo').value = slide.subtitulo || '';
-            document.getElementById('imagen_url').value = slide.imagen_url;
-            document.getElementById('orden').value = slide.orden;
-            document.getElementById('activo').value = slide.activo;
-            document.getElementById('enlace_url').value = slide.enlace_url || '';
-            document.getElementById('imagePreview').src = '../' + slide.imagen_url;
-            document.getElementById('modalTitle').textContent = 'Editar Slide';
+            document.getElementById('patrocinadorId').value = p.id;
+            document.getElementById('nombre_empresa').value = p.nombre_empresa;
+            document.getElementById('logo_url').value = p.logo_url;
+            document.getElementById('sitio_web').value = p.sitio_web || '';
+            document.getElementById('descripcion').value = p.descripcion || '';
+            document.getElementById('orden').value = p.orden;
+            document.getElementById('activo').value = p.activo;
+            document.getElementById('imagePreview').src = '../' + p.logo_url;
+            document.getElementById('modalTitle').textContent = 'Editar Patrocinador';
             
             modal.show();
         }
 
-        // Guardar slide
-        async function saveSlide() {
-            const id = document.getElementById('slideId').value;
+        // Guardar
+        async function savePatrocinador() {
+            const id = document.getElementById('patrocinadorId').value;
             const data = {
-                titulo: document.getElementById('titulo').value,
-                subtitulo: document.getElementById('subtitulo').value || null,
-                imagen_url: document.getElementById('imagen_url').value,
+                nombre_empresa: document.getElementById('nombre_empresa').value,
+                logo_url: document.getElementById('logo_url').value,
+                sitio_web: document.getElementById('sitio_web').value || null,
+                descripcion: document.getElementById('descripcion').value || null,
                 orden: parseInt(document.getElementById('orden').value) || 0,
-                activo: parseInt(document.getElementById('activo').value),
-                enlace_url: document.getElementById('enlace_url').value || null
+                activo: parseInt(document.getElementById('activo').value)
             };
 
             try {
                 let response;
                 if (id) {
-                    response = await adminAPI.put(`admin/hero-slider/${id}`, data);
+                    response = await adminAPI.put(`admin/patrocinadores/${id}`, data);
                 } else {
-                    response = await adminAPI.post('admin/hero-slider', data);
+                    response = await adminAPI.post('admin/patrocinadores', data);
                 }
 
                 if (response.success) {
                     modal.hide();
                     alert(response.message || 'Guardado exitosamente');
-                    loadSlides();
+                    loadPatrocinadores();
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -310,13 +306,13 @@
             }
         }
 
-        // Toggle activo/inactivo
+        // Toggle activo
         async function toggleActivo(id, nuevoEstado) {
             try {
-                const response = await adminAPI.put(`admin/hero-slider/${id}`, { activo: nuevoEstado ? 1 : 0 });
+                const response = await adminAPI.put(`admin/patrocinadores/${id}`, { activo: nuevoEstado ? 1 : 0 });
                 if (response.success) {
-                    alert(nuevoEstado ? 'Slide activado' : 'Slide desactivado');
-                    loadSlides();
+                    alert(nuevoEstado ? 'Patrocinador activado' : 'Patrocinador desactivado');
+                    loadPatrocinadores();
                 }
             } catch (error) {
                 alert('Error al actualizar');
@@ -325,20 +321,20 @@
 
         // Eliminar
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este slide?')) return;
+            if (!confirm('¿Eliminar este patrocinador?')) return;
 
             try {
-                const response = await adminAPI.delete(`admin/hero-slider/${id}`);
+                const response = await adminAPI.delete(`admin/patrocinadores/${id}`);
                 if (response.success) {
-                    alert('Slide eliminado');
-                    loadSlides();
+                    alert('Patrocinador eliminado');
+                    loadPatrocinadores();
                 }
             } catch (error) {
                 alert('Error al eliminar');
             }
         }
 
-        // Preview de imagen
+        // Preview imagen
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -371,20 +367,19 @@
                 const response = await adminAPI.uploadImage(file);
 
                 if (response.success) {
-                    document.getElementById('imagen_url').value = response.data.url;
+                    document.getElementById('logo_url').value = response.data.url;
                     document.getElementById('imagePreview').src = '../' + response.data.url;
                     
-                    const sizeKB = Math.round(response.data.size / 1024);
-                    alert(`✅ Imagen subida!\n\nTamaño: ${sizeKB}KB`);
-                    
+                    alert(`✅ Logo subido!`);
                     fileInput.value = '';
                 }
             } catch (error) {
-                alert('Error al subir imagen');
+                alert('Error al subir logo');
             } finally {
                 document.getElementById('uploadProgress').style.display = 'none';
             }
         }
+
     </script>
 </body>
 </html>

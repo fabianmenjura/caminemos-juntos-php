@@ -640,4 +640,95 @@ class AdminController {
             return Response::error('Error al eliminar', null, 500);
         }
     }
+    
+    // ===== PATROCINADORES =====
+    
+    public function getPatrocinadores() {
+        try {
+            $patrocinadores = $this->db->fetchAll(
+                "SELECT * FROM patrocinadores WHERE deleted = 0 ORDER BY orden ASC, id ASC"
+            );
+            
+            Logger::debug("getPatrocinadores: Encontrados " . count($patrocinadores) . " patrocinadores");
+            return Response::success(['patrocinadores' => $patrocinadores, 'total' => count($patrocinadores)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener patrocinadores", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener patrocinadores', null, 500);
+        }
+    }
+    
+    public function createPatrocinador() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $this->db->execute(
+                "INSERT INTO patrocinadores (nombre_empresa, logo_url, sitio_web, descripcion, orden, activo) 
+                 VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    $data['nombre_empresa'],
+                    $data['logo_url'],
+                    $data['sitio_web'] ?? null,
+                    $data['descripcion'] ?? null,
+                    $data['orden'] ?? 0,
+                    $data['activo'] ?? 1
+                ]
+            );
+            
+            $this->authService->logActivity($this->user['id'], 'CREAR_PATROCINADOR', 'patrocinadores', $this->db->lastInsertId());
+            
+            Logger::debug("createPatrocinador: Patrocinador creado");
+            return Response::success(['id' => $this->db->lastInsertId()], 'Patrocinador creado', 201);
+        } catch (Exception $e) {
+            Logger::error("Error al crear patrocinador", ['error' => $e->getMessage()]);
+            return Response::error('Error al crear', null, 500);
+        }
+    }
+    
+    public function updatePatrocinador($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $updates = [];
+            $params = [];
+            
+            foreach (['nombre_empresa', 'logo_url', 'sitio_web', 'descripcion', 'orden', 'activo'] as $field) {
+                if (isset($data[$field])) {
+                    $updates[] = "$field = ?";
+                    $params[] = $data[$field];
+                }
+            }
+            
+            if (empty($updates)) {
+                return Response::error('No hay datos para actualizar', null, 400);
+            }
+            
+            $params[] = $id;
+            $this->db->execute(
+                "UPDATE patrocinadores SET " . implode(", ", $updates) . " WHERE id = ?",
+                $params
+            );
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_PATROCINADOR', 'patrocinadores', $id);
+            
+            Logger::debug("updatePatrocinador: Patrocinador #$id actualizado");
+            return Response::success(null, 'Patrocinador actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar patrocinador", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deletePatrocinador($id) {
+        try {
+            // Soft delete
+            $this->db->execute("UPDATE patrocinadores SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_PATROCINADOR', 'patrocinadores', $id);
+            
+            Logger::debug("deletePatrocinador: Patrocinador #$id marcado como eliminado");
+            return Response::success(null, 'Patrocinador eliminado');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar patrocinador", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
 }
