@@ -32,7 +32,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 try {
     // Rutas de la API
     if (empty($segments[0])) {
-        Response::json(['message' => 'API Adopta un Abuelo Colombia', 'version' => '1.0']);
+        Response::json(['message' => 'API Caminemos Juntos Colombia', 'version' => '1.0']);
     }
 
     // Health check

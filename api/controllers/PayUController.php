@@ -32,7 +32,7 @@ class PayUController {
             $paymentForm = $this->payuService->createPaymentForm([
                 'amount' => (float)$data['amount'],
                 'currency' => 'COP',
-                'description' => $data['description'] ?? 'Donación Adopta un Abuelo Colombia',
+                'description' => $data['description'] ?? 'Donación Caminemos Juntos Chiquiquirá',
                 'buyerEmail' => $data['buyerEmail'],
                 'buyerFullName' => $data['buyerFullName'],
                 'referenceCode' => $data['referenceCode'] ?? 'DON-' . time()

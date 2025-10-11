@@ -80,7 +80,7 @@ async function processPayUPayment(formData, tipo) {
             amount: parseFloat(formData.monto),
             buyerFullName: tipo === 'personal' ? formData.nombre_completo : formData.nombre_contacto,
             buyerEmail: formData.email,
-            description: `Donación ${tipo === 'personal' ? 'Personal' : 'Empresarial'} - Adopta un Abuelo Colombia`
+            description: `Donación ${tipo === 'personal' ? 'Personal' : 'Empresarial'} - Caminemos Juntos Chiquiquirá`,
         };
 
         const response = await api.createPayment(paymentData);
