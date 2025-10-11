@@ -57,7 +57,7 @@
                             <option value="">Todos</option>
                             <option value="disponible" selected>Disponibles</option>
                             <option value="adoptado">Adoptados</option>
-                            <option value="eliminado">Eliminados</option>
+                            <option value="inactivo">Inactivos</option>
                         </select>
                     </div>
                 </div>
@@ -125,6 +125,7 @@
                                 <select class="form-select" id="estado" required>
                                     <option value="disponible">Disponible</option>
                                     <option value="adoptado">Adoptado</option>
+                                    <option value="inactivo">Inactivo</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -232,10 +233,14 @@
                     <td>${a.edad}</td>
                     <td>${a.ciudad}</td>
                     <td><i class="fas fa-${a.genero === 'M' ? 'male' : 'female'}"></i> ${a.genero === 'M' ? 'M' : 'F'}</td>
-                    <td><span class="badge badge-${a.estado === 'disponible' ? 'success' : 'secondary'}">${a.estado}</span></td>
+                    <td>
+                        <span class="badge badge-${a.estado === 'disponible' ? 'success' : (a.estado === 'adoptado' ? 'info' : 'secondary')}">
+                            ${a.estado}
+                        </span>
+                    </td>
                     <td>
                         <button class="btn action-btn-edit" onclick="editAbuelo(${a.id})"><i class="fas fa-edit"></i></button>
-                        ${a.estado !== 'eliminado' ? 
+                        ${a.estado !== 'inactivo' ? 
                             `<button class="btn action-btn-delete" onclick="deleteAbuelo(${a.id}, '${a.nombre}')"><i class="fas fa-trash"></i></button>` 
                             : ''}
                     </td>

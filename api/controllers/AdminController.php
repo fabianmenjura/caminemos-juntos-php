@@ -231,15 +231,30 @@ class AdminController {
         }
     }
     
-    // ABUELOS - Eliminar
+    // ABUELOS - Eliminar (soft delete)
     public function deleteAbuelo($id) {
         try {
-            $this->db->execute("UPDATE abuelos SET estado = 'eliminado' WHERE id = ?", [$id]);
+            Logger::debug("deleteAbuelo: Eliminando abuelo #$id");
+            
+            // Cambiar estado a 'inactivo' (soft delete)
+            $this->db->execute("UPDATE abuelos SET estado = 'inactivo' WHERE id = ?", [$id]);
+            
             $this->authService->logActivity($this->user['id'], 'ELIMINAR_ABUELO', 'abuelos', $id);
             
-            return Response::success(null, 'Abuelo eliminado');
+            Logger::debug("deleteAbuelo: Abuelo #$id marcado como inactivo");
+            
+            return Response::success(null, 'Abuelo marcado como inactivo');
         } catch (Exception $e) {
-            return Response::error('Error al eliminar', null, 500);
+            Logger::error("Error en deleteAbuelo", ['error' => $e->getMessage(), 'id' => $id]);
+            
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al eliminar',
+                'message' => $e->getMessage(),
+                'details' => 500
+            ]);
+            exit;
         }
     }
     
