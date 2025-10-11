@@ -144,7 +144,7 @@ class AdminController {
             $estado = $_GET['estado'] ?? '';
             
             $offset = ($pagina - 1) * $limite;
-            $where = $estado ? "WHERE estado = '$estado'" : "";
+            $where = $estado ? "WHERE estado = '$estado' AND deleted = 0" : "WHERE deleted = 0";
             
             $total = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos $where")['count'];
             $abuelos = $this->db->fetchAll(
@@ -236,14 +236,14 @@ class AdminController {
         try {
             Logger::debug("deleteAbuelo: Eliminando abuelo #$id");
             
-            // Cambiar estado a 'inactivo' (soft delete)
-            $this->db->execute("UPDATE abuelos SET estado = 'inactivo' WHERE id = ?", [$id]);
+            // Soft delete: marcar como eliminado
+            $this->db->execute("UPDATE abuelos SET deleted = 1 WHERE id = ?", [$id]);
             
             $this->authService->logActivity($this->user['id'], 'ELIMINAR_ABUELO', 'abuelos', $id);
             
-            Logger::debug("deleteAbuelo: Abuelo #$id marcado como inactivo");
+            Logger::debug("deleteAbuelo: Abuelo #$id marcado como eliminado");
             
-            return Response::success(null, 'Abuelo marcado como inactivo');
+            return Response::success(null, 'Abuelo eliminado');
         } catch (Exception $e) {
             Logger::error("Error en deleteAbuelo", ['error' => $e->getMessage(), 'id' => $id]);
             
@@ -278,7 +278,7 @@ class AdminController {
                     "SELECT id, nombre_completo as nombre, email, monto, estado, created_at as fecha_donacion, 'persona' as tipo_categoria
                      FROM donaciones_personas
                      UNION ALL
-                     SELECT id, nombre_empresa as nombre, email_contacto as email, monto, estado, created_at as fecha_donacion, 'empresa' as tipo_categoria
+                     SELECT id, nombre_empresa as nombre, email, monto, estado, created_at as fecha_donacion, 'empresa' as tipo_categoria
                      FROM donaciones_empresas
                      ORDER BY fecha_donacion DESC LIMIT $limite"
                 );
@@ -307,11 +307,11 @@ class AdminController {
             $leido = isset($_GET['leido']) ? $_GET['leido'] : null;
             
             // Adaptar al esquema real: estado = 'nuevo', 'leido', 'respondido'
-            $where = "";
+            $where = "WHERE deleted = 0";
             if ($leido === 'false') {
-                $where = "WHERE estado = 'nuevo'";
+                $where = "WHERE estado = 'nuevo' AND deleted = 0";
             } elseif ($leido === 'true') {
-                $where = "WHERE estado IN ('leido', 'respondido')";
+                $where = "WHERE estado IN ('leido', 'respondido') AND deleted = 0";
             }
             
             $mensajes = $this->db->fetchAll(
@@ -350,11 +350,14 @@ class AdminController {
     
     public function deleteMensaje($id) {
         try {
-            $this->db->execute("DELETE FROM mensajes_contacto WHERE id = ?", [$id]);
+            // Soft delete: marcar como eliminado
+            $this->db->execute("UPDATE mensajes_contacto SET deleted = 1 WHERE id = ?", [$id]);
             $this->authService->logActivity($this->user['id'], 'ELIMINAR_MENSAJE', 'mensajes_contacto', $id);
             
+            Logger::debug("deleteMensaje: Mensaje #$id marcado como eliminado");
             return Response::success(null, 'Mensaje eliminado');
         } catch (Exception $e) {
+            Logger::error("Error al eliminar mensaje", ['error' => $e->getMessage()]);
             return Response::error('Error al eliminar', null, 500);
         }
     }
@@ -390,6 +393,160 @@ class AdminController {
         } catch (Exception $e) {
             Logger::error("Error en updateDonacionEstado", ['error' => $e->getMessage()]);
             return Response::error('Error al actualizar donación', null, 500);
+        }
+    }
+    
+    // ===== VOLUNTARIOS =====
+    
+    public function getVoluntarios() {
+        try {
+            $estado = $_GET['estado'] ?? 'todos';
+            $sql = "SELECT * FROM voluntarios WHERE deleted = 0";
+            
+            if ($estado !== 'todos') {
+                $sql .= " AND estado = ?";
+                $voluntarios = $this->db->fetchAll($sql . " ORDER BY created_at DESC", [$estado]);
+            } else {
+                $voluntarios = $this->db->fetchAll($sql . " ORDER BY created_at DESC");
+            }
+            
+            Logger::debug("getVoluntarios: Encontrados " . count($voluntarios) . " voluntarios");
+            return Response::success(['voluntarios' => $voluntarios, 'total' => count($voluntarios)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener voluntarios", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener voluntarios', null, 500);
+        }
+    }
+    
+    public function updateVoluntario($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $estado = $data['estado'] ?? null;
+            
+            if (!in_array($estado, ['nuevo', 'revisado', 'aprobado', 'rechazado', 'inactivo'])) {
+                return Response::error('Estado inválido', null, 400);
+            }
+            
+            $fechaAprobacion = ($estado === 'aprobado') ? date('Y-m-d H:i:s') : null;
+            
+            $this->db->execute(
+                "UPDATE voluntarios SET estado = ?, fecha_aprobacion = ? WHERE id = ?",
+                [$estado, $fechaAprobacion, $id]
+            );
+            
+            $this->authService->logActivity(
+                $this->user['id'],
+                'ACTUALIZAR_VOLUNTARIO',
+                'voluntarios',
+                $id,
+                "Estado: $estado"
+            );
+            
+            Logger::debug("updateVoluntario: Voluntario #$id → $estado");
+            return Response::success(null, 'Voluntario actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar voluntario", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteVoluntario($id) {
+        try {
+            // Soft delete: marcar como eliminado
+            $this->db->execute("UPDATE voluntarios SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_VOLUNTARIO', 'voluntarios', $id);
+            
+            Logger::debug("deleteVoluntario: Voluntario #$id marcado como eliminado");
+            return Response::success(null, 'Voluntario eliminado');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar voluntario", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
+    // ===== TESTIMONIOS =====
+    
+    public function getTestimonios() {
+        try {
+            $estado = $_GET['estado'] ?? 'todos';
+            $sql = "SELECT * FROM testimonios WHERE deleted = 0";
+            
+            if ($estado === 'aprobados') {
+                $sql .= " AND aprobado = TRUE";
+                $testimonios = $this->db->fetchAll($sql);
+            } elseif ($estado === 'pendientes') {
+                $sql .= " AND aprobado = FALSE";
+                $testimonios = $this->db->fetchAll($sql);
+            } else {
+                $testimonios = $this->db->fetchAll($sql . " ORDER BY created_at DESC");
+            }
+            
+            Logger::debug("getTestimonios: Encontrados " . count($testimonios) . " testimonios");
+            return Response::success(['testimonios' => $testimonios, 'total' => count($testimonios)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener testimonios", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener testimonios', null, 500);
+        }
+    }
+    
+    public function updateTestimonio($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $updates = [];
+            $params = [];
+            
+            if (isset($data['aprobado'])) {
+                $updates[] = "aprobado = ?";
+                $params[] = (bool)$data['aprobado'];
+            }
+            
+            if (isset($data['destacado'])) {
+                $updates[] = "destacado = ?";
+                $params[] = (bool)$data['destacado'];
+            }
+            
+            if (isset($data['orden'])) {
+                $updates[] = "orden = ?";
+                $params[] = (int)$data['orden'];
+            }
+            
+            if (empty($updates)) {
+                return Response::error('No hay datos para actualizar', null, 400);
+            }
+            
+            $params[] = $id;
+            $sql = "UPDATE testimonios SET " . implode(", ", $updates) . " WHERE id = ?";
+            
+            $this->db->execute($sql, $params);
+            
+            $this->authService->logActivity(
+                $this->user['id'],
+                'ACTUALIZAR_TESTIMONIO',
+                'testimonios',
+                $id,
+                json_encode($data)
+            );
+            
+            Logger::debug("updateTestimonio: Testimonio #$id actualizado");
+            return Response::success(null, 'Testimonio actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar testimonio", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteTestimonio($id) {
+        try {
+            // Soft delete: marcar como eliminado
+            $this->db->execute("UPDATE testimonios SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_TESTIMONIO', 'testimonios', $id);
+            
+            Logger::debug("deleteTestimonio: Testimonio #$id marcado como eliminado");
+            return Response::success(null, 'Testimonio eliminado');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar testimonio", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
         }
     }
 }

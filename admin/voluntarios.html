@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voluntarios - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-heart fa-2x mb-2" style="color: #ff8c42;"></i>
+            <h3>Adopta un Abuelo</h3>
+            <p>Panel de Administración</p>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="abuelos.html" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Abuelos</span>
+            </a>
+            <a href="donaciones.html" class="menu-item">
+                <i class="fas fa-hand-holding-heart"></i>
+                <span>Donaciones</span>
+            </a>
+            <a href="mensajes.html" class="menu-item">
+                <i class="fas fa-envelope"></i>
+                <span>Mensajes</span>
+            </a>
+            <a href="voluntarios.html" class="menu-item active">
+                <i class="fas fa-user-friends"></i>
+                <span>Voluntarios</span>
+            </a>
+            <a href="testimonios.html" class="menu-item">
+                <i class="fas fa-star"></i>
+                <span>Testimonios</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <p class="text-white mb-2"><i class="fas fa-user me-2"></i><span id="userName">Admin</span></p>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-user-friends me-2"></i>Gestión de Voluntarios</h1>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrar por Estado</label>
+                            <select class="form-select" id="filter-estado">
+                                <option value="todos">Todos</option>
+                                <option value="nuevo">Nuevos</option>
+                                <option value="revisado">Revisados</option>
+                                <option value="aprobado">Aprobados</option>
+                                <option value="rechazado">Rechazados</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8 text-end">
+                            <span class="badge bg-primary me-2" id="count-badge">Total: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="text-muted mt-2">Cargando voluntarios...</p>
+            </div>
+
+            <!-- Tabla -->
+            <div id="voluntarios-table" style="display: none;">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Teléfono</th>
+                                        <th>Ciudad</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="voluntarios-tbody">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No data -->
+            <div id="no-data" class="text-center py-5" style="display: none;">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No hay voluntarios registrados</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle -->
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Voluntario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalle-content">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let voluntarios = [];
+
+        // Verificar sesión
+        if (!verifySession()) {
+            window.location.href = 'login.html';
+        }
+
+        // Cargar voluntarios
+        async function loadVoluntarios(estado = 'todos') {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('voluntarios-table').style.display = 'none';
+                document.getElementById('no-data').style.display = 'none';
+
+                const url = estado !== 'todos' ? `admin/voluntarios?estado=${estado}` : 'admin/voluntarios';
+                const response = await adminAPI.get(url);
+
+                if (response.success) {
+                    voluntarios = response.data.voluntarios;
+                    document.getElementById('count-badge').textContent = `Total: ${voluntarios.length}`;
+                    renderVoluntarios();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar voluntarios');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Renderizar
+        function renderVoluntarios() {
+            const tbody = document.getElementById('voluntarios-tbody');
+
+            if (voluntarios.length === 0) {
+                document.getElementById('no-data').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('voluntarios-table').style.display = 'block';
+
+            tbody.innerHTML = voluntarios.map(v => `
+                <tr>
+                    <td>${v.id}</td>
+                    <td>${v.nombre_completo}</td>
+                    <td><small>${v.email}</small></td>
+                    <td>${v.telefono}</td>
+                    <td>${v.ciudad || '-'}</td>
+                    <td><span class="badge bg-info">${getTipoLabel(v.tipo_voluntariado)}</span></td>
+                    <td><span class="badge ${getEstadoBadge(v.estado)}">${getEstadoLabel(v.estado)}</span></td>
+                    <td><small>${formatDate(v.created_at)}</small></td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-info" onclick="verDetalle(${v.id})" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success" onclick="cambiarEstado(${v.id}, 'aprobado')" title="Aprobar">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminar(${v.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Ver detalle
+        function verDetalle(id) {
+            const v = voluntarios.find(vol => vol.id === id);
+            if (!v) return;
+
+            document.getElementById('detalle-content').innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Nombre:</strong><br>${v.nombre_completo}</div>
+                    <div class="col-md-6"><strong>Email:</strong><br>${v.email}</div>
+                    <div class="col-md-6"><strong>Teléfono:</strong><br>${v.telefono}</div>
+                    <div class="col-md-6"><strong>Ciudad:</strong><br>${v.ciudad || '-'}</div>
+                    <div class="col-md-6"><strong>Edad:</strong><br>${v.edad || '-'}</div>
+                    <div class="col-md-6"><strong>Profesión:</strong><br>${v.profesion || '-'}</div>
+                    <div class="col-12"><strong>Tipo:</strong><br><span class="badge bg-info">${getTipoLabel(v.tipo_voluntariado)}</span></div>
+                    <div class="col-12"><strong>Disponibilidad:</strong><br>${v.disponibilidad || 'No especificada'}</div>
+                    <div class="col-12"><strong>Habilidades:</strong><br>${v.habilidades || 'No especificadas'}</div>
+                    <div class="col-12"><strong>Mensaje:</strong><br>${v.mensaje || 'Sin mensaje'}</div>
+                    <div class="col-12">
+                        <strong>Cambiar estado:</strong><br>
+                        <select class="form-select" onchange="cambiarEstado(${v.id}, this.value)">
+                            <option value="">Seleccionar...</option>
+                            <option value="revisado">Revisado</option>
+                            <option value="aprobado">Aprobar</option>
+                            <option value="rechazado">Rechazar</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('detalleModal')).show();
+        }
+
+        // Cambiar estado
+        async function cambiarEstado(id, nuevoEstado) {
+            if (!nuevoEstado || !confirm(`¿Cambiar estado a "${getEstadoLabel(nuevoEstado)}"?`)) return;
+
+            try {
+                const response = await adminAPI.put(`admin/voluntarios/${id}`, { estado: nuevoEstado });
+                if (response.success) {
+                    alert('Estado actualizado');
+                    bootstrap.Modal.getInstance(document.getElementById('detalleModal'))?.hide();
+                    loadVoluntarios(document.getElementById('filter-estado').value);
+                }
+            } catch (error) {
+                alert('Error al actualizar');
+            }
+        }
+
+        // Eliminar
+        async function eliminar(id) {
+            if (!confirm('¿Eliminar este voluntario?')) return;
+
+            try {
+                const response = await adminAPI.delete(`admin/voluntarios/${id}`);
+                if (response.success) {
+                    alert('Voluntario eliminado');
+                    loadVoluntarios(document.getElementById('filter-estado').value);
+                }
+            } catch (error) {
+                alert('Error al eliminar');
+            }
+        }
+
+        // Helpers
+        function getTipoLabel(tipo) {
+            return {'voluntario': 'Voluntario', 'tallerista': 'Tallerista', 'ambos': 'Ambos'}[tipo] || tipo;
+        }
+
+        function getEstadoLabel(estado) {
+            return {'nuevo': 'Nuevo', 'revisado': 'Revisado', 'aprobado': 'Aprobado', 'rechazado': 'Rechazado', 'inactivo': 'Inactivo'}[estado] || estado;
+        }
+
+        function getEstadoBadge(estado) {
+            return {'nuevo': 'bg-primary', 'revisado': 'bg-info', 'aprobado': 'bg-success', 'rechazado': 'bg-danger', 'inactivo': 'bg-secondary'}[estado] || 'bg-secondary';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleString('es-CO');
+        }
+
+        // Events
+        document.getElementById('filter-estado').addEventListener('change', (e) => loadVoluntarios(e.target.value));
+
+        // Init
+        loadVoluntarios();
+    </script>
+</body>
+</html>

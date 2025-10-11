@@ -287,3 +287,60 @@ html {
     height: 1rem;
     border-width: 0.15em;
 }
+
+/* Testimonios Section */
+.rating-stars {
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.rating-stars .star {
+    color: #ddd;
+    transition: color 0.2s;
+}
+
+.rating-stars .star.active {
+    color: #ffc107;
+}
+
+.rating-stars .star:hover,
+.rating-stars .star:hover ~ .star {
+    color: #ffc107;
+}
+
+/* Sponsor Logos */
+.sponsor-logo {
+    max-width: 180px;
+    max-height: 80px;
+    object-fit: contain;
+    filter: grayscale(100%);
+    transition: filter 0.3s;
+}
+
+.sponsor-logo:hover {
+    filter: grayscale(0%);
+}
+
+/* Toast Notifications */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}

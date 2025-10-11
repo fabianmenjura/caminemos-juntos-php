@@ -126,3 +126,20 @@ class AdminAuth {
 }
 
 const adminAuth = new AdminAuth();
+
+// Funciones globales para compatibilidad
+function verifySession() {
+    return adminAuth.verifySession();
+}
+
+function logout() {
+    return adminAuth.logout();
+}
+
+function requireAuth() {
+    return adminAuth.requireAuth();
+}
+
+function isAuthenticated() {
+    return adminAuth.isAuthenticated();
+}

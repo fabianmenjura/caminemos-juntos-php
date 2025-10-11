@@ -1,0 +1,427 @@
+<!-- AGREGAR ESTAS SECCIONES EN index.html ANTES DEL FOOTER (LÍNEA 251) -->
+
+<!-- Sección de Testimonios -->
+<section id="testimonios" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Lo Que Dicen Nuestros Colaboradores</h2>
+            <p class="section-subtitle">Historias reales de personas que han marcado la diferencia</p>
+        </div>
+        
+        <div class="row" id="testimonios-container">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="text-muted mt-2">Cargando testimonios...</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4" data-aos="fade-up">
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#testimonioModal">
+                <i class="fas fa-comment-dots me-2"></i>Comparte tu Experiencia
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Voluntarios -->
+<section id="voluntarios" class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h2 class="section-title">Únete a Nuestro Equipo</h2>
+                <p class="lead">
+                    ¿Tienes tiempo y ganas de ayudar? Únete como voluntario o tallerista 
+                    y haz la diferencia en la vida de nuestros abuelos.
+                </p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-hands-helping text-primary me-2"></i>Voluntario</h5>
+                                <p>Acompaña, conversa y brinda amistad a los abuelos.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-chalkboard-teacher text-primary me-2"></i>Tallerista</h5>
+                                <p>Comparte tus conocimientos en talleres y actividades.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4"><i class="fas fa-user-plus me-2"></i>Formulario de Inscripción</h4>
+                        
+                        <form id="voluntario-form">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Nombre Completo *</label>
+                                    <input type="text" class="form-control" name="nombre_completo" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Teléfono *</label>
+                                    <input type="tel" class="form-control" name="telefono" required placeholder="3001234567">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ciudad *</label>
+                                    <input type="text" class="form-control" name="ciudad" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Edad</label>
+                                    <input type="number" class="form-control" name="edad" min="18" max="100">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Profesión/Ocupación</label>
+                                    <input type="text" class="form-control" name="profesion">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Quiero ser *</label>
+                                    <select class="form-select" name="tipo_voluntariado" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="voluntario">Voluntario (acompañamiento)</option>
+                                        <option value="tallerista">Tallerista (dictar talleres)</option>
+                                        <option value="ambos">Ambos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Disponibilidad</label>
+                                    <textarea class="form-control" name="disponibilidad" rows="2" 
+                                              placeholder="Ej: Lunes y miércoles de 2pm a 5pm"></textarea>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Habilidades / Qué puedes aportar</label>
+                                    <textarea class="form-control" name="habilidades" rows="3" 
+                                              placeholder="Ej: Sé tocar guitarra, hacer manualidades, cocina..."></textarea>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Mensaje (opcional)</label>
+                                    <textarea class="form-control" name="mensaje" rows="2"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Patrocinadores -->
+<section id="patrocinadores" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Nuestros Patrocinadores</h2>
+            <p class="section-subtitle">Empresas comprometidas con el bienestar de nuestros abuelos</p>
+        </div>
+        
+        <div id="patrocinadores-loading" class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+        </div>
+        
+        <div id="patrocinadores-container" class="row g-4" style="display: none;">
+            <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+</section>
+
+<!-- Modal Testimonio -->
+<div class="modal fade" id="testimonioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-comment-dots me-2"></i>Comparte tu Experiencia
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testimonio-form">
+                    <div class="mb-3">
+                        <label class="form-label">Tu Nombre *</label>
+                        <input type="text" class="form-control" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rol *</label>
+                        <select class="form-select" name="rol" required>
+                            <option value="">Selecciona...</option>
+                            <option value="Voluntario">Voluntario</option>
+                            <option value="Donante">Donante</option>
+                            <option value="Familiar">Familiar de un abuelo</option>
+                            <option value="Tallerista">Tallerista</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Calificación *</label>
+                        <div class="rating-stars" id="rating-stars">
+                            <i class="far fa-star star" data-rating="1"></i>
+                            <i class="far fa-star star" data-rating="2"></i>
+                            <i class="far fa-star star" data-rating="3"></i>
+                            <i class="far fa-star star" data-rating="4"></i>
+                            <i class="far fa-star star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" name="calificacion" id="calificacion-input" value="5">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tu Testimonio *</label>
+                        <textarea class="form-control" name="testimonio" rows="4" required 
+                                  placeholder="Comparte tu experiencia con nosotros..." minlength="20"></textarea>
+                        <small class="text-muted">Mínimo 20 caracteres</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Testimonio
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ESTILOS CSS ADICIONALES -->
+<style>
+.rating-stars {
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.rating-stars .star {
+    color: #ddd;
+    transition: color 0.2s;
+}
+
+.rating-stars .star.active,
+.rating-stars .star:hover,
+.rating-stars .star:hover ~ .star {
+    color: #ffc107;
+}
+
+.testimonio-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s;
+}
+
+.testimonio-card:hover {
+    transform: translateY(-5px);
+}
+
+.testimonio-stars {
+    color: #ffc107;
+    margin-bottom: 15px;
+}
+
+.sponsor-logo {
+    max-width: 180px;
+    max-height: 80px;
+    object-fit: contain;
+    filter: grayscale(100%);
+    transition: filter 0.3s;
+}
+
+.sponsor-logo:hover {
+    filter: grayscale(0%);
+}
+</style>
+
+<!-- JAVASCRIPT ADICIONAL -->
+<script>
+// Sistema de calificación con estrellas
+document.querySelectorAll('.star').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.getAttribute('data-rating');
+        document.getElementById('calificacion-input').value = rating;
+        
+        // Actualizar estrellas
+        document.querySelectorAll('.star').forEach((s, index) => {
+            if (index < rating) {
+                s.classList.remove('far');
+                s.classList.add('fas', 'active');
+            } else {
+                s.classList.remove('fas', 'active');
+                s.classList.add('far');
+            }
+        });
+    });
+});
+
+// Inicializar con 5 estrellas
+document.querySelectorAll('.star').forEach(s => {
+    s.classList.remove('far');
+    s.classList.add('fas', 'active');
+});
+
+// Formulario de voluntarios
+document.getElementById('voluntario-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    const button = e.target.querySelector('button[type="submit"]');
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+    
+    try {
+        const response = await fetch('/api/voluntarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ ' + result.message);
+            e.target.reset();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error al enviar. Por favor intenta de nuevo.');
+    } finally {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Solicitud';
+    }
+});
+
+// Formulario de testimonios
+document.getElementById('testimonio-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    const button = e.target.querySelector('button[type="submit"]');
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+    
+    try {
+        const response = await fetch('/api/testimonios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ ' + result.message);
+            e.target.reset();
+            bootstrap.Modal.getInstance(document.getElementById('testimonioModal')).hide();
+            
+            // Resetear estrellas a 5
+            document.querySelectorAll('.star').forEach(s => {
+                s.classList.remove('far');
+                s.classList.add('fas', 'active');
+            });
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error al enviar. Por favor intenta de nuevo.');
+    } finally {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Testimonio';
+    }
+});
+
+// Cargar testimonios
+async function loadTestimonios() {
+    try {
+        const response = await fetch('/api/testimonios');
+        const data = await response.json();
+        
+        if (data.success && data.data.testimonios.length > 0) {
+            const container = document.getElementById('testimonios-container');
+            
+            container.innerHTML = data.data.testimonios.map(t => `
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
+                    <div class="testimonio-card">
+                        <div class="testimonio-stars mb-3">
+                            ${'<i class="fas fa-star"></i>'.repeat(t.calificacion)}
+                        </div>
+                        <p class="mb-3">"${t.testimonio}"</p>
+                        <div class="d-flex align-items-center">
+                            ${t.foto_url ? 
+                                `<img src="${t.foto_url}" class="rounded-circle me-3" width="50" height="50" alt="${t.nombre}">` :
+                                `<div class="bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>`
+                            }
+                            <div>
+                                <strong>${t.nombre}</strong><br>
+                                <small class="text-muted">${t.rol}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            document.getElementById('testimonios-container').innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No hay testimonios disponibles aún</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error al cargar testimonios:', error);
+    }
+}
+
+// Cargar patrocinadores
+async function loadPatrocinadores() {
+    try {
+        const response = await fetch('/api/abuelos');  // Temporal, crear endpoint específico
+        const data = await response.json();
+        
+        // Por ahora mostrar placeholder
+        const container = document.getElementById('patrocinadores-container');
+        document.getElementById('patrocinadores-loading').style.display = 'none';
+        container.style.display = 'flex';
+        
+        // Logos de ejemplo (reemplazar con endpoint real)
+        const sponsors = [
+            { nombre: 'Empresa Solidaria', logo: 'assets/images/company-logo-1.jpg', nivel: 'oro' },
+            { nombre: 'Fundación Corazón', logo: 'assets/images/company-logo-2.jpg', nivel: 'plata' },
+            { nombre: 'Grupo Unidos', logo: 'assets/images/company-logo-3.jpg', nivel: 'bronce' },
+        ];
+        
+        container.innerHTML = sponsors.map(s => `
+            <div class="col-lg-3 col-md-4 col-6 text-center mb-4" data-aos="zoom-in">
+                <div class="p-3">
+                    <img src="${s.logo}" class="sponsor-logo img-fluid" alt="${s.nombre}">
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error al cargar patrocinadores:', error);
+    }
+}
+
+// Cargar al inicio
+document.addEventListener('DOMContentLoaded', () => {
+    loadTestimonios();
+    loadPatrocinadores();
+});
+</script>
+

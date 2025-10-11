@@ -59,6 +59,34 @@ class API {
         }
     }
 
+    // Métodos HTTP genéricos
+    async get(endpoint, params = {}) {
+        const query = Object.keys(params).length > 0 
+            ? '?' + new URLSearchParams(params).toString() 
+            : '';
+        return this.request(`${endpoint}${query}`);
+    }
+
+    async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: data
+        });
+    }
+
+    async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: data
+        });
+    }
+
+    async delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
+        });
+    }
+
     // Abuelos
     async getAbuelos(params = {}) {
         const query = new URLSearchParams(params).toString();

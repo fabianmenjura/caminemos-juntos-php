@@ -248,6 +248,160 @@
         </div>
     </section>
 
+    <!-- Sección de Testimonios -->
+    <section id="testimonios" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="section-title">Lo Que Dicen Nuestros Colaboradores</h2>
+                <p class="section-subtitle">Historias reales de personas que han marcado la diferencia</p>
+            </div>
+            
+            <div class="row" id="testimonios-container">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4" data-aos="fade-up">
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#testimonioModal">
+                    <i class="fas fa-comment-dots me-2"></i>Comparte tu Experiencia
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Voluntarios -->
+    <section id="voluntarios" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="section-title">Únete a Nuestro Equipo</h2>
+                    <p class="lead">
+                        ¿Tienes tiempo y ganas de ayudar? Únete como voluntario o tallerista 
+                        y haz la diferencia en la vida de nuestros abuelos.
+                    </p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-hands-helping text-primary me-2"></i>Voluntario</h5>
+                                    <p>Acompaña, conversa y brinda amistad.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-chalkboard-teacher text-primary me-2"></i>Tallerista</h5>
+                                    <p>Comparte conocimientos en talleres.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="card shadow">
+                        <div class="card-body p-4">
+                            <h4 class="mb-4"><i class="fas fa-user-plus me-2"></i>Inscripción</h4>
+                            
+                            <form id="voluntario-form">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <input type="text" class="form-control" name="nombre_completo" placeholder="Nombre Completo *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="email" class="form-control" name="email" placeholder="Email *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="tel" class="form-control" name="telefono" placeholder="Teléfono *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" name="ciudad" placeholder="Ciudad *" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" name="tipo_voluntariado" required>
+                                            <option value="">Quiero ser...</option>
+                                            <option value="voluntario">Voluntario</option>
+                                            <option value="tallerista">Tallerista</option>
+                                            <option value="ambos">Ambos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <textarea class="form-control" name="habilidades" rows="3" placeholder="¿Qué puedes aportar? (opcional)"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Patrocinadores -->
+    <section id="patrocinadores" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="section-title">Nuestros Patrocinadores</h2>
+                <p class="section-subtitle">Empresas comprometidas con el bienestar de nuestros abuelos</p>
+            </div>
+            
+            <div id="patrocinadores-container" class="row g-4 justify-content-center">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Testimonio -->
+    <div class="modal fade" id="testimonioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-comment-dots me-2"></i>Comparte tu Experiencia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="testimonio-form">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="nombre" placeholder="Tu Nombre *" required>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" name="rol" required>
+                                <option value="">Tu Rol...</option>
+                                <option value="Voluntario">Voluntario</option>
+                                <option value="Donante">Donante</option>
+                                <option value="Familiar">Familiar</option>
+                                <option value="Tallerista">Tallerista</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Calificación</label>
+                            <div class="rating-stars" id="rating-stars">
+                                <i class="fas fa-star star active" data-rating="1"></i>
+                                <i class="fas fa-star star active" data-rating="2"></i>
+                                <i class="fas fa-star star active" data-rating="3"></i>
+                                <i class="fas fa-star star active" data-rating="4"></i>
+                                <i class="fas fa-star star active" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" name="calificacion" id="calificacion-input" value="5">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" name="testimonio" rows="4" placeholder="Tu experiencia..." required minlength="20"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="main-footer bg-dark text-white py-5">
         <div class="container">

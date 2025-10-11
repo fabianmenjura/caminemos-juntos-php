@@ -90,7 +90,33 @@ try {
         $controller = new ContactoController();
 
         if ($method === 'POST') {
-            // POST /api/contacto
+            $controller->create();
+        }
+        exit;
+    }
+
+    // Rutas de voluntarios
+    if ($segments[0] === 'voluntarios') {
+        require_once __DIR__ . '/controllers/VoluntariosController.php';
+        $controller = new VoluntariosController();
+
+        if ($method === 'POST') {
+            // POST /api/voluntarios
+            $controller->create();
+        }
+        exit;
+    }
+
+    // Rutas de testimonios
+    if ($segments[0] === 'testimonios') {
+        require_once __DIR__ . '/controllers/TestimoniosController.php';
+        $controller = new TestimoniosController();
+
+        if ($method === 'GET') {
+            // GET /api/testimonios
+            $controller->index();
+        } elseif ($method === 'POST') {
+            // POST /api/testimonios
             $controller->create();
         }
         exit;
@@ -163,6 +189,10 @@ try {
                 $controller->getDonaciones();
             } elseif ($segments[1] === 'mensajes') {
                 $controller->getMensajes();
+            } elseif ($segments[1] === 'voluntarios') {
+                $controller->getVoluntarios();
+            } elseif ($segments[1] === 'testimonios') {
+                $controller->getTestimonios();
             }
         } elseif ($method === 'POST' && $segments[1] === 'abuelos') {
             $controller->createAbuelo();
@@ -174,12 +204,20 @@ try {
                 $controller->updateDonacionEstado($segments[2], $segments[3]);
             } elseif ($segments[1] === 'mensajes' && isset($segments[3]) && $segments[3] === 'marcar-leido') {
                 $controller->marcarMensajeLeido($segments[2]);
+            } elseif ($segments[1] === 'voluntarios') {
+                $controller->updateVoluntario($segments[2]);
+            } elseif ($segments[1] === 'testimonios') {
+                $controller->updateTestimonio($segments[2]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
                 $controller->deleteAbuelo($segments[2]);
             } elseif ($segments[1] === 'mensajes') {
                 $controller->deleteMensaje($segments[2]);
+            } elseif ($segments[1] === 'voluntarios') {
+                $controller->deleteVoluntario($segments[2]);
+            } elseif ($segments[1] === 'testimonios') {
+                $controller->deleteTestimonio($segments[2]);
             }
         }
         exit;
