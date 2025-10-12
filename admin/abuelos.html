@@ -6,6 +6,7 @@
     <title>Gestión de Abuelos - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -200,6 +201,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/admin-auth.js"></script>
     <script src="assets/js/admin-api.js"></script>
     <script>
@@ -230,7 +232,12 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar abuelos');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al Cargar',
+                    text: 'No se pudieron cargar los abuelos. Intenta de nuevo.',
+                    confirmButtonColor: '#2c5f2d'
+                });
             }
         }
         
@@ -277,7 +284,10 @@
                 const response = await adminAPI.getAbuelos({ limite: 1000 });
                 const abuelo = response.data.abuelos.find(a => a.id == id);
                 
-                if (!abuelo) return alert('No encontrado');
+                if (!abuelo) {
+                    Swal.fire('No Encontrado', 'El abuelo no fue encontrado', 'error');
+                    return;
+                }
                 
                 document.getElementById('abueloId').value = abuelo.id;
                 document.getElementById('nombre').value = abuelo.nombre;
@@ -322,26 +332,54 @@
                 
                 if (response.success) {
                     modal.hide();
-                    alert(response.message);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: response.message || 'Abuelo guardado exitosamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     loadAbuelos();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al Guardar',
+                    text: 'No se pudo guardar el abuelo. Verifica los datos.',
+                    confirmButtonColor: '#2c5f2d'
+                });
             }
         }
         
         async function deleteAbuelo(id, nombre) {
-            if (!confirm(`¿Eliminar a ${nombre}?`)) return;
+            const result = await Swal.fire({
+                title: '¿Eliminar Abuelo?',
+                text: `¿Estás seguro de eliminar a ${nombre}? Esta acción marcará el registro como eliminado.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d'
+            });
+            
+            if (!result.isConfirmed) return;
             
             try {
                 const response = await adminAPI.deleteAbuelo(id);
                 if (response.success) {
-                    alert(response.message);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminado',
+                        text: response.message || 'Abuelo eliminado',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     loadAbuelos();
                 }
             } catch (error) {
-                alert('Error al eliminar');
+                Swal.fire('Error', 'No se pudo eliminar el abuelo', 'error');
             }
         }
         
@@ -363,7 +401,7 @@
             const fileInput = document.getElementById('imageFile');
             
             if (!fileInput.files || !fileInput.files[0]) {
-                alert('Por favor selecciona una imagen primero');
+                Swal.fire('Selecciona una Imagen', 'Por favor selecciona una imagen primero', 'warning');
                 return;
             }
             
@@ -371,13 +409,13 @@
             
             // Validar tamaño (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert('La imagen es demasiado grande. Máximo 5MB.');
+                Swal.fire('Archivo Muy Grande', 'La imagen no puede superar 5MB', 'warning');
                 return;
             }
             
             // Validar tipo
             if (!file.type.startsWith('image/')) {
-                alert('El archivo debe ser una imagen');
+                Swal.fire('Archivo Inválido', 'El archivo debe ser una imagen', 'warning');
                 return;
             }
             
@@ -385,8 +423,19 @@
                 // Mostrar progreso
                 document.getElementById('uploadProgress').style.display = 'block';
                 
+                Swal.fire({
+                    title: 'Subiendo Imagen',
+                    text: 'Optimizando y guardando...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
                 // Subir imagen
                 const response = await adminAPI.uploadImage(file);
+                
+                Swal.close();
                 
                 if (response.success) {
                     // Actualizar el campo foto_url
@@ -397,23 +446,41 @@
                     
                     // Mostrar éxito
                     const sizeKB = Math.round(response.data.size / 1024);
-                    alert(`✅ Imagen subida exitosamente!\n\nTamaño optimizado: ${sizeKB}KB\nRuta: ${response.data.url}`);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Imagen Subida!',
+                        html: `Tamaño optimizado: <strong>${sizeKB}KB</strong><br>Ruta: ${response.data.url}`,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
                     
                     // Limpiar input de archivo
                     fileInput.value = '';
                 } else {
-                    alert('Error: ' + (response.message || 'Error al subir imagen'));
+                    Swal.fire('Error', response.message || 'Error al subir imagen', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al subir la imagen: ' + error.message);
+                Swal.fire('Error', 'No se pudo subir la imagen: ' + error.message, 'error');
             } finally {
                 document.getElementById('uploadProgress').style.display = 'none';
             }
         }
         
         async function logout() {
-            if (confirm('¿Cerrar sesión?')) await adminAuth.logout();
+            const result = await Swal.fire({
+                title: '¿Cerrar Sesión?',
+                text: '¿Estás seguro de que quieres salir?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2c5f2d'
+            });
+            
+            if (result.isConfirmed) {
+                await adminAuth.logout();
+            }
         }
     </script>
 </body>

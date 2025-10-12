@@ -6,6 +6,7 @@
     <title>Mensajes de Cumpleaños - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -107,6 +108,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/admin-auth.js"></script>
     <script src="assets/js/admin-api.js"></script>
     <script>
@@ -198,31 +200,62 @@
 
         // Aprobar
         async function aprobar(id) {
-            if (!confirm('¿Aprobar este mensaje? Será visible en la página principal.')) return;
+            const result = await Swal.fire({
+                title: '¿Aprobar Mensaje?',
+                text: 'Este mensaje será visible en la página principal para todos los visitantes.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, aprobar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28a745'
+            });
+            
+            if (!result.isConfirmed) return;
 
             try {
                 const response = await adminAPI.put(`admin/mensajes-cumpleanos/${id}/aprobar`);
                 if (response.success) {
-                    alert('✅ Mensaje aprobado. Ahora es visible en la página principal.');
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Aprobado!',
+                        text: 'El mensaje ahora es visible en la página principal',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     loadMensajes(document.getElementById('filter-estado').value);
                 }
             } catch (error) {
-                alert('Error al aprobar');
+                Swal.fire('Error', 'No se pudo aprobar el mensaje', 'error');
             }
         }
 
         // Eliminar
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este mensaje?')) return;
+            const result = await Swal.fire({
+                title: '¿Eliminar Mensaje?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545'
+            });
+            
+            if (!result.isConfirmed) return;
 
             try {
                 const response = await adminAPI.delete(`admin/mensajes-cumpleanos/${id}`);
                 if (response.success) {
-                    alert('Mensaje eliminado');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminado',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadMensajes(document.getElementById('filter-estado').value);
                 }
             } catch (error) {
-                alert('Error al eliminar');
+                Swal.fire('Error', 'No se pudo eliminar el mensaje', 'error');
             }
         }
 

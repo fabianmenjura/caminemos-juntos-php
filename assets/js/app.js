@@ -192,11 +192,11 @@ if (contactForm) {
             const response = await api.sendContactMessage(data);
             
             if (response.success) {
-                showToast('Mensaje enviado exitosamente. Te responderemos pronto.', 'success');
+                showSuccess('¡Gracias por contactarnos! Te responderemos pronto.', '¡Mensaje Enviado!');
                 contactForm.reset();
             }
         } catch (error) {
-            showToast('Error al enviar el mensaje. Inténtalo de nuevo.', 'error');
+            showError('No pudimos enviar tu mensaje. Por favor, intenta de nuevo.', 'Error al Enviar');
         } finally {
             button.disabled = false;
             button.innerHTML = originalText;
@@ -333,13 +333,13 @@ if (voluntarioForm) {
             const response = await api.post('voluntarios', data);
             
             if (response.success) {
-                showToast('¡Gracias! Tu solicitud ha sido recibida. Te contactaremos pronto.', 'success');
+                showSuccess('¡Tu solicitud ha sido recibida! Te contactaremos pronto para coordinar.', '¡Gracias por Unirte!');
                 voluntarioForm.reset();
             } else {
-                showToast(response.message || 'Error al enviar', 'error');
+                showError(response.message || 'No pudimos procesar tu solicitud.', 'Error al Enviar');
             }
         } catch (error) {
-            showToast('Error al enviar. Por favor intenta de nuevo.', 'error');
+            showError('Ocurrió un error al enviar. Por favor, intenta de nuevo.', 'Error de Conexión');
         } finally {
             button.disabled = false;
             button.innerHTML = originalText;
@@ -365,7 +365,7 @@ if (testimonioForm) {
             const response = await api.post('testimonios', data);
             
             if (response.success) {
-                showToast('¡Gracias por compartir tu experiencia! Será publicado tras revisión.', 'success');
+                showSuccess('Tu testimonio será publicado después de revisión. ¡Gracias por compartir!', '¡Testimonio Recibido!');
                 testimonioForm.reset();
                 
                 // Cerrar modal
@@ -376,10 +376,10 @@ if (testimonioForm) {
                 document.querySelectorAll('.star').forEach(s => s.classList.add('active'));
                 document.getElementById('calificacion-input').value = 5;
             } else {
-                showToast(response.message || 'Error al enviar', 'error');
+                showError(response.message || 'No pudimos guardar tu testimonio.', 'Error');
             }
         } catch (error) {
-            showToast('Error al enviar. Por favor intenta de nuevo.', 'error');
+            showError('Ocurrió un error al enviar. Por favor, intenta de nuevo.', 'Error de Conexión');
         } finally {
             button.disabled = false;
             button.innerHTML = originalText;
@@ -446,16 +446,16 @@ if (cumpleanosForm) {
             const response = await api.post('cumpleanos', data);
             
             if (response.success) {
-                showToast('¡Mensaje enviado! Será entregado después de revisión. 🎂', 'success');
+                showSuccess('Tu felicitación será entregada al abuelo después de revisión. ¡Gracias por alegrar su día! 🎂', '¡Mensaje Enviado!');
                 cumpleanosForm.reset();
                 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('cumpleanosModal'));
                 if (modal) modal.hide();
             } else {
-                showToast(response.message || 'Error al enviar', 'error');
+                showError(response.message || 'No pudimos enviar tu mensaje.', 'Error');
             }
         } catch (error) {
-            showToast('Error al enviar. Por favor intenta de nuevo.', 'error');
+            showError('Ocurrió un error al enviar. Por favor, intenta de nuevo.', 'Error de Conexión');
         } finally {
             button.disabled = false;
             button.innerHTML = originalText;

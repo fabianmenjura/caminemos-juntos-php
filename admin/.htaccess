@@ -1,0 +1,8 @@
+# Página por defecto
+DirectoryIndex login.html
+
+# Prevenir acceso directo a archivos de assets
+<FilesMatch "\.(js|css)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
