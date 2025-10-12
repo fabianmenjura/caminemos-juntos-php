@@ -1,4 +1,7 @@
 RewriteEngine On
+# 🔒 Excluir carpeta admin de las reglas de reescritura
+RewriteCond %{REQUEST_URI} ^/admin/ [NC]
+RewriteRule .* - [L]
 
 # Quitar extensiones .html
 RewriteCond %{THE_REQUEST} ^GET\ (.*)\.html\ HTTP
