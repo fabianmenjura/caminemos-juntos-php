@@ -146,6 +146,21 @@ try {
         exit;
     }
 
+    // Rutas de mensajes de cumpleaños
+    if ($segments[0] === 'cumpleanos') {
+        require_once __DIR__ . '/controllers/MensajesCumpleanosController.php';
+        $controller = new MensajesCumpleanosController();
+
+        if ($method === 'POST') {
+            // POST /api/cumpleanos (enviar mensaje)
+            $controller->create();
+        } elseif ($method === 'GET' && isset($segments[1]) && $segments[1] === 'proximos') {
+            // GET /api/cumpleanos/proximos
+            $controller->proximosCumpleanos();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -221,6 +236,8 @@ try {
                 $controller->getHeroSlider();
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->getPatrocinadores();
+            } elseif ($segments[1] === 'mensajes-cumpleanos') {
+                $controller->getMensajesCumpleanos();
             }
         } elseif ($method === 'POST' && isset($segments[1])) {
             if ($segments[1] === 'abuelos') {
@@ -246,6 +263,9 @@ try {
                 $controller->updateHeroSlide($segments[2]);
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->updatePatrocinador($segments[2]);
+            } elseif ($segments[1] === 'mensajes-cumpleanos' && isset($segments[3]) && $segments[3] === 'aprobar') {
+                // PUT /api/admin/mensajes-cumpleanos/{id}/aprobar
+                $controller->aprobarMensajeCumpleanos($segments[2]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -260,6 +280,8 @@ try {
                 $controller->deleteHeroSlide($segments[2]);
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->deletePatrocinador($segments[2]);
+            } elseif ($segments[1] === 'mensajes-cumpleanos') {
+                $controller->deleteMensajeCumpleanos($segments[2]);
             }
         }
         exit;

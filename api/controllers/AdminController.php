@@ -147,8 +147,16 @@ class AdminController {
             $where = $estado ? "WHERE estado = '$estado' AND deleted = 0" : "WHERE deleted = 0";
             
             $total = $this->db->fetchOne("SELECT COUNT(*) as count FROM abuelos $where")['count'];
+            // Calcular edad en la consulta
             $abuelos = $this->db->fetchAll(
-                "SELECT * FROM abuelos $where ORDER BY created_at DESC LIMIT $limite OFFSET $offset"
+                "SELECT *, 
+                        TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) as edad,
+                        (DATE_FORMAT(fecha_nacimiento, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')) as cumple_hoy,
+                        (DAYOFYEAR(fecha_nacimiento) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE() + INTERVAL 7 DAY)) as cumple_esta_semana
+                 FROM abuelos 
+                 $where 
+                 ORDER BY created_at DESC 
+                 LIMIT $limite OFFSET $offset"
             );
             
             return Response::success([
@@ -170,11 +178,10 @@ class AdminController {
             $data = json_decode(file_get_contents('php://input'), true);
             
             $result = $this->db->execute(
-                "INSERT INTO abuelos (nombre, edad, ciudad, descripcion, genero, foto_url, fecha_nacimiento, estado) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO abuelos (nombre, ciudad, descripcion, genero, foto_url, fecha_nacimiento, estado) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [
                     $data['nombre'],
-                    $data['edad'],
                     $data['ciudad'],
                     $data['descripcion'],
                     $data['genero'] ?? 'M',
@@ -206,7 +213,7 @@ class AdminController {
             
             $fields = [];
             $values = [];
-            $allowedFields = ['nombre', 'edad', 'ciudad', 'descripcion', 'genero', 'foto_url', 'fecha_nacimiento', 'estado'];
+            $allowedFields = ['nombre', 'ciudad', 'descripcion', 'genero', 'foto_url', 'fecha_nacimiento', 'estado'];
             
             foreach ($allowedFields as $field) {
                 if (isset($data[$field])) {
@@ -728,6 +735,58 @@ class AdminController {
             return Response::success(null, 'Patrocinador eliminado');
         } catch (Exception $e) {
             Logger::error("Error al eliminar patrocinador", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
+    // ===== MENSAJES DE CUMPLEAÑOS =====
+    
+    public function getMensajesCumpleanos() {
+        try {
+            $estado = $_GET['estado'] ?? 'todos';
+            $sql = "SELECT mc.*, a.nombre as nombre_abuelo 
+                    FROM mensajes_cumpleanos mc 
+                    JOIN abuelos a ON mc.abuelo_id = a.id 
+                    WHERE mc.deleted = 0";
+            
+            if ($estado === 'pendientes') {
+                $sql .= " AND mc.aprobado = 0";
+            } elseif ($estado === 'aprobados') {
+                $sql .= " AND mc.aprobado = 1";
+            }
+            
+            $mensajes = $this->db->fetchAll($sql . " ORDER BY mc.created_at DESC");
+            
+            Logger::debug("getMensajesCumpleanos: Encontrados " . count($mensajes) . " mensajes");
+            return Response::success(['mensajes' => $mensajes, 'total' => count($mensajes)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener mensajes cumpleaños", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener mensajes', null, 500);
+        }
+    }
+    
+    public function aprobarMensajeCumpleanos($id) {
+        try {
+            $this->db->execute("UPDATE mensajes_cumpleanos SET aprobado = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'APROBAR_MENSAJE_CUMPLEANOS', 'mensajes_cumpleanos', $id);
+            
+            Logger::debug("aprobarMensajeCumpleanos: Mensaje #$id aprobado");
+            return Response::success(null, 'Mensaje aprobado');
+        } catch (Exception $e) {
+            Logger::error("Error al aprobar mensaje cumpleaños", ['error' => $e->getMessage()]);
+            return Response::error('Error al aprobar', null, 500);
+        }
+    }
+    
+    public function deleteMensajeCumpleanos($id) {
+        try {
+            $this->db->execute("UPDATE mensajes_cumpleanos SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_MENSAJE_CUMPLEANOS', 'mensajes_cumpleanos', $id);
+            
+            Logger::debug("deleteMensajeCumpleanos: Mensaje #$id eliminado");
+            return Response::success(null, 'Mensaje eliminado');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar mensaje cumpleaños", ['error' => $e->getMessage()]);
             return Response::error('Error al eliminar', null, 500);
         }
     }

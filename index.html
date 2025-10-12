@@ -515,6 +515,70 @@
         </div>
     </div>
 
+    <!-- Modal Mensaje de Cumpleaños -->
+    <div class="modal fade" id="cumpleanosModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">
+                        <i class="fas fa-birthday-cake me-2"></i>
+                        Felicita a <span id="nombreAbueloCumpleanos"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-heart me-2"></i>
+                        Tu mensaje será revisado y entregado al abuelo. ¡Alégrale el día!
+                    </div>
+                    
+                    <form id="cumpleanos-form">
+                        <input type="hidden" id="abueloIdCumpleanos">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tu Nombre *</label>
+                            <input type="text" class="form-control" name="nombre_remitente" required placeholder="Ej: Juan Pérez">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tu Email (opcional)</label>
+                            <input type="email" class="form-control" name="email_remitente" placeholder="tu@email.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mensaje de Felicitación *</label>
+                            <textarea class="form-control" name="mensaje" rows="4" required minlength="10" 
+                                      placeholder="Ej: ¡Feliz cumpleaños! Que Dios te bendiga con mucha salud y alegría..."></textarea>
+                            <small class="text-muted">Mínimo 10 caracteres</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="fas fa-gift me-2"></i>Enviar Felicitación
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Mensajes de Cumpleaños -->
+    <div class="modal fade" id="verMensajesModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope-open-text me-2"></i>
+                        Mensajes de Felicitación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="mensajesCumpleanosBody">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="main-footer bg-dark text-white py-5">
         <div class="container">
@@ -555,7 +619,7 @@
     </footer>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/573001234567" class="whatsapp-button" target="_blank">
+    <a href="https://wa.me/573219951293" class="whatsapp-button" target="_blank">
         <i class="fab fa-whatsapp"></i>
     </a>
 

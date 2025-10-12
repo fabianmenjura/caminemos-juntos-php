@@ -112,12 +112,21 @@ async function loadAbuelos() {
             
             abuelosContainer.innerHTML = abuelos.map(abuelo => {
                 const imageUrl = fixImagePath(abuelo.foto_url);
+                const cumpleHoy = abuelo.cumple_hoy == 1;
+                const cumpleEstaSemana = abuelo.cumple_esta_semana == 1;
+                
+                const totalMensajes = abuelo.total_mensajes || 0;
+                const mensajes = abuelo.mensajes_cumpleanos || [];
+                
                 return `
                     <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
-                        <div class="card grandparent-card h-100">
+                        <div class="card grandparent-card h-100 ${cumpleHoy ? 'border-warning border-3' : ''}">
+                            ${cumpleHoy ? '<div class="ribbon-birthday">🎂 ¡Cumpleaños Hoy!</div>' : ''}
+                            ${!cumpleHoy && cumpleEstaSemana ? '<div class="ribbon-birthday-soon">🎈 Cumple esta semana</div>' : ''}
                             <img src="${imageUrl}" 
                                  class="card-img-top" 
-                                 alt="${abuelo.nombre}"
+                                 alt="${abuelo.nombre}, ${abuelo.edad} años, adulto mayor en ${abuelo.ciudad}"
+                                 loading="lazy"
                                  onerror="this.src='assets/images/placeholder.jpg'">
                             <div class="card-body">
                                 <h5 class="card-title">${abuelo.nombre}</h5>
@@ -126,9 +135,26 @@ async function loadAbuelos() {
                                     ${abuelo.ciudad} • ${abuelo.edad} años
                                 </p>
                                 <p class="card-text">${abuelo.descripcion.substring(0, 120)}...</p>
-                                <a href="donar.html" class="btn btn-outline-primary btn-sm">
-                                    Apoyar a ${abuelo.nombre.split(' ')[0]}
-                                </a>
+                                
+                                ${totalMensajes > 0 ? `
+                                    <div class="alert alert-warning py-2 px-3 mb-3">
+                                        <strong>💌 ${totalMensajes} felicitación${totalMensajes > 1 ? 'es' : ''}</strong>
+                                        <button class="btn btn-sm btn-link p-0 ms-2" onclick="verMensajesCumpleanos(${abuelo.id}, '${abuelo.nombre}', ${JSON.stringify(mensajes).replace(/"/g, '&quot;')})">
+                                            Ver mensajes
+                                        </button>
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="d-flex gap-2">
+                                    <a href="donar.html" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                        Apoyar a ${abuelo.nombre.split(' ')[0]}
+                                    </a>
+                                    ${(cumpleHoy || cumpleEstaSemana) ? `
+                                        <button class="btn btn-warning btn-sm" onclick="mostrarModalCumpleanos(${abuelo.id}, '${abuelo.nombre}')" title="Enviar felicitación">
+                                            🎂
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -349,6 +375,82 @@ if (testimonioForm) {
                 // Resetear estrellas a 5
                 document.querySelectorAll('.star').forEach(s => s.classList.add('active'));
                 document.getElementById('calificacion-input').value = 5;
+            } else {
+                showToast(response.message || 'Error al enviar', 'error');
+            }
+        } catch (error) {
+            showToast('Error al enviar. Por favor intenta de nuevo.', 'error');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    });
+}
+
+// Modal de cumpleaños
+function mostrarModalCumpleanos(abueloId, nombreAbuelo) {
+    document.getElementById('abueloIdCumpleanos').value = abueloId;
+    document.getElementById('nombreAbueloCumpleanos').textContent = nombreAbuelo;
+    
+    const modal = new bootstrap.Modal(document.getElementById('cumpleanosModal'));
+    modal.show();
+}
+
+// Ver mensajes de cumpleaños
+function verMensajesCumpleanos(abueloId, nombreAbuelo, mensajes) {
+    const modalBody = document.getElementById('mensajesCumpleanosBody');
+    
+    if (mensajes.length === 0) {
+        modalBody.innerHTML = '<p class="text-muted">Aún no hay mensajes aprobados.</p>';
+    } else {
+        modalBody.innerHTML = `
+            <div class="text-center mb-3">
+                <h6>💌 Mensajes para ${nombreAbuelo}</h6>
+            </div>
+            ${mensajes.map(m => `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="mb-2">"${m.mensaje}"</p>
+                        <div class="text-end">
+                            <small class="text-muted">
+                                — ${m.nombre_remitente}
+                                ${m.fecha_envio ? ` • ${new Date(m.fecha_envio).toLocaleDateString('es-CO')}` : ''}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('verMensajesModal'));
+    modal.show();
+}
+
+// Formulario de mensaje de cumpleaños
+const cumpleanosForm = document.getElementById('cumpleanos-form');
+if (cumpleanosForm) {
+    cumpleanosForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(cumpleanosForm);
+        const data = Object.fromEntries(formData);
+        data.abuelo_id = document.getElementById('abueloIdCumpleanos').value;
+        
+        const button = cumpleanosForm.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+        
+        try {
+            const response = await api.post('cumpleanos', data);
+            
+            if (response.success) {
+                showToast('¡Mensaje enviado! Será entregado después de revisión. 🎂', 'success');
+                cumpleanosForm.reset();
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cumpleanosModal'));
+                if (modal) modal.hide();
             } else {
                 showToast(response.message || 'Error al enviar', 'error');
             }

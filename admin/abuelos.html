@@ -32,6 +32,9 @@
             <a href="mensajes.html" class="menu-item">
                 <i class="fas fa-envelope"></i><span>Mensajes</span>
             </a>
+            <a href="mensajes-cumpleanos.html" class="menu-item">
+                <i class="fas fa-birthday-cake"></i><span>Felicitaciones</span>
+            </a>
             <a href="voluntarios.html" class="menu-item">
                 <i class="fas fa-user-friends"></i><span>Voluntarios</span>
             </a>
@@ -113,13 +116,9 @@
                     <form id="abueloForm">
                         <input type="hidden" id="abueloId">
                         <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label">Nombre *</label>
-                                <input type="text" class="form-control" id="nombre" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Edad *</label>
-                                <input type="number" class="form-control" id="edad" min="60" max="120" required>
+                            <div class="col-md-12">
+                                <label class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" id="nombre" required placeholder="Ej: María González">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ciudad *</label>
@@ -141,8 +140,11 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Fecha Nacimiento</label>
-                                <input type="date" class="form-control" id="fecha_nacimiento">
+                                <label class="form-label">Fecha de Nacimiento *</label>
+                                <input type="date" class="form-control" id="fecha_nacimiento" required>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>La edad se calcula automáticamente
+                                </small>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">
@@ -279,7 +281,6 @@
                 
                 document.getElementById('abueloId').value = abuelo.id;
                 document.getElementById('nombre').value = abuelo.nombre;
-                document.getElementById('edad').value = abuelo.edad;
                 document.getElementById('ciudad').value = abuelo.ciudad;
                 document.getElementById('genero').value = abuelo.genero || 'M';
                 document.getElementById('estado').value = abuelo.estado;
@@ -303,7 +304,6 @@
             const id = document.getElementById('abueloId').value;
             const data = {
                 nombre: document.getElementById('nombre').value,
-                edad: parseInt(document.getElementById('edad').value),
                 ciudad: document.getElementById('ciudad').value,
                 genero: document.getElementById('genero').value,
                 estado: document.getElementById('estado').value,

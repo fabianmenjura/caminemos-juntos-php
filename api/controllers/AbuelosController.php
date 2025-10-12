@@ -16,13 +16,39 @@ class AbuelosController {
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
             $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
+            // Calcular edad directamente en la consulta
             $abuelos = $this->db->fetchAll(
-                "SELECT * FROM abuelos WHERE estado = ? ORDER BY created_at DESC LIMIT {$limit} OFFSET {$offset}",
+                "SELECT *, 
+                        TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) as edad,
+                        (DATE_FORMAT(fecha_nacimiento, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')) as cumple_hoy,
+                        (DAYOFYEAR(fecha_nacimiento) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE() + INTERVAL 7 DAY)) as cumple_esta_semana
+                 FROM abuelos 
+                 WHERE estado = ? AND deleted = 0 
+                 ORDER BY created_at DESC 
+                 LIMIT {$limit} OFFSET {$offset}",
                 [$estado]
             );
 
+            // Agregar mensajes de cumpleaños aprobados para abuelos que cumplen años
+            foreach ($abuelos as &$abuelo) {
+                if ($abuelo['cumple_hoy'] || $abuelo['cumple_esta_semana']) {
+                    $mensajes = $this->db->fetchAll(
+                        "SELECT nombre_remitente, mensaje, fecha_envio 
+                         FROM mensajes_cumpleanos 
+                         WHERE abuelo_id = ? AND aprobado = 1 AND deleted = 0 
+                         ORDER BY created_at DESC",
+                        [$abuelo['id']]
+                    );
+                    $abuelo['mensajes_cumpleanos'] = $mensajes;
+                    $abuelo['total_mensajes'] = count($mensajes);
+                } else {
+                    $abuelo['mensajes_cumpleanos'] = [];
+                    $abuelo['total_mensajes'] = 0;
+                }
+            }
+
             $total = $this->db->fetchOne(
-                "SELECT COUNT(*) as total FROM abuelos WHERE estado = ?",
+                "SELECT COUNT(*) as total FROM abuelos WHERE estado = ? AND deleted = 0",
                 [$estado]
             );
 
@@ -41,13 +67,31 @@ class AbuelosController {
     // GET /api/abuelos/{id}
     public function show($id) {
         try {
+            // Calcular edad directamente
             $abuelo = $this->db->fetchOne(
-                "SELECT * FROM abuelos WHERE id = ? AND estado = 'disponible'",
+                "SELECT *, 
+                        TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) as edad,
+                        (DATE_FORMAT(fecha_nacimiento, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')) as cumple_hoy,
+                        (DAYOFYEAR(fecha_nacimiento) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE() + INTERVAL 7 DAY)) as cumple_esta_semana
+                 FROM abuelos 
+                 WHERE id = ? AND estado = 'disponible' AND deleted = 0",
                 [$id]
             );
 
             if (!$abuelo) {
                 Response::notFound('Abuelo no encontrado');
+            }
+
+            // Obtener mensajes de cumpleaños si cumple años hoy o esta semana
+            if ($abuelo['cumple_hoy'] || $abuelo['cumple_esta_semana']) {
+                $mensajes = $this->db->fetchAll(
+                    "SELECT nombre_remitente, mensaje, fecha_envio 
+                     FROM mensajes_cumpleanos 
+                     WHERE abuelo_id = ? AND aprobado = 1 AND deleted = 0 
+                     ORDER BY created_at DESC LIMIT 10",
+                    [$id]
+                );
+                $abuelo['mensajes_cumpleanos'] = $mensajes;
             }
 
             Response::success($abuelo);
