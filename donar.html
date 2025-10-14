@@ -72,11 +72,11 @@
                                     <i class="fas fa-user me-2"></i> Persona Natural
                                 </button>
                             </li>
-                            <li class="nav-item">
+                          <!--  <li class="nav-item">
                                 <button class="nav-link" id="tab-empresa-btn" data-bs-toggle="tab" data-bs-target="#empresa-tab">
                                     <i class="fas fa-building me-2"></i> Empresa
                                 </button>
-                            </li>
+                            </li> -->
                         </ul>
 
                         <!-- Tab Content -->
@@ -364,6 +364,11 @@
                 data.metodo_pago = 'transferencia'; // QR es transferencia
                 data.frecuencia = data.frecuencia || 'unica';
                 data.monto = data.monto || 0; // 0 si no se especifica
+                
+                // Para empresas, agregar tipo_patrocinio por defecto
+                if (tipo === 'empresa') {
+                    data.tipo_patrocinio = 'general';
+                }
 
                 // Guardar en BD
                 const endpoint = tipo === 'personal' ? 'donaciones/personas' : 'donaciones/empresas';

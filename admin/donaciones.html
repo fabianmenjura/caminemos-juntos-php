@@ -11,6 +11,7 @@
     <title>Donaciones - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -23,119 +24,376 @@
         </div>
         
         <div class="content-wrapper">
-            <div class="table-card mb-4">
-                <select class="form-select" id="filtroTipo" onchange="loadDonaciones()">
-                    <option value="todas" selected>Todas</option>
-                    <option value="personas">Personas</option>
-                    <option value="empresas">Empresas</option>
-                </select>
+            <!-- Info -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Aquí se registran todas las donaciones realizadas mediante QR. El monto puede ser "$0" si el donante no lo especificó al momento del registro.
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo de Donante</label>
+                            <select class="form-select" id="filtroTipo" onchange="loadDonaciones()">
+                                <option value="todas" selected>📊 Todas las donaciones</option>
+                                <option value="personas">👤 Solo Personas</option>
+                                <option value="empresas">🏢 Solo Empresas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="filtroEstado" onchange="loadDonaciones()">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">⏳ Pendientes</option>
+                                <option value="completada">✅ Completadas</option>
+                                <option value="cancelada">❌ Canceladas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary w-100" onclick="loadDonaciones()">
+                                <i class="fas fa-sync me-2"></i>Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
+            <!-- Estadísticas -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3 id="total-donantes">0</h3>
+                            <p>Total Donantes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="stat-info">
+                            <h3 id="monto-total">$0</h3>
+                            <p>Monto Estimado</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3 id="total-pendientes">0</h3>
+                            <p>Pendientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3 id="total-completadas">0</h3>
+                            <p>Completadas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
             <div class="table-card">
                 <div id="loading" class="text-center py-5">
-                    <div class="spinner-border text-primary"></div>
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="text-muted mt-3">Cargando donaciones...</p>
                 </div>
                 
                 <div class="table-responsive" id="tabla" style="display: none;">
-                    <table class="table">
+                    <table class="table table-hover">
                         <thead>
-                            <tr><th>ID</th><th>Tipo</th><th>Nombre</th><th>Email</th><th>Monto</th><th>Método</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th style="width: 80px;">Tipo</th>
+                                <th>Donante</th>
+                                <th>Contacto</th>
+                                <th style="width: 120px;">Monto</th>
+                                <th style="width: 100px;">Método</th>
+                                <th style="width: 150px;">Estado</th>
+                                <th style="width: 100px;">Fecha</th>
+                                <th style="width: 100px;">Acciones</th>
+                            </tr>
                         </thead>
                         <tbody id="tbody"></tbody>
                     </table>
+                </div>
+
+                <div id="no-data" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay donaciones con los filtros seleccionados</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/admin-components.js"></script>
     <script src="assets/js/admin-auth.js"></script>
     <script src="assets/js/admin-api.js"></script>
     <script>
+        let donaciones = [];
+
         document.addEventListener('DOMContentLoaded', async () => {
             await initAdminComponents('donaciones');
             loadDonaciones();
         });
         
         async function loadDonaciones() {
-            const tipo = document.getElementById('filtroTipo').value;
+            const filtroTipo = document.getElementById('filtroTipo').value;
+            const filtroEstado = document.getElementById('filtroEstado').value;
             
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('tabla').style.display = 'none';
+                document.getElementById('no-data').style.display = 'none';
                 
-                const response = await adminAPI.getDonaciones({ tipo });
+                const response = await adminAPI.get('admin/donaciones');
                 
                 if (response.success) {
-                    const tbody = document.getElementById('tbody');
-                    tbody.innerHTML = response.data.donaciones.map(d => {
-                        const esPersona = d.tipo_categoria === 'persona';
-                        const tipo = esPersona ? 'persona' : 'empresa';
-                        
-                        return `
-                            <tr>
-                                <td><strong>#${d.id}</strong></td>
-                                <td><span class="badge ${esPersona ? 'badge-info' : 'badge-primary'}">${esPersona ? 'Persona' : 'Empresa'}</span></td>
-                                <td>${d.nombre || d.nombre_completo || d.nombre_empresa || 'N/A'}</td>
-                                <td><small>${d.email || d.email_contacto || 'N/A'}</small></td>
-                                <td><strong>$${parseInt(d.monto).toLocaleString()}</strong></td>
-                                <td><small>${d.metodo_pago || d.metodo || 'N/A'}</small></td>
-                                <td>
-                                    <select class="form-select form-select-sm" onchange="cambiarEstado('${tipo}', ${d.id}, this.value)" style="width: auto;">
-                                        <option value="pendiente" ${d.estado === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
-                                        <option value="completada" ${d.estado === 'completada' ? 'selected' : ''}>✅ Completada</option>
-                                        <option value="cancelada" ${d.estado === 'cancelada' ? 'selected' : ''}>❌ Cancelada</option>
-                                    </select>
-                                </td>
-                                <td><small>${new Date(d.fecha_donacion || d.created_at || d.fecha).toLocaleDateString()}</small></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-info" onclick="verDetalle(${d.id}, '${tipo}')">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
+                    donaciones = response.data.donaciones;
                     
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('tabla').style.display = 'block';
+                    // Filtrar
+                    let filtradas = donaciones;
+                    if (filtroTipo !== 'todas') {
+                        filtradas = filtradas.filter(d => d.tipo_categoria === filtroTipo.slice(0, -1)); // 'personas' -> 'persona'
+                    }
+                    if (filtroEstado) {
+                        filtradas = filtradas.filter(d => d.estado === filtroEstado);
+                    }
+                    
+                    // Actualizar estadísticas
+                    actualizarEstadisticas(donaciones);
+                    
+                    // Renderizar tabla
+                    renderDonaciones(filtradas);
+                    
+                    document.getElementById('tabla').style.display = filtradas.length > 0 ? 'block' : 'none';
+                    document.getElementById('no-data').style.display = filtradas.length === 0 ? 'block' : 'none';
                 }
             } catch (error) {
                 console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar las donaciones'
+                });
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
+        }
+
+        function actualizarEstadisticas(donaciones) {
+            const total = donaciones.length;
+            const pendientes = donaciones.filter(d => d.estado === 'pendiente').length;
+            const completadas = donaciones.filter(d => d.estado === 'completada').length;
+            const montoTotal = donaciones.reduce((sum, d) => sum + (parseInt(d.monto) || 0), 0);
+
+            document.getElementById('total-donantes').textContent = total;
+            document.getElementById('total-pendientes').textContent = pendientes;
+            document.getElementById('total-completadas').textContent = completadas;
+            document.getElementById('monto-total').textContent = '$' + montoTotal.toLocaleString('es-CO');
+        }
+
+        function renderDonaciones(donaciones) {
+            const tbody = document.getElementById('tbody');
+            
+            tbody.innerHTML = donaciones.map(d => {
+                const esPersona = d.tipo_categoria === 'persona';
+                const tipo = esPersona ? 'persona' : 'empresa';
+                const monto = parseInt(d.monto) || 0;
+                
+                return `
+                    <tr>
+                        <td class="text-center"><strong>#${d.id}</strong></td>
+                        <td>
+                            <span class="badge ${esPersona ? 'bg-info' : 'bg-primary'}">
+                                <i class="fas ${esPersona ? 'fa-user' : 'fa-building'} me-1"></i>
+                                ${esPersona ? 'Persona' : 'Empresa'}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>${d.nombre || d.nombre_completo || d.nombre_empresa || 'N/A'}</strong>
+                            ${d.ciudad ? `<br><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${d.ciudad}</small>` : ''}
+                        </td>
+                        <td>
+                            <small>
+                                <i class="fas fa-envelope me-1"></i>${d.email || d.email_contacto || 'N/A'}<br>
+                                <i class="fas fa-phone me-1"></i>${d.telefono || 'N/A'}
+                            </small>
+                        </td>
+                        <td class="text-end">
+                            ${monto > 0 
+                                ? `<strong class="text-success">$${monto.toLocaleString('es-CO')}</strong>` 
+                                : '<span class="text-muted small">No especificado</span>'}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-qrcode me-1"></i>QR
+                            </span>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm" onchange="cambiarEstado('${tipo}', ${d.id}, this.value)">
+                                <option value="pendiente" ${d.estado === 'pendiente' ? 'selected' : ''}>⏳ Pendiente</option>
+                                <option value="completada" ${d.estado === 'completada' ? 'selected' : ''}>✅ Completada</option>
+                                <option value="cancelada" ${d.estado === 'cancelada' ? 'selected' : ''}>❌ Cancelada</option>
+                            </select>
+                        </td>
+                        <td>
+                            <small>${new Date(d.fecha_donacion || d.created_at || d.fecha).toLocaleDateString('es-CO')}</small>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary" onclick='verDetalle(${JSON.stringify(d).replace(/'/g, "&apos;")})' title="Ver detalle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
         
         async function cambiarEstado(tipo, id, nuevoEstado) {
-            if (!confirm(`¿Cambiar estado a "${nuevoEstado}"?`)) {
-                loadDonaciones(); // Recargar para restaurar el select
+            const result = await Swal.fire({
+                title: '¿Cambiar estado?',
+                text: `¿Confirmas que quieres cambiar el estado a "${nuevoEstado}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cambiar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#eaa33a',
+                cancelButtonColor: '#6c757d'
+            });
+
+            if (!result.isConfirmed) {
+                loadDonaciones(); // Recargar para resetear el select
                 return;
             }
-            
+
             try {
-                const response = await adminAPI.updateDonacionEstado(tipo, id, nuevoEstado);
+                const response = await adminAPI.put(`admin/donaciones/${tipo}s/${id}`, { estado: nuevoEstado });
                 
                 if (response.success) {
-                    alert('✅ Estado actualizado');
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Actualizado!',
+                        text: 'Estado cambiado correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     loadDonaciones();
                 } else {
-                    alert('Error: ' + response.message);
+                    Swal.fire('Error', response.message || 'No se pudo actualizar', 'error');
                     loadDonaciones();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al actualizar estado');
+                Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
                 loadDonaciones();
             }
         }
         
-        function verDetalle(id, tipo) {
-            // TODO: Mostrar modal con detalles completos
-            alert(`Ver detalle de donación ${tipo} #${id}\n\nPróximamente: Modal con toda la información`);
-        }
-        
-        async function logout() {
-            if (confirm('¿Cerrar sesión?')) await adminAuth.logout();
+        function verDetalle(donacion) {
+            const esPersona = donacion.tipo_categoria === 'persona';
+            const monto = parseInt(donacion.monto) || 0;
+            
+            let html = `
+                <div class="text-start">
+                    <div class="row mb-3">
+                        <div class="col-6"><strong>Tipo:</strong></div>
+                        <div class="col-6">
+                            <span class="badge ${esPersona ? 'bg-info' : 'bg-primary'}">
+                                ${esPersona ? 'Persona Natural' : 'Empresa'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    ${esPersona 
+                        ? `<div class="row mb-2">
+                            <div class="col-6"><strong>Nombre:</strong></div>
+                            <div class="col-6">${donacion.nombre_completo}</div>
+                           </div>`
+                        : `<div class="row mb-2">
+                            <div class="col-6"><strong>Empresa:</strong></div>
+                            <div class="col-6">${donacion.nombre_empresa}</div>
+                           </div>
+                           <div class="row mb-2">
+                            <div class="col-6"><strong>NIT:</strong></div>
+                            <div class="col-6">${donacion.nit}</div>
+                           </div>
+                           <div class="row mb-2">
+                            <div class="col-6"><strong>Contacto:</strong></div>
+                            <div class="col-6">${donacion.nombre_contacto}</div>
+                           </div>`
+                    }
+                    
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Email:</strong></div>
+                        <div class="col-6">${donacion.email || donacion.email_contacto}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Teléfono:</strong></div>
+                        <div class="col-6">${donacion.telefono}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Ciudad:</strong></div>
+                        <div class="col-6">${donacion.ciudad}</div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Monto:</strong></div>
+                        <div class="col-6">
+                            ${monto > 0 
+                                ? `<strong class="text-success">$${monto.toLocaleString('es-CO')}</strong>` 
+                                : '<span class="text-muted">No especificado</span>'}
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Método:</strong></div>
+                        <div class="col-6"><span class="badge bg-secondary">QR / Transferencia</span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Estado:</strong></div>
+                        <div class="col-6">
+                            <span class="badge bg-${donacion.estado === 'completada' ? 'success' : donacion.estado === 'pendiente' ? 'warning' : 'secondary'}">
+                                ${donacion.estado}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Fecha:</strong></div>
+                        <div class="col-6">${new Date(donacion.fecha_donacion || donacion.created_at).toLocaleString('es-CO')}</div>
+                    </div>
+                    
+                    ${donacion.mensaje ? `
+                        <hr>
+                        <div class="mb-2">
+                            <strong>Mensaje:</strong>
+                            <p class="mt-2 p-3 bg-light rounded"><em>"${donacion.mensaje}"</em></p>
+                        </div>
+                    ` : ''}
+                    
+                    ${!esPersona && donacion.requiere_factura ? '<hr><p><span class="badge bg-info">Requiere Factura Electrónica</span></p>' : ''}
+                </div>
+            `;
+            
+            Swal.fire({
+                title: `<i class="fas fa-receipt me-2"></i>Donación #${donacion.id}`,
+                html: html,
+                width: 650,
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#eaa33a'
+            });
         }
     </script>
 </body>
