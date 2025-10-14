@@ -134,10 +134,15 @@ class AdminAPI {
         formData.append('image', file);
         
         try {
-            const token = localStorage.getItem('admin_token');
+            // Buscar token en localStorage o sessionStorage
+            const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+            
             if (!token) {
-                throw new Error('No hay sesión activa');
+                console.error('No se encontró token en localStorage ni sessionStorage');
+                throw new Error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
             }
+
+            console.log('Upload: Token encontrado:', token.substring(0, 10) + '...');
 
             const response = await fetch(`${this.baseURL}/upload/image`, {
                 method: 'POST',
@@ -156,6 +161,7 @@ class AdminAPI {
                 throw new Error(data.error || data.message || 'Error al subir imagen');
             }
             
+            console.log('Upload exitoso:', data);
             return data;
         } catch (error) {
             console.error('Error al subir imagen:', error);

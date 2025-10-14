@@ -133,7 +133,7 @@
                         <div class="row">
                             <div class="col-md-8 mb-3">
                                 <label class="form-label">Título *</label>
-                                <input type="text" class="form-control" id="titulo" required>
+                                <input type="text" class="form-control" id="titulo" required onkeyup="autoGenerateSlug()">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Orden</label>
@@ -145,7 +145,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Slug (URL amigable) *</label>
                                 <input type="text" class="form-control" id="slug" required>
-                                <small class="text-muted">Ej: voluntario, tallerista, apadrinamiento</small>
+                                <small class="text-muted">Se genera automáticamente del título (puedes editarlo)</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Icono (FontAwesome)</label>
@@ -281,6 +281,25 @@
             document.getElementById('categoria-id').value = '';
             document.getElementById('activo').checked = true;
             modal.show();
+        }
+
+        // Auto-generar slug desde el título
+        function autoGenerateSlug() {
+            const titulo = document.getElementById('titulo').value;
+            const id = document.getElementById('categoria-id').value;
+            
+            // Solo auto-generar si es nueva categoría (no edición)
+            if (id) return;
+            
+            let slug = titulo
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Quitar acentos
+                .replace(/[^a-z0-9\s-]/g, '') // Solo letras, números, espacios y guiones
+                .trim()
+                .replace(/\s+/g, '-') // Espacios a guiones
+                .replace(/-+/g, '-'); // Múltiples guiones a uno solo
+            
+            document.getElementById('slug').value = slug;
         }
 
         function editCategoria(categoria) {

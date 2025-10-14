@@ -185,6 +185,18 @@ try {
         exit;
     }
 
+    // Rutas de configuración general (público)
+    if ($segments[0] === 'configuracion') {
+        require_once __DIR__ . '/controllers/ConfiguracionController.php';
+        $controller = new ConfiguracionController();
+
+        if ($method === 'GET') {
+            // GET /api/configuracion
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -266,6 +278,8 @@ try {
                 $controller->getCategoriasVoluntariado();
             } elseif ($segments[1] === 'acerca-de') {
                 $controller->getAcercaDe();
+            } elseif ($segments[1] === 'configuracion') {
+                $controller->getConfiguracion();
             }
         } elseif ($method === 'POST' && isset($segments[1])) {
             if ($segments[1] === 'abuelos') {
@@ -281,6 +295,12 @@ try {
                     $controller->updateAcercaDeContenido();
                 } elseif ($segments[2] === 'caracteristicas') {
                     $controller->createCaracteristicaAcercaDe();
+                }
+            } elseif ($segments[1] === 'configuracion') {
+                if (isset($segments[2]) && $segments[2] === 'redes-sociales') {
+                    $controller->createRedSocial();
+                } else {
+                    $controller->updateConfiguracion();
                 }
             }
         } elseif ($method === 'PUT' && isset($segments[1]) && isset($segments[2])) {
@@ -306,6 +326,8 @@ try {
                 $controller->updateCategoriaVoluntariado($segments[2]);
             } elseif ($segments[1] === 'acerca-de' && $segments[2] === 'caracteristicas' && isset($segments[3])) {
                 $controller->updateCaracteristicaAcercaDe($segments[3]);
+            } elseif ($segments[1] === 'configuracion' && $segments[2] === 'redes-sociales' && isset($segments[3])) {
+                $controller->updateRedSocial($segments[3]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -326,6 +348,8 @@ try {
                 $controller->deleteCategoriaVoluntariado($segments[2]);
             } elseif ($segments[1] === 'acerca-de' && $segments[2] === 'caracteristicas' && isset($segments[3])) {
                 $controller->deleteCaracteristicaAcercaDe($segments[3]);
+            } elseif ($segments[1] === 'configuracion' && $segments[2] === 'redes-sociales' && isset($segments[3])) {
+                $controller->deleteRedSocial($segments[3]);
             }
         }
         exit;

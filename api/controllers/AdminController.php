@@ -827,6 +827,16 @@ class AdminController {
                 return Response::error('Campos requeridos: titulo, slug, descripcion', null, 400);
             }
             
+            // Validar que el slug no exista
+            $existente = $this->db->fetchOne(
+                "SELECT id FROM categorias_voluntariado WHERE slug = ? AND deleted = 0",
+                [$data['slug']]
+            );
+            
+            if ($existente) {
+                return Response::error('Ya existe una categoría con este slug. Por favor usa otro.', null, 400);
+            }
+            
             // Convertir características a JSON
             $caracteristicas = isset($data['caracteristicas']) && is_array($data['caracteristicas']) 
                 ? json_encode($data['caracteristicas']) 
@@ -856,7 +866,14 @@ class AdminController {
             return Response::success(['id' => $id], 'Categoría creada');
         } catch (Exception $e) {
             Logger::error("Error al crear categoría voluntariado", ['error' => $e->getMessage()]);
-            return Response::error('Error al crear categoría', null, 500);
+            
+            // Mensajes de error más específicos
+            $errorMsg = 'Error al crear categoría';
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $errorMsg = 'Ya existe una categoría con este slug. Por favor usa otro.';
+            }
+            
+            return Response::error($errorMsg, null, 500);
         }
     }
     
@@ -1048,6 +1065,146 @@ class AdminController {
             return Response::success(null, 'Característica eliminada');
         } catch (Exception $e) {
             Logger::error("Error al eliminar característica", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
+    // ===== CONFIGURACIÓN GENERAL =====
+    
+    public function getConfiguracion() {
+        try {
+            // Obtener configuración
+            $config = [];
+            $rows = $this->db->fetchAll("SELECT clave, valor, descripcion FROM configuracion_general");
+            
+            foreach ($rows as $row) {
+                $config[$row['clave']] = [
+                    'valor' => $row['valor'],
+                    'descripcion' => $row['descripcion']
+                ];
+            }
+            
+            // Obtener redes sociales
+            $redes = $this->db->fetchAll(
+                "SELECT * FROM redes_sociales 
+                 WHERE deleted = 0 
+                 ORDER BY orden ASC, id ASC"
+            );
+            
+            Logger::debug("getConfiguracion: Configuración obtenida");
+            return Response::success([
+                'config' => $config,
+                'redes_sociales' => $redes,
+                'total_redes' => count($redes)
+            ]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener configuración", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener configuración', null, 500);
+        }
+    }
+    
+    public function updateConfiguracion() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($data)) {
+                return Response::error('No hay datos para actualizar', null, 400);
+            }
+            
+            // Actualizar cada configuración
+            foreach ($data as $clave => $valor) {
+                $this->db->execute(
+                    "INSERT INTO configuracion_general (clave, valor) VALUES (?, ?) 
+                     ON DUPLICATE KEY UPDATE valor = ?",
+                    [$clave, $valor, $valor]
+                );
+            }
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_CONFIGURACION', 'configuracion_general', 0);
+            
+            Logger::debug("updateConfiguracion: Configuración actualizada");
+            return Response::success(null, 'Configuración actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar configuración", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    // Redes Sociales
+    public function createRedSocial() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($data['nombre']) || empty($data['url'])) {
+                return Response::error('Campos requeridos: nombre, url', null, 400);
+            }
+            
+            $this->db->execute(
+                "INSERT INTO redes_sociales (nombre, icono, url, orden, activo)
+                 VALUES (?, ?, ?, ?, ?)",
+                [
+                    $data['nombre'],
+                    $data['icono'] ?? 'fa-link',
+                    $data['url'],
+                    $data['orden'] ?? 0,
+                    $data['activo'] ?? 1
+                ]
+            );
+            
+            $id = $this->db->getConnection()->lastInsertId();
+            $this->authService->logActivity($this->user['id'], 'CREAR_RED_SOCIAL', 'redes_sociales', $id);
+            
+            Logger::debug("createRedSocial: Red social #$id creada");
+            return Response::success(['id' => $id], 'Red social creada');
+        } catch (Exception $e) {
+            Logger::error("Error al crear red social", ['error' => $e->getMessage()]);
+            return Response::error('Error al crear', null, 500);
+        }
+    }
+    
+    public function updateRedSocial($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $fields = [];
+            $values = [];
+            
+            $allowedFields = ['nombre', 'icono', 'url', 'orden', 'activo'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field])) {
+                    $fields[] = "$field = ?";
+                    $values[] = $data[$field];
+                }
+            }
+            
+            if (empty($fields)) {
+                return Response::error('No hay campos para actualizar', null, 400);
+            }
+            
+            $values[] = $id;
+            $sql = "UPDATE redes_sociales SET " . implode(', ', $fields) . " WHERE id = ?";
+            
+            $this->db->execute($sql, $values);
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_RED_SOCIAL', 'redes_sociales', $id);
+            
+            Logger::debug("updateRedSocial: Red social #$id actualizada");
+            return Response::success(null, 'Red social actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar red social", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteRedSocial($id) {
+        try {
+            $this->db->execute("UPDATE redes_sociales SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_RED_SOCIAL', 'redes_sociales', $id);
+            
+            Logger::debug("deleteRedSocial: Red social #$id eliminada");
+            return Response::success(null, 'Red social eliminada');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar red social", ['error' => $e->getMessage()]);
             return Response::error('Error al eliminar', null, 500);
         }
     }

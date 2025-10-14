@@ -3,15 +3,59 @@
  * Header, Footer y WhatsApp Button
  */
 
-// Configuración
-const CONFIG = {
+// Configuración (se carga dinámicamente desde la API)
+let CONFIG = {
     siteName: 'Caminemos Juntos',
     logo: 'assets/images/placeholder-logo.png',
     phone: '+57 321 9951293',
     phoneDisplay: '+57 321 9951293',
     email: 'contacto@caminemosjuntos.org',
-    whatsappNumber: '573219951293'
+    whatsappNumber: '573219951293',
+    whatsappMensaje: '¡Hola! Me gustaría obtener más información sobre Caminemos Juntos.',
+    redesSociales: []
 };
+
+// Cargar configuración desde la API
+async function loadConfig() {
+    try {
+        const response = await fetch(getApiBase() + '/configuracion');
+        const data = await response.json();
+        
+        if (data.success && data.data.config) {
+            const config = data.data.config;
+            
+            // Actualizar CONFIG con valores de la BD
+            CONFIG.siteName = config.site_name?.valor || CONFIG.siteName;
+            CONFIG.logo = config.logo_url?.valor || CONFIG.logo;
+            CONFIG.phone = config.telefono?.valor || CONFIG.phone;
+            CONFIG.phoneDisplay = config.telefono_display?.valor || CONFIG.phoneDisplay;
+            CONFIG.email = config.email?.valor || CONFIG.email;
+            CONFIG.whatsappNumber = config.whatsapp_numero?.valor || CONFIG.whatsappNumber;
+            CONFIG.whatsappMensaje = config.whatsapp_mensaje?.valor || CONFIG.whatsappMensaje;
+            CONFIG.direccion = config.direccion?.valor || 'Chiquinquirá, Boyacá';
+            CONFIG.redesSociales = data.data.redes_sociales || [];
+            
+            console.log('Configuración cargada:', CONFIG);
+        }
+    } catch (error) {
+        console.error('Error al cargar configuración:', error);
+        // Mantener valores por defecto
+    }
+}
+
+// Helper para obtener la URL base de la API
+function getApiBase() {
+    const path = window.location.pathname;
+    const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+    
+    if (basePath.includes('caminemos-juntos-php')) {
+        return '/caminemos-juntos-php/api';
+    } else if (basePath.includes('admin')) {
+        return basePath.replace('admin/', '') + 'api';
+    } else {
+        return '/api';
+    }
+}
 
 /**
  * Header Component
@@ -111,7 +155,7 @@ function loadFooter() {
                 <div class="col-lg-4">
                     <div class="footer-brand mb-4">
                         <img src="${CONFIG.logo}" alt="Logo" class="footer-logo mb-3" width="50" height="50">
-                        <h5 class="text-white mb-3">${CONFIG.siteName} Chiquinquirá</h5>
+                        <h5 class="text-white mb-3">${CONFIG.siteName}</h5>
                     </div>
                     <p class="footer-description">
                         Conectamos corazones generosos con adultos mayores que necesitan compañía, apoyo económico y sobre todo, mucho cariño.
@@ -141,22 +185,31 @@ function loadFooter() {
                         </li>
                         <li>
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Chiquinquirá, Boyacá</span>
+                            <span>${CONFIG.direccion || 'Chiquinquirá, Boyacá'}</span>
                         </li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-4">
                     <h6 class="footer-title">Síguenos</h6>
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/caminemosjuntos" target="_blank" rel="noopener" class="social-link">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="https://www.instagram.com/caminemosjuntos" target="_blank" rel="noopener" class="social-link">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://wa.me/${CONFIG.whatsappNumber}" target="_blank" rel="noopener" class="social-link">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
+                        ${CONFIG.redesSociales && CONFIG.redesSociales.length > 0 
+                            ? CONFIG.redesSociales.map(red => `
+                                <a href="${red.url}" target="_blank" rel="noopener" class="social-link" title="${red.nombre}">
+                                    <i class="fab ${red.icono}"></i>
+                                </a>
+                            `).join('')
+                            : `
+                                <a href="https://www.facebook.com/caminemosjuntos" target="_blank" rel="noopener" class="social-link">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="https://www.instagram.com/caminemosjuntos" target="_blank" rel="noopener" class="social-link">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="https://wa.me/${CONFIG.whatsappNumber}" target="_blank" rel="noopener" class="social-link">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            `
+                        }
                     </div>
                 </div>
             </div>
@@ -192,8 +245,12 @@ function loadFooter() {
  * WhatsApp Button Component
  */
 function loadWhatsAppButton() {
+    // Codificar mensaje para URL
+    const mensajeCodificado = encodeURIComponent(CONFIG.whatsappMensaje || '¡Hola! Me gustaría obtener más información sobre Caminemos Juntos.');
+    const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${mensajeCodificado}`;
+    
     const whatsappBtn = `
-    <a href="https://wa.me/${CONFIG.whatsappNumber}" 
+    <a href="${whatsappUrl}" 
        class="whatsapp-button" 
        target="_blank" 
        rel="noopener"
@@ -231,7 +288,10 @@ function loadGlobalSpinner() {
  * Inicializar todos los componentes
  * Llamar desde cada página con: initComponents('index') o initComponents('abuelos')
  */
-function initComponents(currentPage = '') {
+async function initComponents(currentPage = '') {
+    // Cargar configuración primero
+    await loadConfig();
+    
     // Cargar componentes
     loadHeader(currentPage);
     loadFooter();
