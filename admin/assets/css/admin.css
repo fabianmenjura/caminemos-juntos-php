@@ -1,7 +1,8 @@
 :root {
-    --color-primary: #2c5f2d;
-    --color-secondary: #97bc62;
-    --color-accent: #ff8c42;
+    --color-primary: #eaa33a;
+    --color-primary-dark: #c8842d;
+    --color-secondary: #d97638;
+    --color-accent: #f4c16f;
     --sidebar-width: 260px;
 }
 
@@ -17,7 +18,7 @@ body {
     left: 0;
     height: 100vh;
     width: var(--sidebar-width);
-    background: linear-gradient(180deg, var(--color-primary) 0%, #1a3a1b 100%);
+    background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
     z-index: 1000;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);

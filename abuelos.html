@@ -17,11 +17,23 @@
     <meta property="og:url" content="https://caminemosjuntos.org/abuelos.html">
     <meta property="og:image" content="https://caminemosjuntos.org/assets/images/elderly-colombian-woman-smiling-warm.jpg">
     
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -56,16 +68,29 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="py-5 mt-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <div class="container text-center text-white py-5">
-            <h1 class="display-4 fw-bold mb-3" data-aos="fade-up">Nuestros Abuelos</h1>
-            <p class="lead mb-4" data-aos="fade-up" data-aos-delay="100">
-                Conoce las historias de adultos mayores que buscan compañía y cariño
-            </p>
-            <div data-aos="fade-up" data-aos-delay="200">
-                <a href="#todos-abuelos" class="btn btn-light btn-lg">
-                    <i class="fas fa-heart me-2"></i>Ver Abuelos
-                </a>
+    <section class="hero-section">
+        <div class="hero-image-container">
+            <img src="assets/images/elderly-colombian-woman-happy-flowers.jpg" 
+                 alt="Adultos mayores felices" 
+                 class="hero-bg-image">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="row align-items-center" style="min-height: 500px;">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="hero-title" data-aos="fade-up">Nuestros Abuelos</h1>
+                    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Conoce las historias de adultos mayores que buscan compañía, cariño y esperanza
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap" data-aos="fade-up" data-aos-delay="200">
+                        <a href="#todos-abuelos" class="btn btn-light btn-lg">
+                            <i class="fas fa-heart me-2"></i>Ver Abuelos
+                        </a>
+                        <a href="donar.html" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-hand-holding-heart me-2"></i>Donar Ahora
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -73,8 +98,9 @@
     <!-- Filtros -->
     <section class="py-4 bg-light">
         <div class="container">
-            <div class="row align-items-center">
+            <div class="row align-items-center g-3">
                 <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Estado:</label>
                     <select class="form-select" id="filtroEstado">
                         <option value="">Todos</option>
                         <option value="disponible" selected>Disponibles</option>
@@ -82,10 +108,11 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <input type="text" class="form-select" id="filtroCiudad" placeholder="Buscar por ciudad...">
+                    <label class="form-label small text-muted mb-1">Ciudad:</label>
+                    <input type="text" class="form-control" id="filtroCiudad" placeholder="Buscar por ciudad...">
                 </div>
                 <div class="col-md-4 text-end">
-                    <span class="badge bg-primary" id="totalAbuelos">0 abuelos</span>
+                    <span class="badge bg-primary fs-6 mt-3 mt-md-4" id="totalAbuelos">0 abuelos</span>
                 </div>
             </div>
         </div>
@@ -155,15 +182,22 @@
     </footer>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/573219951293" class="whatsapp-button" target="_blank">
+    <a href="https://wa.me/573219951293" class="whatsapp-button" target="_blank" rel="noopener">
         <i class="fab fa-whatsapp"></i>
     </a>
+
+    <!-- Global Spinner -->
+    <div id="globalSpinner" class="global-spinner">
+        <div class="spinner-content">
+            <div class="spinner-border text-light" style="width: 4rem; height: 4rem;"></div>
+            <p class="text-white mt-3 fs-5">Cargando...</p>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/utils.js"></script>
     <script src="assets/js/api.js"></script>
     <script>
         AOS.init({ duration: 1000, once: true });
@@ -172,6 +206,32 @@
         let abuelosFiltrados = [];
         let paginaActual = 1;
         const abuelosPorPagina = 12;
+
+        // Global Spinner
+        const globalSpinner = {
+            element: document.getElementById('globalSpinner'),
+            textElement: document.querySelector('#globalSpinner p'),
+            show: function(message = 'Cargando...') {
+                if (this.element) {
+                    this.textElement.textContent = message;
+                    this.element.classList.add('active');
+                }
+            },
+            hide: function() {
+                if (this.element) {
+                    this.element.classList.remove('active');
+                }
+            }
+        };
+
+        // SweetAlert wrappers
+        function showSuccess(message, title = 'Éxito') {
+            return Swal.fire({ icon: 'success', title, text: message, timer: 3000, showConfirmButton: false });
+        }
+
+        function showError(message, title = 'Error') {
+            return Swal.fire({ icon: 'error', title, text: message });
+        }
 
         // Cargar todos los abuelos
         async function cargarAbuelos() {
@@ -190,7 +250,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                Swal.fire('Error', 'No se pudieron cargar los abuelos', 'error');
+                showError('No se pudieron cargar los abuelos');
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
@@ -279,7 +339,7 @@
             // Anterior
             html += `
                 <li class="page-item ${paginaActual === 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPagina(${paginaActual - 1}); return false;">
+                    <a class="page-link" href="#todos-abuelos" onclick="cambiarPagina(${paginaActual - 1}); return false;">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </li>
@@ -290,7 +350,7 @@
                 if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
                     html += `
                         <li class="page-item ${i === paginaActual ? 'active' : ''}">
-                            <a class="page-link" href="#" onclick="cambiarPagina(${i}); return false;">${i}</a>
+                            <a class="page-link" href="#todos-abuelos" onclick="cambiarPagina(${i}); return false;">${i}</a>
                         </li>
                     `;
                 } else if (i === paginaActual - 2 || i === paginaActual + 2) {
@@ -301,7 +361,7 @@
             // Siguiente
             html += `
                 <li class="page-item ${paginaActual === totalPaginas ? 'disabled' : ''}">
-                    <a class="page-link" href="#" onclick="cambiarPagina(${paginaActual + 1}); return false;">
+                    <a class="page-link" href="#todos-abuelos" onclick="cambiarPagina(${paginaActual + 1}); return false;">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </li>
@@ -372,7 +432,7 @@
                 showCancelButton: true,
                 confirmButtonText: 'Enviar Felicitación',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#ffc107',
+                confirmButtonColor: '#ffa726',
                 preConfirm: async () => {
                     const nombre = document.getElementById('swal-nombre').value;
                     const email = document.getElementById('swal-email').value;
@@ -403,13 +463,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Mensaje Enviado!',
-                        text: 'Tu felicitación será entregada después de revisión. 🎂',
-                        timer: 3000,
-                        showConfirmButton: false
-                    });
+                    showSuccess('Tu felicitación será entregada después de revisión. 🎂', '¡Mensaje Enviado!');
                 }
             });
         }
@@ -423,5 +477,3 @@
     </script>
 </body>
 </html>
-
-
