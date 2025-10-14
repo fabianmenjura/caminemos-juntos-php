@@ -437,96 +437,12 @@
                 </div>
             </div>
             
-            <!-- Cambiado de diseño horizontal a vertical con alternancia de imagen -->
-            <div class="volunteer-categories-vertical mb-5">
-                <!-- Voluntario - Imagen a la izquierda -->
-                <div class="volunteer-category-row" data-aos="fade-up" data-aos-delay="100">
-                    <div class="volunteer-category-card-horizontal">
-                        <div class="volunteer-category-image-horizontal">
-                            <img src="/placeholder.svg?height=400&width=500" 
-                                 alt="Voluntario acompañando adulto mayor" 
-                                 class="img-fluid">
-                            <div class="volunteer-category-overlay-horizontal">
-                                <div class="volunteer-category-icon-horizontal">
-                                    <i class="fas fa-hands-helping"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="volunteer-category-content-horizontal">
-                            <h4 class="volunteer-category-title-horizontal">Voluntario</h4>
-                            <p class="volunteer-category-description-horizontal">
-                                Dedica tu tiempo para acompañar, conversar y brindar amistad a nuestros abuelos. 
-                                Tu presencia puede iluminar su día y llenar sus corazones de alegría.
-                            </p>
-                            <ul class="volunteer-category-features-horizontal">
-                                <li><i class="fas fa-check"></i> Visitas semanales</li>
-                                <li><i class="fas fa-check"></i> Compañía y conversación</li>
-                                <li><i class="fas fa-check"></i> Actividades recreativas</li>
-                                <li><i class="fas fa-check"></i> Apoyo emocional</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tallerista - Imagen a la derecha -->
-                <div class="volunteer-category-row" data-aos="fade-up" data-aos-delay="200">
-                    <div class="volunteer-category-card-horizontal volunteer-category-reverse">
-                        <div class="volunteer-category-image-horizontal">
-                            <img src="/placeholder.svg?height=400&width=500" 
-                                 alt="Tallerista enseñando a adultos mayores" 
-                                 class="img-fluid">
-                            <div class="volunteer-category-overlay-horizontal">
-                                <div class="volunteer-category-icon-horizontal">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="volunteer-category-content-horizontal">
-                            <h4 class="volunteer-category-title-horizontal">Tallerista</h4>
-                            <p class="volunteer-category-description-horizontal">
-                                Comparte tus conocimientos y habilidades impartiendo talleres educativos, artísticos o 
-                                recreativos que enriquezcan la vida de nuestros abuelos.
-                            </p>
-                            <ul class="volunteer-category-features-horizontal">
-                                <li><i class="fas fa-check"></i> Talleres mensuales</li>
-                                <li><i class="fas fa-check"></i> Enseñanza de habilidades</li>
-                                <li><i class="fas fa-check"></i> Actividades grupales</li>
-                                <li><i class="fas fa-check"></i> Desarrollo creativo</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Apadrinamiento - Imagen a la izquierda (destacado) -->
-                <div class="volunteer-category-row" data-aos="fade-up" data-aos-delay="300">
-                    <div class="volunteer-category-card-horizontal volunteer-category-featured-horizontal">
-                        <div class="featured-badge-volunteer-horizontal">
-                            <i class="fas fa-heart me-1"></i>Recomendado
-                        </div>
-                        <div class="volunteer-category-image-horizontal">
-                            <img src="/placeholder.svg?height=400&width=500" 
-                                 alt="Apadrinamiento de adulto mayor" 
-                                 class="img-fluid">
-                            <div class="volunteer-category-overlay-horizontal">
-                                <div class="volunteer-category-icon-horizontal">
-                                    <i class="fas fa-heart"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="volunteer-category-content-horizontal">
-                            <h4 class="volunteer-category-title-horizontal">Apadrinamiento</h4>
-                            <p class="volunteer-category-description-horizontal">
-                                Conviértete en el ángel guardián de un abuelo. Brinda apoyo económico mensual y 
-                                acompañamiento emocional para transformar completamente su vida.
-                            </p>
-                            <ul class="volunteer-category-features-horizontal">
-                                <li><i class="fas fa-check"></i> Apoyo económico mensual</li>
-                                <li><i class="fas fa-check"></i> Seguimiento personalizado</li>
-                                <li><i class="fas fa-check"></i> Vínculo especial</li>
-                                <li><i class="fas fa-check"></i> Impacto directo</li>
-                            </ul>
-                        </div>
-                    </div>
+            <!-- Categorías de Voluntariado (Dinámicas desde la BD) -->
+            <div id="categorias-voluntariado-container" class="volunteer-categories-vertical mb-5">
+                <!-- Loading -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                    <p class="text-muted mt-3">Cargando formas de ayudar...</p>
                 </div>
             </div>
 
@@ -569,12 +485,8 @@
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label class="form-label">¿Cómo quieres ayudar? *</label>
-                                        <select class="form-select" name="tipo_voluntariado" required>
-                                            <option value="">Selecciona una opción...</option>
-                                            <option value="voluntario">Voluntario</option>
-                                            <option value="tallerista">Tallerista</option>
-                                            <option value="apadrinamiento">Apadrinamiento</option>
-                                            <option value="varios">Varias opciones</option>
+                                        <select class="form-select" id="tipo-voluntariado-select" name="tipo_voluntariado" required>
+                                            <option value="">Cargando opciones...</option>
                                         </select>
                                     </div>
                                 </div>

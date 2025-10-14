@@ -134,10 +134,16 @@ class AdminAPI {
         formData.append('image', file);
         
         try {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                throw new Error('No hay sesión activa');
+            }
+
             const response = await fetch(`${this.baseURL}/upload/image`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${adminAuth.token}`
+                    'Authorization': `Bearer ${token}`,
+                    'X-Auth-Token': token
                     // NO incluir Content-Type, el navegador lo pone automático para FormData
                 },
                 body: formData
@@ -146,7 +152,8 @@ class AdminAPI {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'Error al subir imagen');
+                console.error('Upload error response:', data);
+                throw new Error(data.error || data.message || 'Error al subir imagen');
             }
             
             return data;

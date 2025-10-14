@@ -790,4 +790,125 @@ class AdminController {
             return Response::error('Error al eliminar', null, 500);
         }
     }
+    
+    // ===== CATEGORÍAS DE VOLUNTARIADO =====
+    
+    public function getCategoriasVoluntariado() {
+        try {
+            $categorias = $this->db->fetchAll(
+                "SELECT * FROM categorias_voluntariado 
+                 WHERE deleted = 0 
+                 ORDER BY orden ASC, id ASC"
+            );
+            
+            // Decodificar JSON de características
+            foreach ($categorias as &$categoria) {
+                if ($categoria['caracteristicas']) {
+                    $categoria['caracteristicas'] = json_decode($categoria['caracteristicas'], true);
+                } else {
+                    $categoria['caracteristicas'] = [];
+                }
+            }
+            
+            Logger::debug("getCategoriasVoluntariado: Encontradas " . count($categorias) . " categorías");
+            return Response::success(['categorias' => $categorias, 'total' => count($categorias)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener categorías voluntariado", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener categorías', null, 500);
+        }
+    }
+    
+    public function createCategoriaVoluntariado() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            // Validar campos requeridos
+            if (empty($data['titulo']) || empty($data['slug']) || empty($data['descripcion'])) {
+                return Response::error('Campos requeridos: titulo, slug, descripcion', null, 400);
+            }
+            
+            // Convertir características a JSON
+            $caracteristicas = isset($data['caracteristicas']) && is_array($data['caracteristicas']) 
+                ? json_encode($data['caracteristicas']) 
+                : json_encode([]);
+            
+            $this->db->execute(
+                "INSERT INTO categorias_voluntariado 
+                 (titulo, slug, descripcion, icono, imagen_url, caracteristicas, orden, destacado, activo)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $data['titulo'],
+                    $data['slug'],
+                    $data['descripcion'],
+                    $data['icono'] ?? 'fa-hands-helping',
+                    $data['imagen_url'] ?? null,
+                    $caracteristicas,
+                    $data['orden'] ?? 0,
+                    $data['destacado'] ?? 0,
+                    $data['activo'] ?? 1
+                ]
+            );
+            
+            $id = $this->db->getConnection()->lastInsertId();
+            $this->authService->logActivity($this->user['id'], 'CREAR_CATEGORIA_VOLUNTARIADO', 'categorias_voluntariado', $id);
+            
+            Logger::debug("createCategoriaVoluntariado: Categoría #$id creada");
+            return Response::success(['id' => $id], 'Categoría creada');
+        } catch (Exception $e) {
+            Logger::error("Error al crear categoría voluntariado", ['error' => $e->getMessage()]);
+            return Response::error('Error al crear categoría', null, 500);
+        }
+    }
+    
+    public function updateCategoriaVoluntariado($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            // Convertir características a JSON si es array
+            if (isset($data['caracteristicas']) && is_array($data['caracteristicas'])) {
+                $data['caracteristicas'] = json_encode($data['caracteristicas']);
+            }
+            
+            $fields = [];
+            $values = [];
+            
+            $allowedFields = ['titulo', 'slug', 'descripcion', 'icono', 'imagen_url', 'caracteristicas', 'orden', 'destacado', 'activo'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field])) {
+                    $fields[] = "$field = ?";
+                    $values[] = $data[$field];
+                }
+            }
+            
+            if (empty($fields)) {
+                return Response::error('No hay campos para actualizar', null, 400);
+            }
+            
+            $values[] = $id;
+            $sql = "UPDATE categorias_voluntariado SET " . implode(', ', $fields) . " WHERE id = ?";
+            
+            $this->db->execute($sql, $values);
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_CATEGORIA_VOLUNTARIADO', 'categorias_voluntariado', $id);
+            
+            Logger::debug("updateCategoriaVoluntariado: Categoría #$id actualizada");
+            return Response::success(null, 'Categoría actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar categoría voluntariado", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar categoría', null, 500);
+        }
+    }
+    
+    public function deleteCategoriaVoluntariado($id) {
+        try {
+            $this->db->execute("UPDATE categorias_voluntariado SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_CATEGORIA_VOLUNTARIADO', 'categorias_voluntariado', $id);
+            
+            Logger::debug("deleteCategoriaVoluntariado: Categoría #$id eliminada");
+            return Response::success(null, 'Categoría eliminada');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar categoría voluntariado", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar categoría', null, 500);
+        }
+    }
 }

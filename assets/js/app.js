@@ -463,10 +463,121 @@ if (cumpleanosForm) {
     });
 }
 
+// Cargar categorías en el select del formulario
+function loadCategoriasEnSelect(categorias) {
+    const select = document.getElementById('tipo-voluntariado-select');
+    if (!select) return;
+    
+    if (categorias.length === 0) {
+        select.innerHTML = `
+            <option value="">No hay opciones disponibles</option>
+            <option value="otros">Otros</option>
+        `;
+        return;
+    }
+    
+    select.innerHTML = `
+        <option value="">Selecciona una opción...</option>
+        ${categorias.map(cat => `
+            <option value="${cat.slug}">${cat.titulo}</option>
+        `).join('')}
+        <option value="varios">Varias opciones</option>
+    `;
+}
+
+// Cargar categorías de voluntariado
+async function loadCategoriasVoluntariado() {
+    const container = document.getElementById('categorias-voluntariado-container');
+    if (!container) return;
+
+    try {
+        const response = await api.get('categorias-voluntariado');
+        
+        if (response.success) {
+            const categorias = response.data.categorias;
+            
+            // Cargar también en el select del formulario
+            loadCategoriasEnSelect(categorias);
+            
+            // Si no hay categorías, mostrar mensaje
+            if (categorias.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aún no hay formas de voluntariado disponibles.</p>
+                        <p class="text-muted small">El administrador agregará las opciones pronto.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Renderizar categorías
+            container.innerHTML = categorias.map((cat, index) => {
+                const isReverse = index % 2 !== 0; // Alternar imagen izq/der
+                const isFeatured = cat.destacado == 1;
+                const imageUrl = cat.imagen_url || '/placeholder.svg?height=400&width=500';
+                
+                const caracteristicas = Array.isArray(cat.caracteristicas) 
+                    ? cat.caracteristicas 
+                    : [];
+                
+                return `
+                    <div class="volunteer-category-row" data-aos="fade-up" data-aos-delay="${100 * (index + 1)}">
+                        <div class="volunteer-category-card-horizontal ${isReverse ? 'volunteer-category-reverse' : ''} ${isFeatured ? 'volunteer-category-featured-horizontal' : ''}">
+                            ${isFeatured ? `
+                                <div class="featured-badge-volunteer-horizontal">
+                                    <i class="fas fa-heart me-1"></i>Recomendado
+                                </div>
+                            ` : ''}
+                            <div class="volunteer-category-image-horizontal">
+                                <img src="${imageUrl}" 
+                                     alt="${cat.titulo}" 
+                                     class="img-fluid"
+                                     onerror="this.src='/placeholder.svg?height=400&width=500'">
+                                <div class="volunteer-category-overlay-horizontal">
+                                    <div class="volunteer-category-icon-horizontal">
+                                        <i class="fas ${cat.icono}"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="volunteer-category-content-horizontal">
+                                <h4 class="volunteer-category-title-horizontal">${cat.titulo}</h4>
+                                <p class="volunteer-category-description-horizontal">
+                                    ${cat.descripcion}
+                                </p>
+                                ${caracteristicas.length > 0 ? `
+                                    <ul class="volunteer-category-features-horizontal">
+                                        ${caracteristicas.map(c => `
+                                            <li><i class="fas fa-check"></i> ${c}</li>
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        console.error('Error al cargar categorías de voluntariado:', error);
+        // Mostrar mensaje de error
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <p class="text-muted">No se pudieron cargar las categorías.</p>
+                <button class="btn btn-primary btn-sm" onclick="loadCategoriasVoluntariado()">
+                    <i class="fas fa-redo me-2"></i>Reintentar
+                </button>
+            </div>
+        `;
+    }
+}
+
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     loadHeroSlider();
     loadAbuelos();
     loadTestimonios();
     loadPatrocinadores();
+    loadCategoriasVoluntariado();
 });
