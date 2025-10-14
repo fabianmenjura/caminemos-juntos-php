@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    <link rel="shortcut icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    
+    <title>QR Donaciones - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-qrcode me-2"></i>Gestión de QR Donaciones</h1>
+            <button class="btn btn-primary" onclick="showCreateModal()">
+                <i class="fas fa-plus me-2"></i>Nuevo QR
+            </button>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Info -->
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Gestiona los códigos QR para recibir donaciones. Los usuarios podrán escanear estos QR en la página de donaciones.
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Orden</th>
+                                <th style="width: 80px;">QR</th>
+                                <th>Título</th>
+                                <th>Descripción</th>
+                                <th style="width: 100px;">Estado</th>
+                                <th style="width: 150px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="qrs-table">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nuevo QR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="qr-form">
+                        <input type="hidden" id="qr-id">
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Título *</label>
+                                <input type="text" class="form-control" id="titulo" required placeholder="Ej: Nequi - Hogar Santo Domingo">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Orden</label>
+                                <input type="number" class="form-control" id="orden" value="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" rows="2" placeholder="Ej: Escanea este código QR con tu app de Nequi"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Imagen del QR *</label>
+                            <div class="mb-2">
+                                <input type="file" class="form-control" id="qr-file" accept="image/*" onchange="previewQR(event)">
+                                <small class="text-muted">O ingresa una URL manualmente abajo</small>
+                            </div>
+                            <input type="text" class="form-control" id="qr_image_url" placeholder="assets/images/qr-nequi.png" required>
+                            
+                            <!-- Preview -->
+                            <div id="qr-preview" class="mt-3" style="display: none;">
+                                <img id="preview-qr-img" src="" alt="Preview QR" class="img-thumbnail" style="max-width: 300px; max-height: 300px;">
+                                <button type="button" class="btn btn-sm btn-danger mt-2" onclick="removeQRPreview()">
+                                    <i class="fas fa-times"></i> Quitar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Información de Cuenta</label>
+                            <textarea class="form-control" id="texto_cuenta" rows="5" placeholder="Ejemplo:&#10;Cuenta Nequi: 300 123 4567&#10;Titular: Fundación Hogar Santo Domingo&#10;NIT: 123456789-0"></textarea>
+                            <small class="text-muted">Esta información se mostrará junto al QR para facilitar transferencias manuales</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="activo" checked>
+                                <label class="form-check-label" for="activo">Activo (visible en la página de donaciones)</label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar QR
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-components.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let modal;
+        let qrs = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAdminComponents('qr-donaciones');
+            modal = new bootstrap.Modal(document.getElementById('qrModal'));
+            loadQRs();
+        });
+
+        // Cargar QRs
+        async function loadQRs() {
+            try {
+                const response = await adminAPI.get('admin/qr-donaciones');
+                if (response.success) {
+                    qrs = response.data.qrs;
+                    renderQRs();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudieron cargar los QR', 'error');
+            }
+        }
+
+        // Renderizar
+        function renderQRs() {
+            const tbody = document.getElementById('qrs-table');
+            
+            if (qrs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay QR registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = qrs.map(qr => `
+                <tr>
+                    <td class="text-center">${qr.orden}</td>
+                    <td>
+                        <img src="../${qr.qr_image_url}" alt="QR" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                    </td>
+                    <td>
+                        <strong>${qr.titulo}</strong>
+                    </td>
+                    <td>${qr.descripcion || '-'}</td>
+                    <td>
+                        <span class="badge ${qr.activo ? 'bg-success' : 'bg-secondary'}">
+                            ${qr.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" onclick='editQR(${JSON.stringify(qr)})' title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteQR(${qr.id})" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Mostrar modal crear
+        function showCreateModal() {
+            document.getElementById('qr-form').reset();
+            document.getElementById('qr-id').value = '';
+            document.getElementById('modalTitle').textContent = 'Nuevo QR';
+            document.getElementById('qr-preview').style.display = 'none';
+            modal.show();
+        }
+
+        // Editar
+        function editQR(qr) {
+            document.getElementById('qr-id').value = qr.id;
+            document.getElementById('titulo').value = qr.titulo;
+            document.getElementById('descripcion').value = qr.descripcion || '';
+            document.getElementById('qr_image_url').value = qr.qr_image_url;
+            document.getElementById('texto_cuenta').value = qr.texto_cuenta || '';
+            document.getElementById('orden').value = qr.orden;
+            document.getElementById('activo').checked = qr.activo == 1;
+            
+            // Preview
+            const preview = document.getElementById('qr-preview');
+            const previewImg = document.getElementById('preview-qr-img');
+            previewImg.src = '../' + qr.qr_image_url;
+            preview.style.display = 'block';
+            
+            document.getElementById('modalTitle').textContent = 'Editar QR';
+            modal.show();
+        }
+
+        // Guardar
+        document.getElementById('qr-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('qr-id').value;
+            const data = {
+                titulo: document.getElementById('titulo').value,
+                descripcion: document.getElementById('descripcion').value,
+                qr_image_url: document.getElementById('qr_image_url').value,
+                texto_cuenta: document.getElementById('texto_cuenta').value,
+                orden: parseInt(document.getElementById('orden').value) || 0,
+                activo: document.getElementById('activo').checked ? 1 : 0
+            };
+
+            try {
+                const response = id ? 
+                    await adminAPI.put(`admin/qr-donaciones/${id}`, data) :
+                    await adminAPI.post('admin/qr-donaciones', data);
+
+                if (response.success) {
+                    Swal.fire('Éxito', 'QR guardado correctamente', 'success');
+                    modal.hide();
+                    loadQRs();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo guardar el QR', 'error');
+            }
+        });
+
+        // Eliminar
+        async function deleteQR(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar QR?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await adminAPI.delete(`admin/qr-donaciones/${id}`);
+                    if (response.success) {
+                        Swal.fire('Eliminado', 'QR eliminado correctamente', 'success');
+                        loadQRs();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'No se pudo eliminar el QR', 'error');
+                }
+            }
+        }
+
+        // Preview QR
+        async function previewQR(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const uploadResult = await adminAPI.uploadImage(file);
+                if (uploadResult.success) {
+                    document.getElementById('qr_image_url').value = uploadResult.data.url;
+                    
+                    const preview = document.getElementById('qr-preview');
+                    const previewImg = document.getElementById('preview-qr-img');
+                    previewImg.src = '../' + uploadResult.data.url;
+                    preview.style.display = 'block';
+                    
+                    Swal.fire('Éxito', 'QR subido correctamente', 'success');
+                }
+            } catch (error) {
+                console.error('Error al subir QR:', error);
+                Swal.fire('Error', 'No se pudo subir el QR', 'error');
+            }
+        }
+
+        // Quitar preview
+        function removeQRPreview() {
+            document.getElementById('qr_image_url').value = '';
+            document.getElementById('qr-file').value = '';
+            document.getElementById('qr-preview').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+

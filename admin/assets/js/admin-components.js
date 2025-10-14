@@ -26,6 +26,9 @@ function loadAdminSidebar(currentPage = '') {
             <a href="donaciones.html" class="menu-item ${currentPage === 'donaciones' ? 'active' : ''}">
                 <i class="fas fa-hand-holding-heart"></i><span>Donaciones</span>
             </a>
+            <a href="qr-donaciones.html" class="menu-item ${currentPage === 'qr-donaciones' ? 'active' : ''}">
+                <i class="fas fa-qrcode"></i><span>QR Donaciones</span>
+            </a>
             <a href="mensajes.html" class="menu-item ${currentPage === 'mensajes' ? 'active' : ''}">
                 <i class="fas fa-envelope"></i><span>Mensajes</span>
             </a>

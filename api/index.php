@@ -197,6 +197,18 @@ try {
         exit;
     }
 
+    // Rutas de QR Donaciones (público)
+    if ($segments[0] === 'qr-donaciones') {
+        require_once __DIR__ . '/controllers/QRDonacionesController.php';
+        $controller = new QRDonacionesController(false); // No requiere auth
+
+        if ($method === 'GET') {
+            // GET /api/qr-donaciones
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -246,6 +258,31 @@ try {
         } elseif ($method === 'DELETE' && $segments[1] === 'image' && isset($segments[2])) {
             // DELETE /api/upload/image/{filename}
             $controller->deleteImage($segments[2]);
+        }
+        exit;
+    }
+
+    // Rutas de administración QR Donaciones (separado para evitar instanciar AdminController)
+    if ($segments[0] === 'admin' && isset($segments[1]) && $segments[1] === 'qr-donaciones') {
+        require_once __DIR__ . '/controllers/QRDonacionesController.php';
+        
+        try {
+            $qrController = new QRDonacionesController(true); // Requiere auth
+
+            if ($method === 'GET') {
+                $qrController->getAll();
+            } elseif ($method === 'POST') {
+                $qrController->create();
+            } elseif ($method === 'PUT' && isset($segments[2])) {
+                $qrController->update($segments[2]);
+            } elseif ($method === 'DELETE' && isset($segments[2])) {
+                $qrController->delete($segments[2]);
+            }
+        } catch (Exception $e) {
+            error_log("QR Route Error: " . $e->getMessage());
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'No autorizado', 'message' => $e->getMessage()]);
         }
         exit;
     }
