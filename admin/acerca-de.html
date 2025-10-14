@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acerca de - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-hands-helping me-2"></i>Admin Panel</h4>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <i class="fas fa-chart-line"></i><span>Dashboard</span>
+            </a>
+            <a href="abuelos.html" class="menu-item">
+                <i class="fas fa-users"></i><span>Abuelos</span>
+            </a>
+            <a href="donaciones.html" class="menu-item">
+                <i class="fas fa-hand-holding-heart"></i><span>Donaciones</span>
+            </a>
+            <a href="mensajes.html" class="menu-item">
+                <i class="fas fa-envelope"></i><span>Mensajes</span>
+            </a>
+            <a href="hero-slider.html" class="menu-item">
+                <i class="fas fa-images"></i><span>Hero Slider</span>
+            </a>
+            <a href="acerca-de.html" class="menu-item active">
+                <i class="fas fa-info-circle"></i><span>Acerca de</span>
+            </a>
+            <a href="voluntarios.html" class="menu-item">
+                <i class="fas fa-user-friends"></i><span>Voluntarios</span>
+            </a>
+            <a href="categorias-voluntariado.html" class="menu-item">
+                <i class="fas fa-list-alt"></i><span>Categorías Voluntariado</span>
+            </a>
+            <a href="testimonios.html" class="menu-item">
+                <i class="fas fa-comment-dots"></i><span>Testimonios</span>
+            </a>
+            <a href="patrocinadores.html" class="menu-item">
+                <i class="fas fa-handshake"></i><span>Patrocinadores</span>
+            </a>
+            <a href="mensajes-cumpleanos.html" class="menu-item">
+                <i class="fas fa-birthday-cake"></i><span>Felicitaciones</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="username">Admin</span>
+            </div>
+            <button onclick="logout()" class="btn btn-outline-light btn-sm w-100 mt-2">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-info-circle me-2"></i>Sección "Acerca de"</h1>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Contenido Principal -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Contenido Principal</h5>
+                </div>
+                <div class="card-body">
+                    <form id="contenido-form">
+                        <div class="mb-3">
+                            <label class="form-label">Título de la Sección</label>
+                            <input type="text" class="form-control" id="titulo" placeholder="¿Qué es Caminemos Juntos?">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" rows="3" placeholder="Somos una iniciativa que..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Contenido
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Características/Cards -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-th-large me-2"></i>Características (Cards)</h5>
+                    <button class="btn btn-primary btn-sm" onclick="showModalCaracteristica()">
+                        <i class="fas fa-plus me-2"></i>Nueva Característica
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Orden</th>
+                                    <th style="width: 80px;">Icono</th>
+                                    <th>Título</th>
+                                    <th>Descripción</th>
+                                    <th style="width: 100px;">Estado</th>
+                                    <th style="width: 150px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="caracteristicas-table">
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <div class="spinner-border text-primary"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Característica -->
+    <div class="modal fade" id="caracteristicaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nueva Característica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="caracteristica-form">
+                        <input type="hidden" id="caracteristica-id">
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Título *</label>
+                                <input type="text" class="form-control" id="car-titulo" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Orden</label>
+                                <input type="number" class="form-control" id="car-orden" value="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Icono (FontAwesome)</label>
+                            <input type="text" class="form-control" id="car-icono" placeholder="fa-heart">
+                            <small class="text-muted">Ej: fa-heart, fa-utensils, fa-pills</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Descripción *</label>
+                            <textarea class="form-control" id="car-descripcion" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="car-activo" checked>
+                                <label class="form-check-label" for="car-activo">Activo</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCaracteristica()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let modal;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await requireAuth();
+            modal = new bootstrap.Modal(document.getElementById('caracteristicaModal'));
+            loadContenido();
+            loadCaracteristicas();
+        });
+
+        // Cargar contenido principal
+        async function loadContenido() {
+            try {
+                const response = await adminAPI.get('admin/acerca-de');
+                
+                if (response.success) {
+                    document.getElementById('titulo').value = response.data.titulo || '';
+                    document.getElementById('descripcion').value = response.data.descripcion || '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Guardar contenido principal
+        document.getElementById('contenido-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                titulo: document.getElementById('titulo').value.trim(),
+                descripcion: document.getElementById('descripcion').value.trim()
+            };
+
+            try {
+                const response = await adminAPI.post('admin/acerca-de/contenido', data);
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Contenido actualizado',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Error', response.message || 'Error al guardar', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo guardar el contenido', 'error');
+            }
+        });
+
+        // Cargar características
+        async function loadCaracteristicas() {
+            try {
+                const response = await adminAPI.get('admin/acerca-de');
+                
+                if (response.success) {
+                    renderCaracteristicas(response.data.caracteristicas);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudieron cargar las características', 'error');
+            }
+        }
+
+        function renderCaracteristicas(caracteristicas) {
+            const tbody = document.getElementById('caracteristicas-table');
+            
+            if (caracteristicas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay características</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = caracteristicas.map(car => `
+                <tr>
+                    <td><span class="badge bg-secondary">${car.orden}</span></td>
+                    <td class="text-center">
+                        <i class="fas ${car.icono} fa-2x text-primary"></i>
+                    </td>
+                    <td><strong>${car.titulo}</strong></td>
+                    <td>${car.descripcion.substring(0, 80)}${car.descripcion.length > 80 ? '...' : ''}</td>
+                    <td>
+                        ${car.activo == 1 
+                            ? '<span class="badge bg-success">Activo</span>' 
+                            : '<span class="badge bg-secondary">Inactivo</span>'}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick='editCaracteristica(${JSON.stringify(car)})' title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteCaracteristica(${car.id})" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showModalCaracteristica() {
+            document.getElementById('modalTitle').textContent = 'Nueva Característica';
+            document.getElementById('caracteristica-form').reset();
+            document.getElementById('caracteristica-id').value = '';
+            document.getElementById('car-activo').checked = true;
+            modal.show();
+        }
+
+        function editCaracteristica(car) {
+            document.getElementById('modalTitle').textContent = 'Editar Característica';
+            document.getElementById('caracteristica-id').value = car.id;
+            document.getElementById('car-titulo').value = car.titulo;
+            document.getElementById('car-descripcion').value = car.descripcion;
+            document.getElementById('car-icono').value = car.icono;
+            document.getElementById('car-orden').value = car.orden;
+            document.getElementById('car-activo').checked = car.activo == 1;
+            modal.show();
+        }
+
+        async function saveCaracteristica() {
+            const id = document.getElementById('caracteristica-id').value;
+            const titulo = document.getElementById('car-titulo').value.trim();
+            const descripcion = document.getElementById('car-descripcion').value.trim();
+            
+            if (!titulo || !descripcion) {
+                Swal.fire('Error', 'Por favor completa los campos requeridos', 'error');
+                return;
+            }
+
+            const data = {
+                titulo,
+                descripcion,
+                icono: document.getElementById('car-icono').value.trim() || 'fa-heart',
+                orden: parseInt(document.getElementById('car-orden').value) || 0,
+                activo: document.getElementById('car-activo').checked ? 1 : 0
+            };
+
+            try {
+                const response = id 
+                    ? await adminAPI.put(`admin/acerca-de/caracteristicas/${id}`, data)
+                    : await adminAPI.post('admin/acerca-de/caracteristicas', data);
+
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: id ? 'Característica actualizada' : 'Característica creada',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    modal.hide();
+                    loadCaracteristicas();
+                } else {
+                    Swal.fire('Error', response.message || 'Error al guardar', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo guardar la característica', 'error');
+            }
+        }
+
+        async function deleteCaracteristica(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar característica?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await adminAPI.delete(`admin/acerca-de/caracteristicas/${id}`);
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Característica eliminada',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    loadCaracteristicas();
+                } else {
+                    Swal.fire('Error', response.message || 'Error al eliminar', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo eliminar la característica', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+

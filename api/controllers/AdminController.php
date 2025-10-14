@@ -911,4 +911,144 @@ class AdminController {
             return Response::error('Error al eliminar categoría', null, 500);
         }
     }
+    
+    // ===== SECCIÓN ACERCA DE =====
+    
+    public function getAcercaDe() {
+        try {
+            // Obtener título y descripción
+            $contenido = [];
+            $rows = $this->db->fetchAll("SELECT clave, contenido FROM seccion_acerca_de");
+            
+            foreach ($rows as $row) {
+                $contenido[$row['clave']] = $row['contenido'];
+            }
+            
+            // Obtener características
+            $caracteristicas = $this->db->fetchAll(
+                "SELECT * FROM caracteristicas_acerca_de 
+                 WHERE deleted = 0 
+                 ORDER BY orden ASC, id ASC"
+            );
+            
+            Logger::debug("getAcercaDe: Encontradas " . count($caracteristicas) . " características");
+            return Response::success([
+                'titulo' => $contenido['titulo'] ?? '',
+                'descripcion' => $contenido['descripcion'] ?? '',
+                'caracteristicas' => $caracteristicas,
+                'total' => count($caracteristicas)
+            ]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener acerca de", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener contenido', null, 500);
+        }
+    }
+    
+    public function updateAcercaDeContenido() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (isset($data['titulo'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_acerca_de (clave, contenido) VALUES ('titulo', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['titulo'], $data['titulo']]
+                );
+            }
+            
+            if (isset($data['descripcion'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_acerca_de (clave, contenido) VALUES ('descripcion', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['descripcion'], $data['descripcion']]
+                );
+            }
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_ACERCA_DE', 'seccion_acerca_de', 0);
+            
+            Logger::debug("updateAcercaDeContenido: Contenido actualizado");
+            return Response::success(null, 'Contenido actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar acerca de", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function createCaracteristicaAcercaDe() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($data['titulo']) || empty($data['descripcion'])) {
+                return Response::error('Campos requeridos: titulo, descripcion', null, 400);
+            }
+            
+            $this->db->execute(
+                "INSERT INTO caracteristicas_acerca_de (titulo, descripcion, icono, orden, activo)
+                 VALUES (?, ?, ?, ?, ?)",
+                [
+                    $data['titulo'],
+                    $data['descripcion'],
+                    $data['icono'] ?? 'fa-heart',
+                    $data['orden'] ?? 0,
+                    $data['activo'] ?? 1
+                ]
+            );
+            
+            $id = $this->db->getConnection()->lastInsertId();
+            $this->authService->logActivity($this->user['id'], 'CREAR_CARACTERISTICA_ACERCA_DE', 'caracteristicas_acerca_de', $id);
+            
+            Logger::debug("createCaracteristicaAcercaDe: Característica #$id creada");
+            return Response::success(['id' => $id], 'Característica creada');
+        } catch (Exception $e) {
+            Logger::error("Error al crear característica", ['error' => $e->getMessage()]);
+            return Response::error('Error al crear', null, 500);
+        }
+    }
+    
+    public function updateCaracteristicaAcercaDe($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $fields = [];
+            $values = [];
+            
+            $allowedFields = ['titulo', 'descripcion', 'icono', 'orden', 'activo'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field])) {
+                    $fields[] = "$field = ?";
+                    $values[] = $data[$field];
+                }
+            }
+            
+            if (empty($fields)) {
+                return Response::error('No hay campos para actualizar', null, 400);
+            }
+            
+            $values[] = $id;
+            $sql = "UPDATE caracteristicas_acerca_de SET " . implode(', ', $fields) . " WHERE id = ?";
+            
+            $this->db->execute($sql, $values);
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_CARACTERISTICA_ACERCA_DE', 'caracteristicas_acerca_de', $id);
+            
+            Logger::debug("updateCaracteristicaAcercaDe: Característica #$id actualizada");
+            return Response::success(null, 'Característica actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar característica", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteCaracteristicaAcercaDe($id) {
+        try {
+            $this->db->execute("UPDATE caracteristicas_acerca_de SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_CARACTERISTICA_ACERCA_DE', 'caracteristicas_acerca_de', $id);
+            
+            Logger::debug("deleteCaracteristicaAcercaDe: Característica #$id eliminada");
+            return Response::success(null, 'Característica eliminada');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar característica", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
 }

@@ -573,9 +573,63 @@ async function loadCategoriasVoluntariado() {
     }
 }
 
+// Cargar sección "Acerca de"
+async function loadAcercaDe() {
+    try {
+        const response = await api.get('acerca-de');
+        
+        if (response.success) {
+            // Actualizar título y descripción
+            const tituloEl = document.getElementById('acerca-titulo');
+            const descripcionEl = document.getElementById('acerca-descripcion');
+            
+            if (tituloEl && response.data.titulo) {
+                tituloEl.textContent = response.data.titulo;
+            }
+            
+            if (descripcionEl && response.data.descripcion) {
+                descripcionEl.textContent = response.data.descripcion;
+            }
+            
+            // Renderizar características
+            const container = document.getElementById('acerca-caracteristicas-container');
+            if (container && response.data.caracteristicas) {
+                const caracteristicas = response.data.caracteristicas;
+                
+                if (caracteristicas.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-3">
+                            <p class="text-muted">No hay características disponibles.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = caracteristicas.map((car, index) => `
+                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="${100 * (index + 1)}">
+                        <div class="feature-card">
+                            <div class="feature-icon-wrapper">
+                                <div class="feature-icon">
+                                    <i class="fas ${car.icono}"></i>
+                                </div>
+                            </div>
+                            <h4 class="feature-title">${car.titulo}</h4>
+                            <p class="feature-description">${car.descripcion}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar acerca de:', error);
+        // Mantener contenido por defecto si falla
+    }
+}
+
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     loadHeroSlider();
+    loadAcercaDe();
     loadAbuelos();
     loadTestimonios();
     loadPatrocinadores();

@@ -173,6 +173,18 @@ try {
         exit;
     }
 
+    // Rutas de "Acerca de" (público)
+    if ($segments[0] === 'acerca-de') {
+        require_once __DIR__ . '/controllers/AcercaDeController.php';
+        $controller = new AcercaDeController();
+
+        if ($method === 'GET') {
+            // GET /api/acerca-de
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de PayU
     if ($segments[0] === 'payu') {
         require_once __DIR__ . '/controllers/PayUController.php';
@@ -252,6 +264,8 @@ try {
                 $controller->getMensajesCumpleanos();
             } elseif ($segments[1] === 'categorias-voluntariado') {
                 $controller->getCategoriasVoluntariado();
+            } elseif ($segments[1] === 'acerca-de') {
+                $controller->getAcercaDe();
             }
         } elseif ($method === 'POST' && isset($segments[1])) {
             if ($segments[1] === 'abuelos') {
@@ -262,6 +276,12 @@ try {
                 $controller->createPatrocinador();
             } elseif ($segments[1] === 'categorias-voluntariado') {
                 $controller->createCategoriaVoluntariado();
+            } elseif ($segments[1] === 'acerca-de' && isset($segments[2])) {
+                if ($segments[2] === 'contenido') {
+                    $controller->updateAcercaDeContenido();
+                } elseif ($segments[2] === 'caracteristicas') {
+                    $controller->createCaracteristicaAcercaDe();
+                }
             }
         } elseif ($method === 'PUT' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -284,6 +304,8 @@ try {
                 $controller->aprobarMensajeCumpleanos($segments[2]);
             } elseif ($segments[1] === 'categorias-voluntariado') {
                 $controller->updateCategoriaVoluntariado($segments[2]);
+            } elseif ($segments[1] === 'acerca-de' && $segments[2] === 'caracteristicas' && isset($segments[3])) {
+                $controller->updateCaracteristicaAcercaDe($segments[3]);
             }
         } elseif ($method === 'DELETE' && isset($segments[1]) && isset($segments[2])) {
             if ($segments[1] === 'abuelos') {
@@ -302,6 +324,8 @@ try {
                 $controller->deleteMensajeCumpleanos($segments[2]);
             } elseif ($segments[1] === 'categorias-voluntariado') {
                 $controller->deleteCategoriaVoluntariado($segments[2]);
+            } elseif ($segments[1] === 'acerca-de' && $segments[2] === 'caracteristicas' && isset($segments[3])) {
+                $controller->deleteCaracteristicaAcercaDe($segments[3]);
             }
         }
         exit;
