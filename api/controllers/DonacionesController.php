@@ -21,10 +21,20 @@ class DonacionesController {
                 ->required('nombre_completo')->min('nombre_completo', 2)->max('nombre_completo', 150)
                 ->required('email')->email('email')
                 ->required('telefono')->min('telefono', 7)->max('telefono', 20)
-                ->required('ciudad')->min('ciudad', 2)->max('ciudad', 100)
-                ->required('monto')->numeric('monto')->minValue('monto', 10000)
-                ->required('frecuencia')->inArray('frecuencia', ['unica', 'mensual', 'trimestral', 'anual'])
-                ->required('metodo_pago')->inArray('metodo_pago', ['nequi', 'daviplata', 'tarjeta', 'transferencia']);
+                ->required('ciudad')->min('ciudad', 2)->max('ciudad', 100);
+            
+            // Monto y frecuencia opcionales para QR
+            if (isset($data['monto']) && $data['monto'] > 0) {
+                $validator->numeric('monto')->minValue('monto', 1000);
+            }
+            
+            if (isset($data['frecuencia']) && !empty($data['frecuencia'])) {
+                $validator->inArray('frecuencia', ['unica', 'mensual', 'trimestral', 'anual']);
+            }
+            
+            if (isset($data['metodo_pago']) && !empty($data['metodo_pago'])) {
+                $validator->inArray('metodo_pago', ['nequi', 'daviplata', 'tarjeta', 'transferencia']);
+            }
 
             if ($validator->fails()) {
                 Response::badRequest('Datos inválidos', $validator->errors());
@@ -51,9 +61,9 @@ class DonacionesController {
                     $data['email'],
                     $data['telefono'],
                     $data['ciudad'],
-                    $data['monto'],
-                    $data['frecuencia'],
-                    $data['metodo_pago'],
+                    $data['monto'] ?? 0,
+                    $data['frecuencia'] ?? 'unica',
+                    $data['metodo_pago'] ?? 'transferencia',
                     $data['abuelo_id'] ?? null,
                     $data['mensaje'] ?? null
                 ]
@@ -80,13 +90,22 @@ class DonacionesController {
                 ->required('nombre_empresa')->min('nombre_empresa', 2)->max('nombre_empresa', 200)
                 ->required('nit')->min('nit', 8)->max('nit', 50)
                 ->required('nombre_contacto')->min('nombre_contacto', 2)->max('nombre_contacto', 150)
-                ->required('email')->email('email')
+                ->required('email_contacto')->email('email_contacto')
                 ->required('telefono')->min('telefono', 7)->max('telefono', 20)
-                ->required('ciudad')->min('ciudad', 2)->max('ciudad', 100)
-                ->required('monto')->numeric('monto')->minValue('monto', 100000)
-                ->required('frecuencia')->inArray('frecuencia', ['unica', 'mensual', 'trimestral', 'anual'])
-                ->required('metodo_pago')->inArray('metodo_pago', ['transferencia', 'tarjeta'])
-                ->required('tipo_patrocinio')->inArray('tipo_patrocinio', ['general', 'especifico']);
+                ->required('ciudad')->min('ciudad', 2)->max('ciudad', 100);
+            
+            // Campos opcionales para QR
+            if (isset($data['monto']) && $data['monto'] > 0) {
+                $validator->numeric('monto')->minValue('monto', 1000);
+            }
+            
+            if (isset($data['frecuencia']) && !empty($data['frecuencia'])) {
+                $validator->inArray('frecuencia', ['unica', 'mensual', 'trimestral', 'anual']);
+            }
+            
+            if (isset($data['metodo_pago']) && !empty($data['metodo_pago'])) {
+                $validator->inArray('metodo_pago', ['transferencia', 'tarjeta']);
+            }
 
             if ($validator->fails()) {
                 Response::badRequest('Datos inválidos', $validator->errors());
@@ -95,19 +114,19 @@ class DonacionesController {
             // Insertar donación empresarial
             $stmt = $this->db->query(
                 "INSERT INTO donaciones_empresas 
-                 (nombre_empresa, nit, nombre_contacto, email, telefono, ciudad, monto, frecuencia, metodo_pago, tipo_patrocinio, abuelo_id, mensaje, requiere_factura, estado) 
+                 (nombre_empresa, nit, nombre_contacto, email_contacto, telefono, ciudad, monto, frecuencia, metodo_pago, tipo_patrocinio, abuelo_id, mensaje, requiere_factura, estado) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')",
                 [
                     $data['nombre_empresa'],
                     $data['nit'],
                     $data['nombre_contacto'],
-                    $data['email'],
+                    $data['email_contacto'],
                     $data['telefono'],
                     $data['ciudad'],
-                    $data['monto'],
-                    $data['frecuencia'],
-                    $data['metodo_pago'],
-                    $data['tipo_patrocinio'],
+                    $data['monto'] ?? 0,
+                    $data['frecuencia'] ?? 'unica',
+                    $data['metodo_pago'] ?? 'transferencia',
+                    $data['tipo_patrocinio'] ?? 'general',
                     $data['abuelo_id'] ?? null,
                     $data['mensaje'] ?? null,
                     isset($data['requiere_factura']) ? 1 : 0
