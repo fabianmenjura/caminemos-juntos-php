@@ -169,7 +169,7 @@ function loadFooter() {
                         <li><a href="abuelos.html">Ver Todos los Abuelos</a></li>
                         <li><a href="donar.html">Donar</a></li>
                         <li><a href="index.html#voluntarios">Voluntariado</a></li>
-                        <li><a href="admin/login.html"><i class="fas fa-lock me-1"></i>Panel Admin</a></li>
+                        <li><a href="admin/login.html" target="_blank" rel="noopener noreferrer"><i class="fas fa-lock me-1"></i>Panel Admin</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-4">
