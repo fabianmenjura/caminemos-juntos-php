@@ -376,10 +376,15 @@ class AdminController {
             $nuevoEstado = $data['estado'] ?? null;
             
             if (!in_array($nuevoEstado, ['pendiente', 'completada', 'cancelada'])) {
-                return Response::error('Estado inválido', null, 400);
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'Estado inválido']);
+                exit;
             }
             
-            $tabla = $tipo === 'persona' ? 'donaciones_personas' : 'donaciones_empresas';
+            // Normalizar tipo (aceptar singular o plural)
+            $tipoNormalizado = rtrim($tipo, 's'); // Quitar 's' final si existe
+            $tabla = $tipoNormalizado === 'persona' ? 'donaciones_personas' : 'donaciones_empresas';
             
             $this->db->execute(
                 "UPDATE $tabla SET estado = ? WHERE id = ?",
@@ -394,12 +399,15 @@ class AdminController {
                 "Estado cambiado a: $nuevoEstado"
             );
             
-            Logger::debug("updateDonacionEstado: Donación $tipo #$id → $nuevoEstado");
-            
-            return Response::success(null, 'Donación actualizada');
+            http_response_code(200);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Donación actualizada']);
+            exit;
         } catch (Exception $e) {
-            Logger::error("Error en updateDonacionEstado", ['error' => $e->getMessage()]);
-            return Response::error('Error al actualizar donación', null, 500);
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            exit;
         }
     }
     

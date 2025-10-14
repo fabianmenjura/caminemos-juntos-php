@@ -262,6 +262,37 @@ try {
         exit;
     }
 
+    // Rutas de notificaciones (admin)
+    if ($segments[0] === 'admin' && isset($segments[1]) && $segments[1] === 'notificaciones') {
+        require_once __DIR__ . '/controllers/NotificacionesController.php';
+        $notifController = new NotificacionesController();
+
+        if ($method === 'GET') {
+            if (isset($segments[2]) && $segments[2] === 'count') {
+                // GET /api/admin/notificaciones/count
+                $notifController->getCount();
+            } else {
+                // GET /api/admin/notificaciones
+                $notifController->index();
+            }
+        } elseif ($method === 'PUT') {
+            if (isset($segments[2]) && $segments[2] === 'mark-all-read') {
+                // PUT /api/admin/notificaciones/mark-all-read
+                $notifController->markAllAsRead();
+            } elseif (isset($segments[2])) {
+                // PUT /api/admin/notificaciones/{id}
+                $notifController->markAsRead($segments[2]);
+            }
+        } elseif ($method === 'DELETE' && isset($segments[2])) {
+            // DELETE /api/admin/notificaciones/{id}
+            $notifController->delete($segments[2]);
+        } elseif ($method === 'POST' && isset($segments[2]) && $segments[2] === 'generar-cumpleanos') {
+            // POST /api/admin/notificaciones/generar-cumpleanos
+            $notifController->generarCumpleanos();
+        }
+        exit;
+    }
+
     // Rutas de administración QR Donaciones (separado para evitar instanciar AdminController)
     if ($segments[0] === 'admin' && isset($segments[1]) && $segments[1] === 'qr-donaciones') {
         require_once __DIR__ . '/controllers/QRDonacionesController.php';

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    <link rel="shortcut icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    
+    <title>Notificaciones - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <style>
+        .notif-item {
+            padding: 1rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .notif-item:hover {
+            background-color: #f8f9fa;
+        }
+        .notif-item.unread {
+            background-color: #fff8e1;
+            border-left-color: #eaa33a;
+        }
+        .notif-item.read {
+            opacity: 0.7;
+        }
+        .notif-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .notif-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+    
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-bell me-2"></i>Notificaciones</h1>
+            <div>
+                <button class="btn btn-outline-primary me-2" onclick="loadNotificaciones()">
+                    <i class="fas fa-sync me-2"></i>Actualizar
+                </button>
+                <button class="btn btn-primary" onclick="marcarTodasLeidas()">
+                    <i class="fas fa-check-double me-2"></i>Marcar Todas Leídas
+                </button>
+            </div>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning"><i class="fas fa-bell"></i></div>
+                        <div class="stat-info">
+                            <h3 id="count-no-leidas">0</h3>
+                            <p>No Leídas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary"><i class="fas fa-list"></i></div>
+                        <div class="stat-info">
+                            <h3 id="count-total">0</h3>
+                            <p>Total</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success"><i class="fas fa-calendar-day"></i></div>
+                        <div class="stat-info">
+                            <h3 id="count-hoy">0</h3>
+                            <p>Hoy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Notificaciones -->
+            <div class="card">
+                <div class="card-body">
+                    <div id="loading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted mt-3">Cargando notificaciones...</p>
+                    </div>
+
+                    <div id="notificaciones-container" style="display: none;">
+                        <!-- Notificaciones se cargan aquí -->
+                    </div>
+
+                    <div id="no-data" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay notificaciones</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-components.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let notificaciones = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAdminComponents('notificaciones');
+            loadNotificaciones();
+        });
+
+        async function loadNotificaciones() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('notificaciones-container').style.display = 'none';
+                document.getElementById('no-data').style.display = 'none';
+
+                const response = await adminAPI.get('admin/notificaciones');
+
+                if (response.success) {
+                    notificaciones = response.data.notificaciones;
+                    
+                    // Actualizar stats
+                    const noLeidas = notificaciones.filter(n => n.leida == 0).length;
+                    const hoy = notificaciones.filter(n => {
+                        const fecha = new Date(n.created_at);
+                        const today = new Date();
+                        return fecha.toDateString() === today.toDateString();
+                    }).length;
+
+                    document.getElementById('count-no-leidas').textContent = noLeidas;
+                    document.getElementById('count-total').textContent = notificaciones.length;
+                    document.getElementById('count-hoy').textContent = hoy;
+
+                    // Renderizar
+                    renderNotificaciones(notificaciones);
+
+                    if (notificaciones.length > 0) {
+                        document.getElementById('notificaciones-container').style.display = 'block';
+                    } else {
+                        document.getElementById('no-data').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudieron cargar las notificaciones', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderNotificaciones(notificaciones) {
+            const container = document.getElementById('notificaciones-container');
+            
+            container.innerHTML = notificaciones.map(n => {
+                const colorMap = {
+                    'success': 'bg-success',
+                    'warning': 'bg-warning',
+                    'danger': 'bg-danger',
+                    'info': 'bg-info',
+                    'primary': 'bg-primary'
+                };
+                
+                const tiempoTranscurrido = getTimeAgo(n.created_at);
+                
+                return `
+                    <div class="notif-item ${n.leida == 0 ? 'unread' : 'read'} mb-2 rounded" 
+                         onclick="clickNotificacion(${n.id}, '${n.enlace || ''}')">
+                        <div class="d-flex align-items-start">
+                            <div class="notif-icon ${colorMap[n.color] || 'bg-primary'} text-white me-3">
+                                <i class="fas ${n.icono}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1">
+                                        ${n.titulo}
+                                        ${n.leida == 0 ? '<span class="badge bg-danger ms-2">Nuevo</span>' : ''}
+                                    </h6>
+                                    <small class="notif-time">${tiempoTranscurrido}</small>
+                                </div>
+                                <p class="mb-1 text-muted small">${n.mensaje}</p>
+                                <div class="d-flex gap-2 mt-2">
+                                    ${n.enlace ? `<small class="text-primary"><i class="fas fa-link me-1"></i>Ver detalles</small>` : ''}
+                                    <button class="btn btn-sm btn-outline-danger ms-auto" onclick="event.stopPropagation(); eliminarNotificacion(${n.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function clickNotificacion(id, enlace) {
+            try {
+                // Marcar como leída
+                await adminAPI.put(`admin/notificaciones/${id}`, {});
+                
+                // Actualizar badge
+                if (typeof updateNotifications === 'function') {
+                    updateNotifications();
+                }
+                
+                // Redirigir si hay enlace
+                if (enlace && enlace.trim() !== '') {
+                    window.location.href = enlace;
+                } else {
+                    loadNotificaciones();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function marcarTodasLeidas() {
+            const noLeidas = notificaciones.filter(n => n.leida == 0).length;
+            
+            if (noLeidas === 0) {
+                Swal.fire('Info', 'No hay notificaciones sin leer', 'info');
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Marcar todas como leídas',
+                text: `¿Marcar ${noLeidas} notificación(es) como leídas?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, marcar todas',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#eaa33a'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await adminAPI.put('admin/notificaciones/mark-all-read', {});
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Listo!',
+                        text: 'Todas las notificaciones marcadas como leídas',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    loadNotificaciones();
+                    if (typeof updateNotifications === 'function') {
+                        updateNotifications();
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudieron marcar las notificaciones', 'error');
+                }
+            }
+        }
+
+        async function eliminarNotificacion(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar notificación?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d33'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await adminAPI.delete(`admin/notificaciones/${id}`);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminada',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    loadNotificaciones();
+                    if (typeof updateNotifications === 'function') {
+                        updateNotifications();
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo eliminar la notificación', 'error');
+                }
+            }
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return 'Hace un momento';
+            if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
+            if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)}h`;
+            if (seconds < 604800) return `Hace ${Math.floor(seconds / 86400)}d`;
+            
+            return date.toLocaleDateString('es-CO');
+        }
+    </script>
+</body>
+</html>
+
