@@ -1,64 +1,52 @@
-# Archivo .gitignore para el proyecto
+# =====================================================
+# GIT IGNORE - Caminemos Juntos
+# =====================================================
 
-# Variables de entorno (IMPORTANTE: NO subir al repositorio)
-.env
+# Configuración local
 api/.env
-*.env
+.env
 
-# Archivos del sistema
+# Logs
+logs/*.log
+!logs/.gitkeep
+
+# Imágenes subidas por usuarios
+assets/images/uploads/*
+!assets/images/uploads/.gitkeep
+
+# Archivos temporales de PHP
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archivos de sistema
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# IDEs y editores
+# IDEs
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.swp
-*.swo
-*~
+*.sublime-*
 
-# Logs
-*.log
-logs/
-*.log.*
-/logs/*
-!/logs/.gitkeep
-
-# Archivos temporales
-tmp/
-temp/
-*.tmp
-*.bak
-*.cache
-
-# Dependencias (si usaras Composer en el futuro)
+# Composer (si se usa en el futuro)
 vendor/
+composer.lock
+
+# Node modules (si se usa en el futuro)
 node_modules/
+package-lock.json
 
-# Archivos de caché
-*.cache
+# Archivos de prueba
+test-*.php
+test-*.html
+verificar-*.php
 
-# Archivos de base de datos (backups locales)
+# Backups
 *.sql.backup
-*.sql.gz
-*.sql.zip
+*.sql.bak
+backup/
 
-# Archivos de Windows
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Archivos específicos del proyecto
-database/backups/
-uploads/
-*.old
-*.orig
-
-# NO ignorar estos archivos importantes
-!database/schema.sql
-!database/seed.sql
-!database/fix-image-paths.sql
-
-/assets/images
+# Documentación temporal
+*.tmp.md
