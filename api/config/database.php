@@ -20,6 +20,9 @@ class Database {
 
         try {
             $this->connection = new PDO($dsn, $username, $password, $options);
+            
+            // Establecer zona horaria de Colombia en MySQL
+            $this->connection->exec("SET time_zone = '-05:00'");
         } catch (PDOException $e) {
             error_log("Error de conexión: " . $e->getMessage());
             throw new Exception("Error conectando a la base de datos");

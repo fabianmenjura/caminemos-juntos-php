@@ -473,6 +473,15 @@
                                                   placeholder="Cuéntanos sobre tus habilidades, experiencia o motivación..."></textarea>
                                     </div>
                                 </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="terminos-voluntario" required>
+                                        <label class="form-check-label" for="terminos-voluntario">
+                                            He leído y acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#terminosModal">Términos y Condiciones</a> 
+                                            y la <a href="#" data-bs-toggle="modal" data-bs-target="#politicaModal">Política de Tratamiento de Datos</a> *
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="col-12 text-center">
                                     <button type="submit" class="btn btn-primary btn-lg px-5">
                                         <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
@@ -531,6 +540,15 @@
                                     <div class="form-group">
                                         <label class="form-label">Mensaje</label>
                                         <textarea class="form-control" name="mensaje" rows="5" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="terminos-contacto" required>
+                                        <label class="form-check-label" for="terminos-contacto">
+                                            He leído y acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#terminosModal">Términos y Condiciones</a> 
+                                            y la <a href="#" data-bs-toggle="modal" data-bs-target="#politicaModal">Política de Tratamiento de Datos</a> *
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="col-12 text-center">
@@ -623,6 +641,15 @@
                         <div class="mb-3">
                             <textarea class="form-control" name="testimonio" rows="4" placeholder="Tu experiencia..." required minlength="20"></textarea>
                         </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terminos-testimonio" required>
+                                <label class="form-check-label" for="terminos-testimonio">
+                                    He leído y acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#terminosModal">Términos y Condiciones</a> 
+                                    y la <a href="#" data-bs-toggle="modal" data-bs-target="#politicaModal">Política de Tratamiento de Datos</a> *
+                                </label>
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Enviar</button>
                     </form>
                 </div>
@@ -667,6 +694,16 @@
                             <small class="text-muted">Mínimo 10 caracteres</small>
                         </div>
                         
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terminos-cumpleanos" required>
+                                <label class="form-check-label" for="terminos-cumpleanos">
+                                    He leído y acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#terminosModal">Términos y Condiciones</a> 
+                                    y la <a href="#" data-bs-toggle="modal" data-bs-target="#politicaModal">Política de Tratamiento de Datos</a> *
+                                </label>
+                            </div>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fas fa-gift me-2"></i>Enviar Felicitación
                         </button>
@@ -689,6 +726,114 @@
                 </div>
                 <div class="modal-body" id="mensajesCumpleanosBody">
                      Se llena dinámicamente 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Términos y Condiciones -->
+    <div class="modal fade" id="terminosModal" tabindex="-1" aria-labelledby="terminosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="terminosModalLabel">Términos y Condiciones</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Aceptación de los Términos</h6>
+                    <p>Al utilizar los servicios de Caminemos Juntos (Hogar Santo Domingo), usted acepta estos términos y condiciones.</p>
+
+                    <h6>2. Propósito del Programa</h6>
+                    <p>Caminemos Juntos es un programa del Hogar Santo Domingo que busca conectar personas generosas con adultos mayores que necesitan compañía, apoyo económico y sobre todo, cariño.</p>
+
+                    <h6>3. Participación como Voluntario</h6>
+                    <p>Al inscribirse como voluntario, usted se compromete a:</p>
+                    <ul>
+                        <li>Proporcionar información veraz y actualizada</li>
+                        <li>Mantener un trato respetuoso y digno hacia los adultos mayores</li>
+                        <li>Cumplir con los compromisos asumidos</li>
+                        <li>Respetar la privacidad de los beneficiarios</li>
+                        <li>Seguir las directrices del programa</li>
+                    </ul>
+
+                    <h6>4. Donaciones</h6>
+                    <p>- Las donaciones son voluntarias y no reembolsables.<br>
+                    - Puede realizar donaciones únicas o recurrentes según su preferencia.<br>
+                    - Recibirá un comprobante de su donación vía correo electrónico.<br>
+                    - Todas las donaciones serán destinadas exclusivamente para el bienestar de los adultos mayores.</p>
+
+                    <h6>5. Uso de Información</h6>
+                    <p>La información proporcionada será utilizada únicamente para los fines del programa y será tratada de acuerdo con nuestra Política de Tratamiento de Datos.</p>
+
+                    <h6>6. Responsabilidades</h6>
+                    <p>El Hogar Santo Domingo se compromete a utilizar las donaciones de manera transparente y eficiente. Puede solicitar información sobre el uso de los fondos contactándonos directamente.</p>
+
+                    <h6>7. Modificaciones</h6>
+                    <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados a través de nuestro sitio web.</p>
+
+                    <h6>8. Contacto</h6>
+                    <p>Para cualquier consulta sobre estos términos, puede contactarnos a través de nuestros canales oficiales.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Política de Datos -->
+    <div class="modal fade" id="politicaModal" tabindex="-1" aria-labelledby="politicaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="politicaModalLabel">Política de Tratamiento de Datos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Responsable del Tratamiento</h6>
+                    <p>Hogar Santo Domingo - Caminemos Juntos es el responsable del tratamiento de sus datos personales.</p>
+
+                    <h6>2. Finalidad del Tratamiento</h6>
+                    <p>Los datos personales recopilados serán utilizados para:</p>
+                    <ul>
+                        <li>Gestionar su participación en el programa (voluntariado o donaciones)</li>
+                        <li>Mantener contacto relacionado con las actividades del programa</li>
+                        <li>Enviar información sobre el impacto de su contribución</li>
+                        <li>Procesar donaciones y enviar comprobantes</li>
+                        <li>Coordinar actividades de voluntariado</li>
+                        <li>Cumplir con obligaciones legales y contables</li>
+                    </ul>
+
+                    <h6>3. Datos Recopilados</h6>
+                    <p>Podemos recopilar: nombre, correo electrónico, teléfono, ciudad, información de voluntariado, datos de transacción, y cualquier información que usted proporcione voluntariamente.</p>
+
+                    <h6>4. Derechos del Titular</h6>
+                    <p>Usted tiene derecho a:</p>
+                    <ul>
+                        <li>Conocer, actualizar y rectificar sus datos personales</li>
+                        <li>Solicitar prueba de la autorización otorgada</li>
+                        <li>Ser informado sobre el uso de sus datos</li>
+                        <li>Presentar quejas ante la Superintendencia de Industria y Comercio</li>
+                        <li>Revocar la autorización y/o solicitar la supresión de datos cuando sea procedente</li>
+                        <li>Acceder de forma gratuita a sus datos personales</li>
+                    </ul>
+
+                    <h6>5. Seguridad de la Información</h6>
+                    <p>Implementamos medidas de seguridad técnicas, administrativas y físicas para proteger su información personal contra acceso no autorizado, alteración, divulgación o destrucción.</p>
+
+                    <h6>6. Conservación de Datos</h6>
+                    <p>Conservaremos sus datos durante el tiempo necesario para cumplir con las finalidades descritas y las obligaciones legales aplicables.</p>
+
+                    <h6>7. Compartir Información</h6>
+                    <p>No compartimos, vendemos ni alquilamos su información personal a terceros, excepto cuando sea necesario para cumplir con la ley o con su consentimiento explícito.</p>
+
+                    <h6>8. Contacto</h6>
+                    <p>Para ejercer sus derechos o realizar consultas sobre esta política, puede contactarnos a través de nuestros canales oficiales.</p>
+
+                    <p class="mt-3"><small><strong>Fecha de última actualización:</strong> Octubre 2025</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

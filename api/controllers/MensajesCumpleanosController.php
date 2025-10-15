@@ -74,29 +74,43 @@ class MensajesCumpleanosController {
      */
     public function proximosCumpleanos() {
         try {
+            // Establecer zona horaria de Colombia
+            date_default_timezone_set('America/Bogota');
+            $fechaHoyColombia = date('Y-m-d');
+            
             $dias = isset($_GET['dias']) ? min(30, max(1, (int)$_GET['dias'])) : 7;
             
             $abuelos = $this->db->fetchAll(
                 "SELECT id, nombre, ciudad, foto_url, fecha_nacimiento,
-                        TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) as edad,
-                        (DATE_FORMAT(fecha_nacimiento, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')) as cumple_hoy,
-                        (DAYOFYEAR(fecha_nacimiento) BETWEEN DAYOFYEAR(CURDATE()) AND DAYOFYEAR(CURDATE() + INTERVAL 7 DAY)) as cumple_esta_semana,
+                        TIMESTAMPDIFF(YEAR, fecha_nacimiento, ?) as edad,
+                        (DATE_FORMAT(fecha_nacimiento, '%m-%d') = DATE_FORMAT(?, '%m-%d')) as cumple_hoy,
+                        (DAYOFYEAR(fecha_nacimiento) BETWEEN DAYOFYEAR(?) AND DAYOFYEAR(? + INTERVAL 7 DAY)) as cumple_esta_semana,
                         CASE 
-                            WHEN DAYOFYEAR(fecha_nacimiento) >= DAYOFYEAR(CURDATE()) 
-                            THEN DAYOFYEAR(fecha_nacimiento) - DAYOFYEAR(CURDATE())
-                            ELSE (365 - DAYOFYEAR(CURDATE())) + DAYOFYEAR(fecha_nacimiento)
+                            WHEN DAYOFYEAR(fecha_nacimiento) >= DAYOFYEAR(?) 
+                            THEN DAYOFYEAR(fecha_nacimiento) - DAYOFYEAR(?)
+                            ELSE (365 - DAYOFYEAR(?)) + DAYOFYEAR(fecha_nacimiento)
                         END as dias_hasta_cumpleanos
                  FROM abuelos 
                  WHERE estado = 'disponible' AND deleted = 0
                  HAVING dias_hasta_cumpleanos <= ?
                  ORDER BY dias_hasta_cumpleanos ASC",
-                [$dias]
+                [
+                    $fechaHoyColombia,  // edad
+                    $fechaHoyColombia,  // cumple_hoy
+                    $fechaHoyColombia,  // cumple_esta_semana start
+                    $fechaHoyColombia,  // cumple_esta_semana end
+                    $fechaHoyColombia,  // dias_hasta CASE WHEN
+                    $fechaHoyColombia,  // dias_hasta THEN
+                    $fechaHoyColombia,  // dias_hasta ELSE
+                    $dias               // HAVING
+                ]
             );
             
             return Response::success([
                 'abuelos' => $abuelos,
                 'total' => count($abuelos),
-                'dias' => $dias
+                'dias' => $dias,
+                'fecha_servidor' => $fechaHoyColombia
             ]);
             
         } catch (Exception $e) {
