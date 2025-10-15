@@ -30,13 +30,27 @@
                 Aquí se registran todas las donaciones realizadas mediante QR. El monto puede ser "$0" si el donante no lo especificó al momento del registro.
             </div>
 
-            <!-- Filtros -->
+            <!-- Filtros y Búsqueda -->
             <div class="card mb-4">
                 <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Buscar Donación</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="buscarDonacion" 
+                                       placeholder="Buscar por nombre, email, ciudad..." 
+                                       onkeyup="filtrarDonaciones()">
+                                <button class="btn btn-outline-secondary" onclick="limpiarBusquedaDonaciones()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Tipo de Donante</label>
-                            <select class="form-select" id="filtroTipo" onchange="loadDonaciones()">
+                            <select class="form-select" id="filtroTipo" onchange="filtrarDonaciones()">
                                 <option value="todas" selected>📊 Todas las donaciones</option>
                                 <option value="personas">👤 Solo Personas</option>
                                 <option value="empresas">🏢 Solo Empresas</option>
@@ -44,7 +58,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Estado</label>
-                            <select class="form-select" id="filtroEstado" onchange="loadDonaciones()">
+                            <select class="form-select" id="filtroEstado" onchange="filtrarDonaciones()">
                                 <option value="">Todos los estados</option>
                                 <option value="pendiente">⏳ Pendientes</option>
                                 <option value="completada">✅ Completadas</option>
@@ -142,6 +156,7 @@
     <script src="assets/js/admin-api.js"></script>
     <script>
         let donaciones = [];
+        let todasLasDonaciones = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             await initAdminComponents('donaciones');
@@ -149,9 +164,6 @@
         });
         
         async function loadDonaciones() {
-            const filtroTipo = document.getElementById('filtroTipo').value;
-            const filtroEstado = document.getElementById('filtroEstado').value;
-            
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('tabla').style.display = 'none';
@@ -160,25 +172,9 @@
                 const response = await adminAPI.get('admin/donaciones');
                 
                 if (response.success) {
-                    donaciones = response.data.donaciones;
-                    
-                    // Filtrar
-                    let filtradas = donaciones;
-                    if (filtroTipo !== 'todas') {
-                        filtradas = filtradas.filter(d => d.tipo_categoria === filtroTipo.slice(0, -1)); // 'personas' -> 'persona'
-                    }
-                    if (filtroEstado) {
-                        filtradas = filtradas.filter(d => d.estado === filtroEstado);
-                    }
-                    
-                    // Actualizar estadísticas
-                    actualizarEstadisticas(donaciones);
-                    
-                    // Renderizar tabla
-                    renderDonaciones(filtradas);
-                    
-                    document.getElementById('tabla').style.display = filtradas.length > 0 ? 'block' : 'none';
-                    document.getElementById('no-data').style.display = filtradas.length === 0 ? 'block' : 'none';
+                    todasLasDonaciones = response.data.donaciones;
+                    actualizarEstadisticas(todasLasDonaciones);
+                    filtrarDonaciones();
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -190,6 +186,45 @@
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
+        }
+
+        function filtrarDonaciones() {
+            const busqueda = document.getElementById('buscarDonacion').value.toLowerCase();
+            const filtroTipo = document.getElementById('filtroTipo').value;
+            const filtroEstado = document.getElementById('filtroEstado').value;
+            
+            let filtradas = todasLasDonaciones;
+            
+            // Filtrar por búsqueda
+            if (busqueda) {
+                filtradas = filtradas.filter(d => {
+                    const nombre = (d.nombre || d.nombre_completo || d.nombre_empresa || '').toLowerCase();
+                    const email = (d.email || d.email_contacto || '').toLowerCase();
+                    const ciudad = (d.ciudad || '').toLowerCase();
+                    return nombre.includes(busqueda) || email.includes(busqueda) || ciudad.includes(busqueda);
+                });
+            }
+            
+            // Filtrar por tipo
+            if (filtroTipo !== 'todas') {
+                filtradas = filtradas.filter(d => d.tipo_categoria === filtroTipo.slice(0, -1)); // 'personas' -> 'persona'
+            }
+            
+            // Filtrar por estado
+            if (filtroEstado) {
+                filtradas = filtradas.filter(d => d.estado === filtroEstado);
+            }
+            
+            donaciones = filtradas;
+            renderDonaciones(filtradas);
+            
+            document.getElementById('tabla').style.display = filtradas.length > 0 ? 'block' : 'none';
+            document.getElementById('no-data').style.display = filtradas.length === 0 ? 'block' : 'none';
+        }
+
+        function limpiarBusquedaDonaciones() {
+            document.getElementById('buscarDonacion').value = '';
+            filtrarDonaciones();
         }
 
         function actualizarEstadisticas(donaciones) {

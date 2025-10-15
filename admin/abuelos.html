@@ -28,16 +28,39 @@
         </div>
         
         <div class="content-wrapper">
-            <!-- Filtros -->
-            <div class="table-card mb-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <select class="form-select" id="filtroEstado" onchange="loadAbuelos()">
-                            <option value="">Todos</option>
-                            <option value="disponible" selected>Disponibles</option>
-                            <option value="adoptado">Adoptados</option>
-                            <option value="inactivo">Inactivos</option>
-                        </select>
+            <!-- Filtros y Búsqueda -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="buscarAbuelo" 
+                                       placeholder="Buscar por nombre, ciudad o historia..." 
+                                       onkeyup="filtrarAbuelos()">
+                                <button class="btn btn-outline-secondary" onclick="limpiarBusqueda()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="filtroEstado" onchange="filtrarAbuelos()">
+                                <option value="">Todos</option>
+                                <option value="disponible" selected>Disponibles</option>
+                                <option value="adoptado">Adoptados</option>
+                                <option value="inactivo">Inactivos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Género</label>
+                            <select class="form-select" id="filtroGenero" onchange="filtrarAbuelos()">
+                                <option value="">Todos</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -170,6 +193,7 @@
     <script src="assets/js/admin-api.js"></script>
     <script>
         let modal;
+        let todosLosAbuelos = [];
         
         document.addEventListener('DOMContentLoaded', async () => {
             await initAdminComponents('abuelos');
@@ -178,26 +202,77 @@
         });
         
         async function loadAbuelos() {
-            const estado = document.getElementById('filtroEstado').value;
-            
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('tabla').style.display = 'none';
                 
-                const response = await adminAPI.getAbuelos({ estado, limite: 50 });
+                const response = await adminAPI.get('admin/abuelos');
                 
                 if (response.success) {
-                    renderAbuelos(response.data.abuelos);
+                    todosLosAbuelos = response.data.abuelos;
+                    filtrarAbuelos();
                 }
             } catch (error) {
                 console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error al Cargar',
-                    text: 'No se pudieron cargar los abuelos. Intenta de nuevo.',
-                    confirmButtonColor: '#2c5f2d'
+                    text: 'No se pudieron cargar los abuelos.',
+                    confirmButtonColor: '#eaa33a'
+                });
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function filtrarAbuelos() {
+            const inputBuscar = document.getElementById('buscarAbuelo');
+            const selectEstado = document.getElementById('filtroEstado');
+            const selectGenero = document.getElementById('filtroGenero');
+            
+            if (!inputBuscar || !selectEstado || !selectGenero) return;
+            
+            const busqueda = inputBuscar.value.toLowerCase();
+            const filtroEstado = selectEstado.value;
+            const filtroGenero = selectGenero.value;
+            
+            let filtrados = todosLosAbuelos;
+            
+            // Filtrar por búsqueda
+            if (busqueda) {
+                filtrados = filtrados.filter(a => {
+                    const nombre = (a.nombre_completo || a.nombre || '').toLowerCase();
+                    const ciudad = (a.ciudad || '').toLowerCase();
+                    const historia = (a.historia || '').toLowerCase();
+                    return nombre.includes(busqueda) || ciudad.includes(busqueda) || historia.includes(busqueda);
                 });
             }
+            
+            // Filtrar por estado
+            if (filtroEstado) {
+                filtrados = filtrados.filter(a => a.estado === filtroEstado);
+            }
+            
+            // Filtrar por género
+            if (filtroGenero) {
+                filtrados = filtrados.filter(a => a.genero === filtroGenero);
+            }
+            
+            renderAbuelos(filtrados);
+            
+            // Mostrar mensaje si no hay resultados
+            if (filtrados.length === 0) {
+                const tbody = document.getElementById('tbody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-search fa-2x mb-2 d-block"></i>No se encontraron abuelos con los filtros seleccionados</td></tr>';
+                }
+            }
+        }
+
+        function limpiarBusqueda() {
+            const input = document.getElementById('buscarAbuelo');
+            if (input) input.value = '';
+            filtrarAbuelos();
         }
         
         function renderAbuelos(abuelos) {

@@ -96,21 +96,43 @@ async function initAdminComponents(currentPage = '') {
         }
     }
     
-    // Cargar campana de notificaciones en el topbar
-    loadNotificationBell();
+    // Cargar buscador global y campana de notificaciones
+    loadTopbarComponents();
     
-    // Actualizar cada 30 segundos
+    // Actualizar notificaciones cada 30 segundos
     setInterval(updateNotifications, 30000);
 }
+
+/**
+ * Cargar componentes del topbar (solo campana de notificaciones)
+ */
+function loadTopbarComponents() {
+    const topbars = document.querySelectorAll('.topbar');
+    topbars.forEach(topbar => {
+        // Crear topbar-right si no existe
+        if (!topbar.querySelector('.topbar-right')) {
+            const rightDiv = document.createElement('div');
+            rightDiv.className = 'topbar-right';
+            topbar.appendChild(rightDiv);
+        }
+    });
+    
+    // Cargar campana de notificaciones
+    loadNotificationBell();
+}
+
+/**
+ * Cargar campana de notificaciones (actualizado para usar topbar-right)
+ */
 
 /**
  * Cargar campana de notificaciones en el topbar
  */
 function loadNotificationBell() {
-    const topbars = document.querySelectorAll('.topbar');
-    topbars.forEach(topbar => {
+    const topbarRights = document.querySelectorAll('.topbar-right');
+    topbarRights.forEach(topbarRight => {
         // Crear contenedor de la campana si no existe
-        if (!topbar.querySelector('.notification-bell-container')) {
+        if (!topbarRight.querySelector('.notification-bell-container')) {
             const bellContainer = document.createElement('div');
             bellContainer.className = 'notification-bell-container position-relative';
             bellContainer.innerHTML = `
@@ -135,7 +157,7 @@ function loadNotificationBell() {
                     </div>
                 </div>
             `;
-            topbar.appendChild(bellContainer);
+            topbarRight.appendChild(bellContainer);
         }
     });
     
@@ -372,4 +394,6 @@ function getTimeAgo(dateString) {
     
     return date.toLocaleDateString('es-CO');
 }
+
+// Buscador global eliminado - se usan buscadores individuales en cada página
 
