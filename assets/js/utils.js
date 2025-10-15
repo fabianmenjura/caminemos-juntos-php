@@ -1,6 +1,47 @@
 /**
- * Utilidades para Notificaciones y Loading
+ * Utilidades para Notificaciones, Loading y Seguridad
  * Usando SweetAlert2
+ */
+
+/**
+ * ========================================
+ * SEGURIDAD - Sanitización XSS
+ * ========================================
+ */
+
+/**
+ * Escapar HTML para prevenir XSS
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Sanitizar objeto completo
+ */
+function sanitizeObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    const sanitized = {};
+    for (let key in obj) {
+        if (typeof obj[key] === 'string') {
+            sanitized[key] = escapeHtml(obj[key]);
+        } else if (typeof obj[key] === 'object') {
+            sanitized[key] = sanitizeObject(obj[key]);
+        } else {
+            sanitized[key] = obj[key];
+        }
+    }
+    return sanitized;
+}
+
+/**
+ * ========================================
+ * SWEETALERT2 - Notificaciones
+ * ========================================
  */
 
 // Configuración global de SweetAlert2
