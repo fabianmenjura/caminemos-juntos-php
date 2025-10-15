@@ -11,6 +11,7 @@
     <title>Testimonios - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -92,7 +93,11 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar testimonios');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los testimonios'
+                });
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
@@ -153,41 +158,100 @@
         // Aprobar
         async function aprobar(id) {
             try {
+                Swal.fire({
+                    title: 'Aprobando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.put(`admin/testimonios/${id}`, { aprobado: true });
                 if (response.success) {
-                    alert('Testimonio aprobado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Aprobado!',
+                        text: 'Testimonio aprobado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadTestimonios(document.getElementById('filter-estado').value);
                 }
             } catch (error) {
-                alert('Error al aprobar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo aprobar el testimonio'
+                });
             }
         }
 
         // Toggle destacado
         async function toggleDestacado(id, destacar) {
             try {
+                Swal.fire({
+                    title: 'Actualizando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.put(`admin/testimonios/${id}`, { destacado: destacar });
                 if (response.success) {
-                    alert(destacar ? 'Testimonio destacado' : 'Ya no está destacado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Listo!',
+                        text: destacar ? 'Testimonio destacado' : 'Ya no está destacado',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadTestimonios(document.getElementById('filter-estado').value);
                 }
             } catch (error) {
-                alert('Error al actualizar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar'
+                });
             }
         }
 
         // Eliminar
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este testimonio?')) return;
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción marcará el testimonio como eliminado',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
 
             try {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.delete(`admin/testimonios/${id}`);
                 if (response.success) {
-                    alert('Testimonio eliminado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Eliminado!',
+                        text: 'Testimonio eliminado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadTestimonios(document.getElementById('filter-estado').value);
                 }
             } catch (error) {
-                alert('Error al eliminar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el testimonio'
+                });
             }
         }
 

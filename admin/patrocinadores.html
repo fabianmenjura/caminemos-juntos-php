@@ -11,60 +11,12 @@
     <title>Patrocinadores - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-heart fa-2x mb-2" style="color: #ff8c42;"></i>
-            <h3>Caminemos Juntos</h3>
-            <p>Panel de Administración</p>
-        </div>
-        
-        <div class="sidebar-menu">
-            <a href="dashboard.html" class="menu-item">
-                <i class="fas fa-chart-line"></i><span>Dashboard</span>
-            </a>
-            <a href="abuelos.html" class="menu-item">
-                <i class="fas fa-users"></i><span>Abuelos</span>
-            </a>
-            <a href="donaciones.html" class="menu-item">
-                <i class="fas fa-hand-holding-heart"></i><span>Donaciones</span>
-            </a>
-            <a href="mensajes.html" class="menu-item">
-                <i class="fas fa-envelope"></i><span>Mensajes</span>
-            </a>
-            <a href="hero-slider.html" class="menu-item">
-                <i class="fas fa-images"></i><span>Hero Slider</span>
-            </a>
-            <a href="acerca-de.html" class="menu-item">
-                <i class="fas fa-info-circle"></i><span>Acerca de</span>
-            </a>
-            <a href="voluntarios.html" class="menu-item">
-                <i class="fas fa-user-friends"></i><span>Voluntarios</span>
-            </a>
-            <a href="categorias-voluntariado.html" class="menu-item">
-                <i class="fas fa-list-alt"></i><span>Categorías Voluntariado</span>
-            </a>
-            <a href="testimonios.html" class="menu-item">
-                <i class="fas fa-comment-dots"></i><span>Testimonios</span>
-            </a>
-            <a href="patrocinadores.html" class="menu-item active">
-                <i class="fas fa-handshake"></i><span>Patrocinadores</span>
-            </a>
-            <a href="mensajes-cumpleanos.html" class="menu-item">
-                <i class="fas fa-birthday-cake"></i><span>Felicitaciones</span>
-            </a>
-        </div>
-        
-        <div class="sidebar-footer">
-            <p class="text-white mb-2"><i class="fas fa-user me-2"></i><span id="userName">Admin</span></p>
-            <button class="btn-logout" onclick="logout()">
-                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-            </button>
-        </div>
-    </div>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
     
     <!-- Main -->
     <div class="main-content">
@@ -180,21 +132,19 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-components.js"></script>
     <script src="assets/js/admin-auth.js"></script>
     <script src="assets/js/admin-api.js"></script>
     <script>
         let modal;
         let patrocinadores = [];
 
-        if (!verifySession()) {
-            window.location.href = 'login.html';
-        }
-
-        (async function() {
-            if (!await adminAuth.requireAuth()) return;
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAdminComponents('patrocinadores');
             modal = new bootstrap.Modal(document.getElementById('patrocinadorModal'));
             loadPatrocinadores();
-        })();
+        });
 
         // Cargar
         async function loadPatrocinadores() {
@@ -211,7 +161,11 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar patrocinadores');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los patrocinadores'
+                });
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
@@ -311,40 +265,93 @@
 
                 if (response.success) {
                     modal.hide();
-                    alert(response.message || 'Guardado exitosamente');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: response.message || 'Patrocinador guardado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadPatrocinadores();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo guardar el patrocinador'
+                });
             }
         }
 
         // Toggle activo
         async function toggleActivo(id, nuevoEstado) {
             try {
+                Swal.fire({
+                    title: 'Actualizando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.put(`admin/patrocinadores/${id}`, { activo: nuevoEstado ? 1 : 0 });
                 if (response.success) {
-                    alert(nuevoEstado ? 'Patrocinador activado' : 'Patrocinador desactivado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Listo!',
+                        text: nuevoEstado ? 'Patrocinador activado' : 'Patrocinador desactivado',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadPatrocinadores();
                 }
             } catch (error) {
-                alert('Error al actualizar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar'
+                });
             }
         }
 
         // Eliminar
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este patrocinador?')) return;
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción marcará el patrocinador como eliminado',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
 
             try {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.delete(`admin/patrocinadores/${id}`);
                 if (response.success) {
-                    alert('Patrocinador eliminado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Eliminado!',
+                        text: 'Patrocinador eliminado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadPatrocinadores();
                 }
             } catch (error) {
-                alert('Error al eliminar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el patrocinador'
+                });
             }
         }
 
@@ -364,14 +371,22 @@
             const fileInput = document.getElementById('imageFile');
             
             if (!fileInput.files || !fileInput.files[0]) {
-                alert('Selecciona una imagen primero');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Selecciona una imagen primero'
+                });
                 return;
             }
 
             const file = fileInput.files[0];
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('Máximo 5MB');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Archivo muy grande',
+                    text: 'El tamaño máximo es 5MB'
+                });
                 return;
             }
 
@@ -384,11 +399,20 @@
                     document.getElementById('logo_url').value = response.data.url;
                     document.getElementById('imagePreview').src = '../' + response.data.url;
                     
-                    alert(`✅ Logo subido!`);
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Logo subido!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     fileInput.value = '';
                 }
             } catch (error) {
-                alert('Error al subir logo');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo subir el logo'
+                });
             } finally {
                 document.getElementById('uploadProgress').style.display = 'none';
             }
@@ -397,4 +421,3 @@
     </script>
 </body>
 </html>
-

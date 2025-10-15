@@ -11,6 +11,7 @@
     <title>Hero Slider - Panel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -162,7 +163,11 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cargar slides');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los slides'
+                });
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
@@ -263,40 +268,93 @@
 
                 if (response.success) {
                     modal.hide();
-                    alert(response.message || 'Guardado exitosamente');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: response.message || 'Slide guardado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadSlides();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo guardar el slide'
+                });
             }
         }
 
         // Toggle activo/inactivo
         async function toggleActivo(id, nuevoEstado) {
             try {
+                Swal.fire({
+                    title: 'Actualizando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.put(`admin/hero-slider/${id}`, { activo: nuevoEstado ? 1 : 0 });
                 if (response.success) {
-                    alert(nuevoEstado ? 'Slide activado' : 'Slide desactivado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Listo!',
+                        text: nuevoEstado ? 'Slide activado' : 'Slide desactivado',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadSlides();
                 }
             } catch (error) {
-                alert('Error al actualizar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo actualizar'
+                });
             }
         }
 
         // Eliminar
         async function eliminar(id) {
-            if (!confirm('¿Eliminar este slide?')) return;
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción marcará el slide como eliminado',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
 
             try {
+                Swal.fire({
+                    title: 'Eliminando...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 const response = await adminAPI.delete(`admin/hero-slider/${id}`);
                 if (response.success) {
-                    alert('Slide eliminado');
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Eliminado!',
+                        text: 'Slide eliminado correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     loadSlides();
                 }
             } catch (error) {
-                alert('Error al eliminar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el slide'
+                });
             }
         }
 
@@ -316,14 +374,22 @@
             const fileInput = document.getElementById('imageFile');
             
             if (!fileInput.files || !fileInput.files[0]) {
-                alert('Selecciona una imagen primero');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Selecciona una imagen primero'
+                });
                 return;
             }
 
             const file = fileInput.files[0];
 
             if (file.size > 5 * 1024 * 1024) {
-                alert('Máximo 5MB');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Archivo muy grande',
+                    text: 'El tamaño máximo es 5MB'
+                });
                 return;
             }
 
@@ -337,12 +403,22 @@
                     document.getElementById('imagePreview').src = '../' + response.data.url;
                     
                     const sizeKB = Math.round(response.data.size / 1024);
-                    alert(`✅ Imagen subida!\n\nTamaño: ${sizeKB}KB`);
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Imagen subida!',
+                        text: `Tamaño: ${sizeKB}KB`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     
                     fileInput.value = '';
                 }
             } catch (error) {
-                alert('Error al subir imagen');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo subir la imagen'
+                });
             } finally {
                 document.getElementById('uploadProgress').style.display = 'none';
             }
