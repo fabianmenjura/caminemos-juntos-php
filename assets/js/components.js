@@ -84,7 +84,7 @@ function loadHeader(currentPage = '') {
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link" href="#acerca">Acerca de</a></li>
-                        <li class="nav-item"><a class="nav-link" href="abuelos.html">Adultos Mayores</a></li>
+                        <li class="nav-item"><a class="nav-link" href="abuelos.html">Abuelos</a></li>
                         <li class="nav-item"><a class="nav-link" href="#donar">Donar</a></li>
                         <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
                         <li class="nav-item">
@@ -120,7 +120,7 @@ function loadHeader(currentPage = '') {
                             <a class="nav-link ${currentPage === 'index' ? 'active' : ''}" href="index.html">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link ${currentPage === 'abuelos' ? 'active' : ''}" href="abuelos.html">Adultos Mayores</a>
+                            <a class="nav-link ${currentPage === 'abuelos' ? 'active' : ''}" href="abuelos.html">Abuelos</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link ${currentPage === 'donar' ? 'active' : ''}" href="donar.html">Donar</a>
@@ -166,7 +166,7 @@ function loadFooter() {
                     <ul class="footer-links">
                         <li><a href="index.html">Inicio</a></li>
                         <li><a href="index.html#acerca">Acerca de</a></li>
-                        <li><a href="abuelos.html">Ver Todos los Adultos Mayores</a></li>
+                        <li><a href="abuelos.html">Ver Todos los Abuelos</a></li>
                         <li><a href="donar.html">Donar</a></li>
                         <li><a href="index.html#voluntarios">Voluntariado</a></li>
                         <li><a href="admin/login.html" target="_blank" rel="noopener noreferrer"><i class="fas fa-lock me-1"></i>Panel Admin</a></li>
