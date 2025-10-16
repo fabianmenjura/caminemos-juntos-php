@@ -137,3 +137,5 @@ WHERE trigger_schema = 'caminemos_juntos';
 --        Contraseña: Admin123!
 -- =====================================================
 
+
+

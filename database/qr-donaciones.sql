@@ -60,3 +60,5 @@ USO:
 - Admin: CRUD completo para gestionar QR
 */
 
+
+

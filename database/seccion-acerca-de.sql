@@ -36,3 +36,5 @@ INSERT INTO caracteristicas_acerca_de (titulo, descripcion, icono, orden, activo
 -- Nota: La tabla seccion_acerca_de es simple (clave-valor) para título y descripción
 -- Las características son más flexibles con orden, activo/inactivo, soft delete
 
+
+

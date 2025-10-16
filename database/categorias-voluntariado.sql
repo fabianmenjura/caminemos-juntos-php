@@ -26,3 +26,4 @@ INSERT INTO categorias_voluntariado (titulo, slug, descripcion, icono, imagen_ur
 -- Nota: Las características se guardan como JSON array
 -- Ejemplo: ["Característica 1", "Característica 2", "Característica 3"]
 
+
