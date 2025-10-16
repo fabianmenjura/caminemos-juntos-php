@@ -180,5 +180,3 @@ Gracias a todos los que apoyan la labor del Hogar Santo Domingo en Chiquinquirá
 
 **Hecho con ❤️ para los abuelos de Chiquinquirá** 🇨🇴
 
-
-

@@ -297,5 +297,3 @@ Resultado: Seguridad EXCELENTE ⭐⭐⭐⭐⭐
 
 *Última actualización: Octubre 2025*
 
-
-

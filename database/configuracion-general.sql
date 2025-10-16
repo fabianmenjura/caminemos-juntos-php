@@ -48,5 +48,3 @@ INSERT INTO redes_sociales (nombre, icono, url, orden, activo) VALUES
 -- Nota: El mensaje de WhatsApp se codificará en URL cuando se use
 -- Ejemplo: https://wa.me/573219951293?text={mensaje_codificado}
 
-
-
