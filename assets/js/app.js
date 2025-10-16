@@ -582,6 +582,7 @@ async function loadAcercaDe() {
             // Actualizar título y descripción
             const tituloEl = document.getElementById('acerca-titulo');
             const descripcionEl = document.getElementById('acerca-descripcion');
+            const imagenEl = document.getElementById('acerca-imagen');
             
             if (tituloEl && response.data.titulo) {
                 tituloEl.textContent = response.data.titulo;
@@ -589,6 +590,12 @@ async function loadAcercaDe() {
             
             if (descripcionEl && response.data.descripcion) {
                 descripcionEl.textContent = response.data.descripcion;
+            }
+            
+            // Actualizar imagen si existe
+            if (imagenEl && response.data.imagen) {
+                imagenEl.src = response.data.imagen;
+                imagenEl.alt = response.data.titulo || 'Caminemos Juntos';
             }
             
             // Renderizar características

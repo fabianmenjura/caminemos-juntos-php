@@ -34,6 +34,7 @@ class AcercaDeController {
             return Response::success([
                 'titulo' => $contenido['titulo'] ?? '¿Qué es Caminemos Juntos?',
                 'descripcion' => $contenido['descripcion'] ?? '',
+                'imagen' => $contenido['imagen_principal'] ?? 'assets/images/about-section.jpg',
                 'caracteristicas' => $caracteristicas,
                 'total_caracteristicas' => count($caracteristicas)
             ]);

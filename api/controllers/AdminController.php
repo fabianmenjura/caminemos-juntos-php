@@ -960,6 +960,7 @@ class AdminController {
             return Response::success([
                 'titulo' => $contenido['titulo'] ?? '',
                 'descripcion' => $contenido['descripcion'] ?? '',
+                'imagen' => $contenido['imagen_principal'] ?? 'assets/images/about-section.jpg',
                 'caracteristicas' => $caracteristicas,
                 'total' => count($caracteristicas)
             ]);
@@ -986,6 +987,14 @@ class AdminController {
                     "INSERT INTO seccion_acerca_de (clave, contenido) VALUES ('descripcion', ?) 
                      ON DUPLICATE KEY UPDATE contenido = ?",
                     [$data['descripcion'], $data['descripcion']]
+                );
+            }
+            
+            if (isset($data['imagen'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_acerca_de (clave, contenido) VALUES ('imagen_principal', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['imagen'], $data['imagen']]
                 );
             }
             

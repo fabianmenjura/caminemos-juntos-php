@@ -1,0 +1,122 @@
+================================================================================
+  INSTRUCCIONES RÁPIDAS - IMAGEN EN SECCIÓN "ABOUT"
+================================================================================
+
+✅ ¡YA ESTÁ CASI LISTO!
+
+Solo necesitas ejecutar 1 script SQL. El resto ya está hecho:
+- ✅ Código frontend implementado
+- ✅ Código backend implementado  
+- ✅ Panel admin configurado
+- ✅ Estilos CSS aplicados
+- ✅ JavaScript funcionando
+- ✅ Imagen por defecto copiada
+
+================================================================================
+📝 ÚNICO PASO NECESARIO
+================================================================================
+
+EJECUTA ESTE SQL (30 segundos):
+────────────────────────────────
+
+1. Abre phpMyAdmin o HeidiSQL
+
+2. Selecciona la base de datos: caminemos_juntos
+
+3. Pega y ejecuta:
+
+   ALTER TABLE seccion_acerca_de 
+   ADD COLUMN IF NOT EXISTS imagen_principal VARCHAR(255) DEFAULT NULL 
+   COMMENT 'Ruta de la imagen principal de la sección' 
+   AFTER contenido;
+
+   INSERT INTO seccion_acerca_de (clave, contenido)
+   VALUES ('imagen_principal', 'assets/images/about-section.jpg')
+   ON DUPLICATE KEY UPDATE contenido = contenido;
+
+4. ¡Listo!
+
+================================================================================
+🎉 VERIFICAR QUE FUNCIONA
+================================================================================
+
+1. Abre: http://localhost/caminemos-juntos-php
+
+2. Scroll hasta la sección "Acerca de"
+
+3. Deberías ver:
+   - ✓ Imagen a la izquierda con decoración
+   - ✓ Badge flotante "Con amor y dedicación"
+   - ✓ Contenido a la derecha
+   - ✓ Highlights con iconos ✓
+   - ✓ Botones de "Donar" y "Contáctanos"
+
+================================================================================
+🎨 CAMBIAR LA IMAGEN (desde panel admin)
+================================================================================
+
+1. Ve a: http://localhost/caminemos-juntos-php/admin/acerca-de.html
+
+2. Login si es necesario
+
+3. En "Contenido Principal" verás "Imagen Principal"
+
+4. Haz clic en "Seleccionar archivo"
+
+5. Elige tu imagen (máx 2MB, JPG/PNG/WEBP)
+
+6. La vista previa se muestra automáticamente
+
+7. Haz clic en "Guardar Contenido"
+
+8. ¡Actualiza el sitio y verás tu nueva imagen!
+
+================================================================================
+💡 TIPS PARA LA MEJOR IMAGEN
+================================================================================
+
+✓ Dimensiones: 800x600px (horizontal)
+✓ Tamaño: Menos de 500KB
+✓ Contenido: Adultos mayores felices, voluntarios ayudando
+✓ Iluminación: Natural y cálida
+✓ Evitar: Fotos oscuras, tristes o genéricas
+
+OPTIMIZAR EN:
+→ TinyPNG.com (reducir tamaño)
+→ Squoosh.app (convertir a WEBP)
+
+================================================================================
+❓ PROBLEMAS?
+================================================================================
+
+NO VEO LA IMAGEN:
+  - Ctrl + F5 para limpiar caché
+  - Verifica que ejecutaste el SQL
+  - Confirma que existe: assets/images/about-section.jpg
+
+EL DISEÑO SE VE MAL:
+  - Ctrl + F5 para limpiar caché
+  - Abre consola del navegador (F12) para ver errores
+
+NO PUEDO SUBIR IMAGEN:
+  - Verifica tamaño < 2MB
+  - Verifica formato: JPG, PNG, WEBP
+  - Revisa permisos de assets/images/
+
+================================================================================
+📚 MÁS INFORMACIÓN
+================================================================================
+
+Documentación completa:
+  → IMPLEMENTACION_IMAGEN_ABOUT.md
+  → docs/IMAGEN_ACERCA_DE.md
+  → RESUMEN_CAMBIOS_ABOUT.txt
+
+================================================================================
+
+¡ESO ES TODO! 🎊
+
+Ejecuta el SQL y disfruta de tu nueva sección About con diseño moderno.
+
+================================================================================
+

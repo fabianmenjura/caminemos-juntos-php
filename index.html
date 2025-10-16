@@ -286,16 +286,67 @@
      <!-- About Section  -->
     <section id="acerca" class="section-about">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
+            <!-- Header de la sección -->
+            <div class="row mb-5">
+                <div class="col-lg-10 mx-auto text-center" data-aos="fade-up">
                     <span class="section-label">Nuestra Misión</span>
                     <h2 class="section-title" id="acerca-titulo">¿Qué es Caminemos Juntos?</h2>
-                    <p class="section-description" id="acerca-descripcion">
-                        Somos una iniciativa que conecta a personas generosas con adultos mayores 
-                        que necesitan compañía, apoyo económico y sobre todo, cariño.
-                    </p>
                 </div>
             </div>
+
+            <!-- Contenido principal con imagen -->
+            <div class="row align-items-center mb-5 g-4">
+                <!-- Imagen -->
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="about-image-wrapper">
+                        <div class="about-image-decoration"></div>
+                        <img id="acerca-imagen" 
+                             src="assets/images/about-section.jpg" 
+                             alt="Caminemos Juntos" 
+                             class="about-image img-fluid rounded-4 shadow-lg">
+                        <div class="about-image-badge">
+                            <i class="fas fa-heart text-danger"></i>
+                            <span>Con amor y dedicación</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="about-content">
+                        <p class="about-description" id="acerca-descripcion">
+                            Somos una iniciativa que conecta a personas generosas con adultos mayores 
+                            que necesitan compañía, apoyo económico y sobre todo, cariño.
+                        </p>
+                        
+                        <!-- <div class="about-highlights mt-4">
+                            <div class="highlight-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span>Transparencia total en donaciones</span>
+                            </div>
+                            <div class="highlight-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span>Impacto directo en la comunidad</span>
+                            </div>
+                            <div class="highlight-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span>Acompañamiento personalizado</span>
+                            </div>
+                        </div> -->
+
+                        <div class="about-cta mt-4">
+                            <a href="#donar" class="btn btn-primary btn-lg me-2">
+                                <i class="fas fa-donate me-2"></i>Donar Ahora
+                            </a>
+                            <a href="#contacto" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-envelope me-2"></i>Contáctanos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Características en cards -->
             <div id="acerca-caracteristicas-container" class="row g-4">
                 <!-- Loading -->
                 <div class="col-12 text-center py-3">

@@ -90,6 +90,33 @@
                             <label class="form-label">Descripción</label>
                             <textarea class="form-control" id="descripcion" rows="3" placeholder="Somos una iniciativa que..."></textarea>
                         </div>
+                        
+                        <!-- Imagen Principal -->
+                        <div class="mb-3">
+                            <label class="form-label">Imagen Principal</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="imagen-file" accept="image/*">
+                                        <button class="btn btn-outline-primary" type="button" onclick="uploadImagenAbout()">
+                                            <i class="fas fa-upload me-1"></i>Subir
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        La imagen se optimizará automáticamente (máx. 2MB). Recomendado: 800x600px
+                                    </small>
+                                    <input type="hidden" id="imagen-path">
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="imagen-preview" class="border rounded p-2" style="min-height: 100px;">
+                                        <img id="imagen-preview-img" src="" alt="Preview" class="img-fluid rounded" style="max-height: 150px; display: none;">
+                                        <p id="imagen-preview-text" class="text-muted text-center mb-0 py-3">No hay imagen</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save me-2"></i>Guardar Contenido
                         </button>
@@ -204,9 +231,108 @@
                 if (response.success) {
                     document.getElementById('titulo').value = response.data.titulo || '';
                     document.getElementById('descripcion').value = response.data.descripcion || '';
+                    
+                    // Cargar imagen
+                    const imagenPath = response.data.imagen || '';
+                    console.log('Imagen cargada desde API:', imagenPath);
+                    document.getElementById('imagen-path').value = imagenPath;
+                    
+                    if (imagenPath && imagenPath !== '') {
+                        const imgElement = document.getElementById('imagen-preview-img');
+                        const textElement = document.getElementById('imagen-preview-text');
+                        
+                        // Si la ruta no empieza con http o /, añadir ../
+                        const imgSrc = imagenPath.startsWith('http') || imagenPath.startsWith('/') 
+                            ? imagenPath 
+                            : '../' + imagenPath;
+                        
+                        imgElement.src = imgSrc;
+                        imgElement.style.display = 'block';
+                        textElement.style.display = 'none';
+                        
+                        console.log('Preview cargado:', imgSrc);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar contenido:', error);
+            }
+        }
+
+        // Preview de imagen al seleccionar archivo
+        document.getElementById('imagen-file').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Preview local
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imgElement = document.getElementById('imagen-preview-img');
+                const textElement = document.getElementById('imagen-preview-text');
+                imgElement.src = e.target.result;
+                imgElement.style.display = 'block';
+                textElement.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Subir imagen
+        async function uploadImagenAbout() {
+            const fileInput = document.getElementById('imagen-file');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                Swal.fire('Selecciona una Imagen', 'Por favor selecciona una imagen primero', 'warning');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Validar tamaño (máx 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Archivo Muy Grande', 'La imagen no puede superar 5MB', 'warning');
+                return;
+            }
+            
+            // Mostrar progreso
+            Swal.fire({
+                title: 'Subiendo imagen...',
+                html: 'Por favor espera mientras se procesa la imagen',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                const response = await adminAPI.uploadImage(file);
+                
+                Swal.close();
+                
+                if (response.success) {
+                    // Actualizar el campo imagen-path
+                    document.getElementById('imagen-path').value = response.data.url;
+                    
+                    // Actualizar preview con la imagen subida
+                    document.getElementById('imagen-preview-img').src = '../' + response.data.url;
+                    
+                    // Mostrar éxito
+                    const sizeKB = Math.round(response.data.size / 1024);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Imagen Subida!',
+                        html: `
+                            <p>Imagen optimizada correctamente</p>
+                            <small class="text-muted">Tamaño: ${sizeKB}KB</small>
+                        `,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Error', response.message || 'Error al subir imagen', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
+                Swal.close();
+                Swal.fire('Error', error.message || 'No se pudo subir la imagen', 'error');
             }
         }
 
@@ -214,10 +340,15 @@
         document.getElementById('contenido-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const imagenPath = document.getElementById('imagen-path').value.trim();
+            
             const data = {
                 titulo: document.getElementById('titulo').value.trim(),
-                descripcion: document.getElementById('descripcion').value.trim()
+                descripcion: document.getElementById('descripcion').value.trim(),
+                imagen: imagenPath
             };
+
+            console.log('Guardando contenido:', data);
 
             try {
                 const response = await adminAPI.post('admin/acerca-de/contenido', data);
@@ -226,6 +357,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Contenido actualizado',
+                        html: imagenPath ? '<small>Imagen guardada correctamente</small>' : '',
                         timer: 2000,
                         showConfirmButton: false
                     });
@@ -233,7 +365,7 @@
                     Swal.fire('Error', response.message || 'Error al guardar', 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error al guardar:', error);
                 Swal.fire('Error', 'No se pudo guardar el contenido', 'error');
             }
         });
