@@ -133,14 +133,14 @@ class QRDonacionesController {
             
             Logger::debug("QR create: Data recibida", ['data' => $data]);
 
-            if (empty($data['titulo']) || empty($data['qr_image_url'])) {
+            // Solo el título es requerido, el QR es opcional
+            if (empty($data['titulo'])) {
                 Logger::error("QR create: Validación fallida", [
-                    'titulo' => $data['titulo'] ?? 'VACIO',
-                    'qr_image_url' => $data['qr_image_url'] ?? 'VACIO'
+                    'titulo' => $data['titulo'] ?? 'VACIO'
                 ]);
                 http_response_code(400);
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'error' => 'Campos requeridos: titulo, qr_image_url']);
+                echo json_encode(['success' => false, 'error' => 'El campo título es requerido']);
                 exit;
             }
 
@@ -151,7 +151,7 @@ class QRDonacionesController {
             $params = [
                 $data['titulo'],
                 $data['descripcion'] ?? '',
-                $data['qr_image_url'],
+                $data['qr_image_url'] ?? '', // QR es opcional
                 $data['texto_cuenta'] ?? '',
                 $data['numero_cuenta'] ?? '',
                 $data['titular'] ?? '',
@@ -184,10 +184,11 @@ class QRDonacionesController {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
 
-            if (empty($data['titulo']) || empty($data['qr_image_url'])) {
+            // Solo el título es requerido, el QR es opcional
+            if (empty($data['titulo'])) {
                 http_response_code(400);
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'error' => 'Campos requeridos: titulo, qr_image_url']);
+                echo json_encode(['success' => false, 'error' => 'El campo título es requerido']);
                 exit;
             }
 
@@ -199,7 +200,7 @@ class QRDonacionesController {
             $this->db->execute($sql, [
                 $data['titulo'],
                 $data['descripcion'] ?? '',
-                $data['qr_image_url'],
+                $data['qr_image_url'] ?? '', // QR es opcional
                 $data['texto_cuenta'] ?? '',
                 $data['numero_cuenta'] ?? '',
                 $data['titular'] ?? '',

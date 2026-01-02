@@ -797,12 +797,8 @@
             // Limpiar espacios del número de cuenta
             const numeroCuenta = document.getElementById('numero_cuenta').value.replace(/\s/g, '');
             
-            // Validar que se haya subido una imagen
-            const qrImageUrl = document.getElementById('qr_image_url').value;
-            if (!qrImageUrl && !document.getElementById('qr-id').value) {
-                Swal.fire('Error', 'Debes subir una imagen del código QR', 'error');
-                return;
-            }
+            // El QR es opcional, no validamos que esté presente
+            const qrImageUrl = document.getElementById('qr_image_url').value || '';
             
             const data = {
                 titulo: document.getElementById('titulo').value,
