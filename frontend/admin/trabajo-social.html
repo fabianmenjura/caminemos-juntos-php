@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    <link rel="shortcut icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    
+    <title>Trabajo Social - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1><i class="fas fa-hands-helping me-2"></i>Sección "Trabajo Social"</h1>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Contenido Principal -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Contenido Principal</h5>
+                </div>
+                <div class="card-body">
+                    <form id="contenido-form">
+                        <div class="mb-3">
+                            <label class="form-label">Título de la Sección *</label>
+                            <input type="text" class="form-control" id="titulo" placeholder="Nuestro Trabajo Social" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción *</label>
+                            <textarea class="form-control" id="descripcion" rows="5" placeholder="En Caminemos Juntos, el trabajo social es el corazón de nuestra misión..." required></textarea>
+                            <small class="text-muted">Describe el trabajo social que realizan en la fundación</small>
+                        </div>
+                        
+                        <!-- Imagen Principal -->
+                        <div class="mb-3">
+                            <label class="form-label">Imagen Principal</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="file" class="form-control" id="imagen-file" accept="image/*">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        La imagen se optimizará automáticamente al guardar (máx. 5MB). Recomendado: 800x600px
+                                    </small>
+                                    <input type="hidden" id="imagen-path">
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="imagen-preview" class="border rounded p-2" style="min-height: 100px;">
+                                        <img id="imagen-preview-img" src="" alt="Preview" class="img-fluid rounded" style="max-height: 150px; display: none;">
+                                        <p id="imagen-preview-text" class="text-muted text-center mb-0 py-3">No hay imagen</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Contenido
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-components.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await requireAuth();
+            await initAdminComponents('trabajo-social');
+            loadContenido();
+        });
+
+        async function loadContenido() {
+            try {
+                const response = await adminAPI.get('admin/trabajo-social');
+                if (response.success) {
+                    document.getElementById('titulo').value = response.data.titulo || '';
+                    document.getElementById('descripcion').value = response.data.descripcion || '';
+                    
+                    if (response.data.imagen) {
+                        document.getElementById('imagen-path').value = response.data.imagen;
+                        const previewImg = document.getElementById('imagen-preview-img');
+                        const previewText = document.getElementById('imagen-preview-text');
+                        previewImg.src = '../' + response.data.imagen;
+                        previewImg.style.display = 'block';
+                        previewText.style.display = 'none';
+                    }
+                } else {
+                    // Si la respuesta no es exitosa pero tiene datos, mostrarlos igual
+                    if (response.data) {
+                        document.getElementById('titulo').value = response.data.titulo || '';
+                        document.getElementById('descripcion').value = response.data.descripcion || '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar contenido:', error);
+                const errorMessage = error.message || 'No se pudo cargar el contenido';
+                
+                // Si el error menciona la tabla, mostrar mensaje más específico
+                if (errorMessage.includes('tabla') || errorMessage.includes('table')) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tabla no encontrada',
+                        html: `
+                            <p>La tabla <code>seccion_trabajo_social</code> no existe en la base de datos.</p>
+                            <p class="mt-3"><strong>Por favor ejecuta el script SQL:</strong></p>
+                            <p><code>database/seccion-trabajo-social.sql</code></p>
+                        `,
+                        confirmButtonText: 'Entendido'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage
+                    });
+                }
+            }
+        }
+
+        // Preview de imagen al seleccionar archivo
+        document.getElementById('imagen-file').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Validar tamaño (máx 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Archivo Muy Grande', 'La imagen no puede superar 5MB', 'warning');
+                e.target.value = '';
+                return;
+            }
+            
+            // Preview local
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imgElement = document.getElementById('imagen-preview-img');
+                const textElement = document.getElementById('imagen-preview-text');
+                imgElement.src = e.target.result;
+                imgElement.style.display = 'block';
+                textElement.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('contenido-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('imagen-file');
+            const file = fileInput.files[0];
+            let imagenUrl = document.getElementById('imagen-path').value.trim();
+            
+            // Si hay un archivo nuevo, subirlo primero
+            if (file) {
+                try {
+                    // Mostrar progreso de subida
+                    Swal.fire({
+                        title: 'Subiendo imagen...',
+                        html: 'Por favor espera mientras se procesa la imagen',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    const uploadResult = await adminAPI.uploadImage(file);
+                    
+                    if (uploadResult.success) {
+                        imagenUrl = uploadResult.data.url;
+                        document.getElementById('imagen-path').value = imagenUrl;
+                        
+                        // Actualizar preview con la imagen subida
+                        const previewImg = document.getElementById('imagen-preview-img');
+                        previewImg.src = '../' + imagenUrl;
+                        
+                        Swal.close();
+                    } else {
+                        Swal.fire('Error', uploadResult.message || 'Error al subir imagen', 'error');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error al subir imagen:', error);
+                    Swal.close();
+                    Swal.fire('Error', error.message || 'No se pudo subir la imagen', 'error');
+                    return;
+                }
+            }
+            
+            // Preparar datos para guardar
+            const data = {
+                titulo: document.getElementById('titulo').value.trim(),
+                descripcion: document.getElementById('descripcion').value.trim(),
+                imagen: imagenUrl
+            };
+            
+            // Mostrar progreso de guardado
+            Swal.fire({
+                title: 'Guardando...',
+                html: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            try {
+                const response = await adminAPI.post('admin/trabajo-social/contenido', data);
+                
+                Swal.close();
+                
+                if (response.success) {
+                    // Limpiar el input de archivo si se subió correctamente
+                    if (file) {
+                        fileInput.value = '';
+                    }
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Contenido actualizado',
+                        html: imagenUrl ? '<small>Imagen y contenido guardados correctamente</small>' : '<small>Contenido guardado correctamente</small>',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Error', response.message || 'Error al guardar', 'error');
+                }
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                Swal.close();
+                Swal.fire('Error', 'No se pudo guardar el contenido', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
+

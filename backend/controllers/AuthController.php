@@ -128,6 +128,12 @@ class AuthController {
     
     public static function requireAuth() {
         try {
+            // Limpiar cualquier output previo
+            if (ob_get_level()) {
+                ob_clean();
+            }
+            header('Content-Type: application/json; charset=utf-8');
+            
             $authService = new AuthService();
             $controller = new AuthController();
             $token = $controller->getAuthToken();
@@ -145,6 +151,11 @@ class AuthController {
             
             return $user;
         } catch (Exception $e) {
+            // Limpiar cualquier output previo
+            if (ob_get_level()) {
+                ob_clean();
+            }
+            header('Content-Type: application/json; charset=utf-8');
             error_log("requireAuth exception: " . $e->getMessage());
             Response::error('Error de autenticación: ' . $e->getMessage(), 500);
             exit;

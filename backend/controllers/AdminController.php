@@ -937,6 +937,81 @@ class AdminController {
         }
     }
     
+    // ===== SECCIÓN TRABAJO SOCIAL =====
+    
+    public function getTrabajoSocial() {
+        try {
+            // Obtener título, descripción e imagen
+            $contenido = [];
+            
+            // Intentar obtener datos, si la tabla no existe, usar valores por defecto
+            try {
+                $rows = $this->db->fetchAll("SELECT clave, contenido FROM seccion_trabajo_social");
+                
+                foreach ($rows as $row) {
+                    $contenido[$row['clave']] = $row['contenido'];
+                }
+            } catch (Exception $dbError) {
+                // Si la tabla no existe, usar valores por defecto
+                Logger::warning("Tabla seccion_trabajo_social no existe o error de BD", ['error' => $dbError->getMessage()]);
+                $contenido = [];
+            }
+            
+            Logger::debug("getTrabajoSocial: Contenido obtenido");
+            return Response::success([
+                'titulo' => $contenido['titulo'] ?? 'Nuestro Trabajo Social',
+                'descripcion' => $contenido['descripcion'] ?? 'En Caminemos Juntos, el trabajo social es el corazón de nuestra misión.',
+                'imagen' => $contenido['imagen'] ?? 'assets/images/trabajo-social-placeholder.jpg'
+            ]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener trabajo social", ['error' => $e->getMessage()]);
+            // Devolver valores por defecto en caso de error
+            return Response::success([
+                'titulo' => 'Nuestro Trabajo Social',
+                'descripcion' => 'En Caminemos Juntos, el trabajo social es el corazón de nuestra misión.',
+                'imagen' => 'assets/images/trabajo-social-placeholder.jpg'
+            ]);
+        }
+    }
+    
+    public function updateTrabajoSocialContenido() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (isset($data['titulo'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_trabajo_social (clave, contenido) VALUES ('titulo', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['titulo'], $data['titulo']]
+                );
+            }
+            
+            if (isset($data['descripcion'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_trabajo_social (clave, contenido) VALUES ('descripcion', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['descripcion'], $data['descripcion']]
+                );
+            }
+            
+            if (isset($data['imagen'])) {
+                $this->db->execute(
+                    "INSERT INTO seccion_trabajo_social (clave, contenido) VALUES ('imagen', ?) 
+                     ON DUPLICATE KEY UPDATE contenido = ?",
+                    [$data['imagen'], $data['imagen']]
+                );
+            }
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_TRABAJO_SOCIAL', 'seccion_trabajo_social', 0);
+            
+            Logger::debug("updateTrabajoSocialContenido: Contenido actualizado");
+            return Response::success(null, 'Contenido actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar trabajo social", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
     // ===== SECCIÓN ACERCA DE =====
     
     public function getAcercaDe() {

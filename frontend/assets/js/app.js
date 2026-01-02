@@ -573,6 +573,51 @@ async function loadCategoriasVoluntariado() {
     }
 }
 
+// Cargar sección "Trabajo Social"
+async function loadTrabajoSocial() {
+    try {
+        const response = await api.get('trabajo-social');
+        
+        if (response.success) {
+            const loadingEl = document.getElementById('trabajo-social-loading');
+            const contentEl = document.getElementById('trabajo-social-content');
+            const imageContainerEl = document.getElementById('trabajo-social-image-container');
+            const tituloEl = document.getElementById('trabajo-social-titulo');
+            const descripcionEl = document.getElementById('trabajo-social-descripcion');
+            const imagenEl = document.getElementById('trabajo-social-imagen');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            if (tituloEl && response.data.titulo) {
+                tituloEl.textContent = response.data.titulo;
+            }
+            
+            if (descripcionEl && response.data.descripcion) {
+                descripcionEl.textContent = response.data.descripcion;
+            }
+            
+            if (imagenEl && response.data.imagen) {
+                const imageUrl = fixImagePath(response.data.imagen);
+                imagenEl.src = imageUrl;
+                imagenEl.alt = response.data.titulo || 'Trabajo Social';
+                imagenEl.onerror = function() {
+                    this.src = 'assets/images/placeholder.jpg';
+                };
+                if (imageContainerEl) imageContainerEl.style.display = 'block';
+            }
+            
+            if (contentEl) contentEl.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error al cargar trabajo social:', error);
+        // Mantener contenido por defecto si falla
+        const loadingEl = document.getElementById('trabajo-social-loading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const contentEl = document.getElementById('trabajo-social-content');
+        if (contentEl) contentEl.style.display = 'block';
+    }
+}
+
 // Cargar sección "Acerca de"
 async function loadAcercaDe() {
     try {
@@ -638,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHeroSlider();
     loadAcercaDe();
     loadAbuelos();
+    loadTrabajoSocial();
     loadTestimonios();
     loadPatrocinadores();
     loadCategoriasVoluntariado();

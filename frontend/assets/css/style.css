@@ -642,6 +642,47 @@ section {
   padding: 6rem 0;
 }
 
+.section-trabajo-social {
+  background: var(--bg-cream);
+  padding: 6rem 0;
+}
+
+.section-trabajo-social .section-label {
+  color: var(--primary-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.section-trabajo-social .section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.section-trabajo-social .section-description {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-gray);
+  margin-bottom: 0;
+}
+
+.section-trabajo-social img {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: var(--transition-base);
+}
+
+.section-trabajo-social img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
 .custom-spinner {
   color: var(--primary-color);
 }

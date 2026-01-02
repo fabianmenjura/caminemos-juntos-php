@@ -9,12 +9,20 @@ require_once __DIR__ . '/../helpers/Response.php';
 require_once __DIR__ . '/../helpers/Logger.php';
 require_once __DIR__ . '/AuthController.php';
 
+// Asegurar que Logger esté disponible para ImageUploader
+if (!class_exists('Logger')) {
+    require_once __DIR__ . '/../helpers/Logger.php';
+}
+
 class UploadController {
     private $uploader;
     private $user;
     
     public function __construct() {
-        // Asegurar headers JSON desde el inicio
+        // Asegurar headers JSON desde el inicio y limpiar cualquier output previo
+        if (ob_get_level()) {
+            ob_clean();
+        }
         header('Content-Type: application/json; charset=utf-8');
         
         try {
@@ -22,6 +30,12 @@ class UploadController {
             $this->user = AuthController::requireAuth();
             $this->uploader = new ImageUploader();
         } catch (Exception $e) {
+            // Limpiar cualquier output previo
+            if (ob_get_level()) {
+                ob_clean();
+            }
+            header('Content-Type: application/json; charset=utf-8');
+            
             Logger::error("UploadController construct error", [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -30,6 +44,10 @@ class UploadController {
             ]);
             Response::error('Error de autenticación: ' . $e->getMessage(), 401);
         } catch (Error $e) {
+            // Limpiar cualquier output previo
+            if (ob_get_level()) {
+                ob_clean();
+            }
             header('Content-Type: application/json; charset=utf-8');
             error_log("UploadController fatal error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
             Response::error('Error fatal de autenticación', 500);
@@ -41,8 +59,11 @@ class UploadController {
      */
     public function uploadImage() {
         try {
-            // Asegurar que siempre se devuelva JSON
-            header('Content-Type: application/json');
+            // Limpiar cualquier output previo y asegurar JSON
+            if (ob_get_level()) {
+                ob_clean();
+            }
+            header('Content-Type: application/json; charset=utf-8');
             
             Logger::debug("uploadImage: Iniciando upload");
             

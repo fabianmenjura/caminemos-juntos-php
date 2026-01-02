@@ -47,13 +47,27 @@ class AdminAPI {
         try {
             const response = await fetch(url, config);
             console.log('AdminAPI.request - Response status:', response.status);
+            console.log('AdminAPI.request - URL:', url);
             
-            if (!response.ok && response.status !== 401) {
-                const errorText = await response.text();
-                console.error('AdminAPI.request - Error response:', errorText);
+            // Verificar content-type antes de parsear JSON
+            const contentType = response.headers.get('content-type');
+            let data;
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                // Si no es JSON, leer como texto primero
+                const text = await response.text();
+                console.error('AdminAPI.request - Respuesta no JSON:', text.substring(0, 500));
+                
+                // Intentar parsear como JSON si parece ser JSON
+                try {
+                    data = JSON.parse(text);
+                } catch (parseError) {
+                    // Si no es JSON válido, es un error del servidor (probablemente HTML/error de PHP)
+                    throw new Error('El servidor devolvió una respuesta no válida. Verifica que la tabla exista en la base de datos.');
+                }
             }
-            
-            const data = await response.json();
             
             if (response.status === 401) {
                 adminAuth.clearSession();
@@ -181,21 +195,45 @@ class AdminAPI {
             const contentType = response.headers.get('content-type');
             console.log('Upload: Content-Type:', contentType);
             console.log('Upload: Status:', response.status);
+            console.log('Upload: Response OK:', response.ok);
+            
+            // Leer la respuesta como texto primero para poder inspeccionarla
+            const responseText = await response.text();
+            console.log('Upload: Response text (first 1000 chars):', responseText.substring(0, 1000));
             
             let data;
             if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Upload: Error parsing JSON:', parseError);
+                    console.error('Upload: Full response text:', responseText);
+                    throw new Error('El servidor devolvió una respuesta JSON inválida. Ver la consola para más detalles.');
+                }
             } else {
                 // Si no es JSON, probablemente es un error HTML de PHP
-                const text = await response.text();
-                console.error('Upload: Respuesta no JSON:', text.substring(0, 500));
+                console.error('Upload: Respuesta no es JSON, es:', contentType);
+                console.error('Upload: Respuesta completa (primeros 2000 chars):', responseText.substring(0, 2000));
                 
                 // Intentar extraer información del error HTML si es posible
-                let errorMessage = 'Error al subir imagen';
-                if (text.includes('Fatal error') || text.includes('Parse error') || text.includes('Warning')) {
-                    errorMessage = 'Error del servidor al procesar la imagen. Verifica los logs del servidor.';
-                } else if (text.includes('No se envió ningún archivo')) {
+                let errorMessage = 'Error al subir imagen. El servidor devolvió HTML en lugar de JSON.';
+                
+                // Intentar extraer mensajes de error comunes de PHP
+                const errorMatch = responseText.match(/<b>(Warning|Fatal error|Parse error|Notice):<\/b>\s*(.+?)<br/i);
+                if (errorMatch) {
+                    errorMessage = `Error del servidor: ${errorMatch[2]}`;
+                } else if (responseText.includes('Fatal error')) {
+                    errorMessage = 'Error fatal del servidor. Verifica los logs del servidor.';
+                } else if (responseText.includes('Parse error')) {
+                    errorMessage = 'Error de sintaxis en el servidor. Verifica los logs del servidor.';
+                } else if (responseText.includes('Warning')) {
+                    errorMessage = 'Advertencia del servidor. Verifica los logs del servidor.';
+                } else if (responseText.includes('No se envió ningún archivo') || responseText.includes('No file')) {
                     errorMessage = 'No se recibió el archivo en el servidor';
+                } else if (responseText.includes('401') || responseText.includes('Unauthorized')) {
+                    errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
+                } else if (responseText.includes('403') || responseText.includes('Forbidden')) {
+                    errorMessage = 'Acceso prohibido. No tienes permisos para esta acción.';
                 }
                 
                 throw new Error(errorMessage);

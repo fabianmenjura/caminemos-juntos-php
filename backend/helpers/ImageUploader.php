@@ -4,6 +4,14 @@
  * Convierte y comprime imágenes automáticamente
  */
 
+// Incluir Logger si está disponible
+if (!class_exists('Logger')) {
+    $loggerPath = __DIR__ . '/Logger.php';
+    if (file_exists($loggerPath)) {
+        require_once $loggerPath;
+    }
+}
+
 class ImageUploader {
     private $uploadDir;
     private $maxWidth = 800;  // Ancho máximo
@@ -89,9 +97,12 @@ class ImageUploader {
             ];
             
         } catch (Exception $e) {
-            Logger::error("Error al subir imagen", [
-                'error' => $e->getMessage()
-            ]);
+            // Log si Logger está disponible
+            if (class_exists('Logger')) {
+                Logger::error("Error al subir imagen", [
+                    'error' => $e->getMessage()
+                ]);
+            }
             
             return [
                 'success' => false,
@@ -146,6 +157,10 @@ class ImageUploader {
             }
         }
         
+        // Convertir a enteros para evitar warnings de deprecación en PHP 8.1+
+        $newWidth = (int) round($newWidth);
+        $newHeight = (int) round($newHeight);
+        
         // Crear imagen redimensionada
         $optimized = imagecreatetruecolor($newWidth, $newHeight);
         
@@ -173,13 +188,19 @@ class ImageUploader {
             
             if (file_exists($filepath)) {
                 unlink($filepath);
-                Logger::log("Imagen eliminada", ['filename' => $filename]);
+                // Log si Logger está disponible
+                if (class_exists('Logger')) {
+                    Logger::log("Imagen eliminada", ['filename' => $filename]);
+                }
                 return ['success' => true];
             }
             
             return ['success' => false, 'error' => 'Archivo no encontrado'];
         } catch (Exception $e) {
-            Logger::error("Error al eliminar imagen", ['error' => $e->getMessage()]);
+            // Log si Logger está disponible
+            if (class_exists('Logger')) {
+                Logger::error("Error al eliminar imagen", ['error' => $e->getMessage()]);
+            }
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

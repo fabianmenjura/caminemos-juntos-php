@@ -263,6 +263,18 @@ try {
         exit;
     }
 
+    // Rutas de "Trabajo Social" (público)
+    if ($segments[0] === 'trabajo-social') {
+        require_once __DIR__ . '/controllers/TrabajoSocialController.php';
+        $controller = new TrabajoSocialController();
+
+        if ($method === 'GET') {
+            // GET /api/trabajo-social
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de configuración general (público)
     if ($segments[0] === 'configuracion') {
         require_once __DIR__ . '/controllers/ConfiguracionController.php';
@@ -436,6 +448,8 @@ try {
                 $controller->getCategoriasVoluntariado();
             } elseif ($segments[1] === 'acerca-de') {
                 $controller->getAcercaDe();
+            } elseif ($segments[1] === 'trabajo-social') {
+                $controller->getTrabajoSocial();
             } elseif ($segments[1] === 'configuracion') {
                 $controller->getConfiguracion();
             }
@@ -454,6 +468,8 @@ try {
                 } elseif ($segments[2] === 'caracteristicas') {
                     $controller->createCaracteristicaAcercaDe();
                 }
+            } elseif ($segments[1] === 'trabajo-social' && isset($segments[2]) && $segments[2] === 'contenido') {
+                $controller->updateTrabajoSocialContenido();
             } elseif ($segments[1] === 'configuracion') {
                 if (isset($segments[2]) && $segments[2] === 'redes-sociales') {
                     $controller->createRedSocial();
