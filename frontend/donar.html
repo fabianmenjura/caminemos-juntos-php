@@ -187,12 +187,12 @@
             </div>
         </div>
 
-        <!-- Paso 2: QR Donaciones (Oculto inicialmente) -->
+        <!-- Paso 2: Información de Cuentas (Oculto inicialmente) -->
         <div class="row mb-5" id="paso-2" style="display: none;">
             <div class="col-lg-10 mx-auto">
                 <div class="text-center mb-4" data-aos="fade-up">
-                    <h3 class="mb-3"><i class="fas fa-qrcode me-2"></i>Paso 2: Escanea y Dona</h3>
-                    <p class="section-description">Escanea cualquiera de estos códigos QR con tu aplicación favorita</p>
+                    <h3 class="mb-3"><i class="fas fa-university me-2"></i>Paso 2: Realiza tu Donación</h3>
+                    <p class="section-description">Selecciona tu método de pago preferido y realiza la transferencia</p>
                 </div>
 
                 <!-- Datos del donante confirmados -->
@@ -210,8 +210,9 @@
                     </div>
                 </div>
 
-                <div id="qr-donaciones-container" class="row g-4">
-                    <!-- Los QR se cargan dinámicamente -->
+                <!-- Tarjetas de Cuentas Bancarias -->
+                <div id="cuentas-container" class="row g-4 mb-4">
+                    <!-- Las cuentas se cargan dinámicamente -->
                 </div>
 
                 <!-- Instrucciones -->
@@ -219,7 +220,58 @@
                     <div class="col-lg-8 mx-auto">
                         <div class="alert alert-info text-center">
                     <i class="fas fa-info-circle me-2"></i>
-                            <strong>Importante:</strong> Después de realizar tu donación, recibirás un comprobante por correo electrónico.
+                            <strong>Importante:</strong> Después de realizar tu donación, te enviaremos el comprobante por WhatsApp 💚
+                            Si no lo recibes, escríbenos y con gusto te lo enviamos.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 3: Confirmación Final (Oculto inicialmente) -->
+        <div class="row mb-5" id="paso-3" style="display: none;" data-aos="fade-up">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow border-success">
+                    <div class="card-body p-5 text-center">
+                        <div class="mb-4">
+                            <div class="success-icon mb-3">
+                                <i class="fas fa-check-circle fa-5x text-success"></i>
+                            </div>
+                            <h3 class="mb-3 text-success">
+                                <i class="fab fa-whatsapp me-2"></i>
+                                ¡Gracias por tu Generosidad!
+                            </h3>
+                            <p class="lead text-muted">
+                                Hemos recibido tu solicitud de donación correctamente.
+                            </p>
+                        </div>
+
+                        <div class="alert alert-info mb-4 text-start">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>¿Qué sigue?
+                            </h6>
+                            <ol class="mb-0">
+                                <li class="mb-2">Ya enviaste el mensaje por WhatsApp con tus datos</li>
+                                <li class="mb-2">Realiza la transferencia a la cuenta que seleccionaste</li>
+                                <li class="mb-2">Nuestro equipo se pondrá en contacto contigo pronto</li>
+                                <li>Solicita el comprobante por WhatsApp</li>
+                            </ol>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Resumen de tu Donación:</h6>
+                            <div id="resumen-donacion" class="text-start bg-light p-3 rounded">
+                                <!-- Se llena dinámicamente -->
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="index.html" class="btn btn-primary btn-lg">
+                                <i class="fas fa-home me-2"></i>Volver al Inicio
+                            </a>
+                            <button class="btn btn-outline-secondary btn-lg" onclick="volverPaso2()">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Métodos de Pago
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -252,7 +304,7 @@
                     <p>La información proporcionada será tratada de acuerdo con nuestra Política de Tratamiento de Datos.</p>
 
                     <h6>5. Métodos de Pago</h6>
-                    <p>Aceptamos donaciones mediante códigos QR para Nequi, Daviplata, Bancolombia y otros métodos electrónicos.</p>
+                    <p>Aceptamos donaciones mediante transferencias bancarias, Nequi, Daviplata, Bancolombia y otros métodos electrónicos. Los códigos QR pueden estar disponibles como opción adicional.</p>
 
                     <h6>6. Contacto</h6>
                     <p>Para consultas, contáctenos a través de nuestros canales oficiales.</p>
@@ -330,6 +382,8 @@
         });
 
         let tipoDonante = 'personal'; // 'personal' o 'empresa'
+        let donacionId = null; // ID de la donación guardada
+        let datosDonante = {}; // Datos del donante para usar en WhatsApp
 
         // Form Personal
         document.getElementById('form-donante-personal').addEventListener('submit', async (e) => {
@@ -362,20 +416,27 @@
                     data.tipo_patrocinio = 'general';
                 }
 
-                // Guardar en BD
+                // Guardar en BD con estado 'pendiente'
                 const endpoint = tipo === 'personal' ? 'donaciones/personas' : 'donaciones/empresas';
                 const response = await api.post(endpoint, data);
 
                 if (response.success) {
+                    // Guardar ID de la donación y datos
+                    donacionId = response.data.id;
+                    datosDonante = { ...data, tipo };
+                    
                     // Mostrar info del donante
                     mostrarInfoDonante(data, tipo);
                     
-                    // Cargar QR
-                    await loadQRDonaciones();
+                    // Cargar cuentas de donación
+                    await loadCuentasDonaciones();
                     
                     // Cambiar a paso 2
                     document.getElementById('paso-1').style.display = 'none';
                     document.getElementById('paso-2').style.display = 'block';
+                    if (document.getElementById('paso-3')) {
+                        document.getElementById('paso-3').style.display = 'none';
+                    }
                     
                     // Scroll al paso 2
                     document.getElementById('paso-2').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -414,10 +475,104 @@
             document.getElementById('paso-1').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Cargar QR de donaciones
-        async function loadQRDonaciones() {
-            const container = document.getElementById('qr-donaciones-container');
-            if (!container) return;
+        // Parsear información de cuenta desde texto
+        function parsearInfoCuenta(texto) {
+            const info = {
+                numero: '',
+                titular: '',
+                banco: '',
+                tipo: '',
+                nit: '',
+                otros: []
+            };
+            
+            if (!texto) return info;
+            
+            const lineas = texto.split('\n').map(l => l.trim()).filter(l => l);
+            
+            lineas.forEach(linea => {
+                const lower = linea.toLowerCase();
+                
+                // Extraer número de cuenta
+                if (lower.includes('número') || lower.includes('numero') || lower.includes('cuenta:')) {
+                    const match = linea.match(/(\d{1,3}[\s.-]?\d{1,3}[\s.-]?\d{1,4}[\s.-]?\d{0,4})/);
+                    if (match) info.numero = match[1].replace(/\s/g, ' ');
+                } else if (/^\d{7,15}$/.test(linea.replace(/[\s.-]/g, ''))) {
+                    // Si es solo un número, es probablemente el número de cuenta
+                    info.numero = linea;
+                }
+                
+                // Extraer titular
+                if (lower.includes('titular') || lower.includes('nombre')) {
+                    info.titular = linea.split(':').slice(1).join(':').trim();
+                }
+                
+                // Extraer banco
+                if (lower.includes('banco:') || lower.startsWith('banco')) {
+                    info.banco = linea.split(':').slice(1).join(':').trim() || linea;
+                } else if (lower.includes('nequi') || lower.includes('daviplata') || lower.includes('bancolombia')) {
+                    info.banco = linea.split(':')[0].trim();
+                }
+                
+                // Extraer tipo
+                if (lower.includes('tipo:') || lower.includes('ahorro') || lower.includes('corriente')) {
+                    info.tipo = linea.split(':').slice(1).join(':').trim() || linea;
+                }
+                
+                // Extraer NIT
+                if (lower.includes('nit:')) {
+                    info.nit = linea.split(':').slice(1).join(':').trim();
+                }
+            });
+            
+            // Si no encontramos número específico, buscar el primer número largo
+            if (!info.numero) {
+                const numeroMatch = texto.match(/(\d{7,15})/);
+                if (numeroMatch) info.numero = numeroMatch[1];
+            }
+            
+            return info;
+        }
+
+        // Obtener icono según el método
+        function getIconoMetodo(titulo) {
+            const lower = titulo.toLowerCase();
+            if (lower.includes('nequi')) return 'fa-mobile-alt';
+            if (lower.includes('daviplata')) return 'fa-wallet';
+            if (lower.includes('bancolombia')) return 'fa-university';
+            if (lower.includes('banco') || lower.includes('transferencia')) return 'fa-landmark';
+            return 'fa-credit-card';
+        }
+
+        // Copiar al portapapeles
+        async function copiarAlPortapapeles(texto, elementoId) {
+            try {
+                await navigator.clipboard.writeText(texto);
+                
+                const elemento = document.getElementById(elementoId);
+                const btnOriginal = elemento.innerHTML;
+                elemento.innerHTML = '<i class="fas fa-check me-2"></i>¡Copiado!';
+                elemento.classList.add('btn-success');
+                elemento.classList.remove('btn-primary');
+                
+                setTimeout(() => {
+                    elemento.innerHTML = btnOriginal;
+                    elemento.classList.remove('btn-success');
+                    elemento.classList.add('btn-primary');
+                }, 2000);
+                
+                toastSuccess('Número copiado al portapapeles');
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                toastError('No se pudo copiar. Por favor, copia manualmente.');
+            }
+        }
+
+        // Cargar cuentas de donaciones
+        async function loadCuentasDonaciones() {
+            const cuentasContainer = document.getElementById('cuentas-container');
+            
+            if (!cuentasContainer) return;
 
             try {
                 const response = await api.get('qr-donaciones');
@@ -425,7 +580,7 @@
                     const qrs = response.data.qrs;
                     
                     if (qrs.length === 0) {
-                        container.innerHTML = `
+                        cuentasContainer.innerHTML = `
                             <div class="col-12 text-center py-5">
                                 <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
                                 <p class="text-muted">Pronto habilitaremos las opciones de donación.</p>
@@ -434,47 +589,110 @@
                         return;
                     }
 
-                    container.innerHTML = qrs.map((qr, index) => `
-                        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="${100 * (index + 1)}">
-                            <div class="card h-100 shadow-sm hover-card">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title mb-3">
-                                        <i class="fas fa-qrcode text-primary me-2"></i>
-                                        ${qr.titulo}
-                                    </h5>
-                                    ${qr.descripcion ? `<p class="text-muted small">${qr.descripcion}</p>` : ''}
-                                    
-                                    <!-- QR Code Image -->
-                                    <div class="my-3">
-                                        <img src="${qr.qr_image_url}" 
-                                             alt="QR ${qr.titulo}" 
-                                             class="img-fluid rounded"
-                                             style="max-width: 250px; border: 3px solid #eaa33a; cursor: pointer;"
-                                             onclick="ampliarQR('${qr.qr_image_url}', '${qr.titulo}')">
+                    // Renderizar todas las cuentas
+                    cuentasContainer.innerHTML = qrs.map((qr, index) => {
+                        // Usar datos estructurados de la API si existen, sino parsear desde texto_cuenta
+                        let info = {};
+                        if (qr.cuenta && typeof qr.cuenta === 'object') {
+                            // Datos estructurados de la API
+                            info = {
+                                numero: qr.cuenta.numero || '',
+                                titular: qr.cuenta.titular || '',
+                                banco: qr.cuenta.banco || '',
+                                tipo: qr.cuenta.tipo || '',
+                                nit: qr.cuenta.nit || ''
+                            };
+                        } else {
+                            // Parsear desde texto_cuenta (fallback)
+                            info = parsearInfoCuenta(qr.texto_cuenta || '');
+                        }
+                        
+                        const icono = getIconoMetodo(qr.titulo);
+                        const numeroCuenta = info.numero || '';
+                        const tieneQR = qr.qr_image_url && qr.qr_image_url.trim() !== '';
+                        
+                        return `
+                            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="${100 * index}">
+                                <div class="account-card">
+                                    <div class="account-card-header">
+                                        <div class="account-icon">
+                                            <i class="fas ${icono}"></i>
+                                        </div>
+                                        <div class="account-title-wrapper">
+                                            <h5 class="account-title">${qr.titulo}</h5>
+                                            ${qr.descripcion ? `<p class="account-subtitle">${qr.descripcion}</p>` : ''}
+                                        </div>
                                     </div>
                                     
-                                    <!-- Información de cuenta -->
-                                    ${qr.texto_cuenta ? `
-                                        <div class="alert alert-light text-start mb-3">
-                                            <small style="white-space: pre-line;">${qr.texto_cuenta}</small>
-                                        </div>
-                                    ` : ''}
+                                    <div class="account-card-body">
+                                        ${numeroCuenta ? `
+                                            <div class="account-number-section">
+                                                <label class="account-number-label">Número de cuenta</label>
+                                                <div class="account-number-display">
+                                                    <span class="account-number">${numeroCuenta}</span>
+                                                    <button 
+                                                        id="btn-copy-${qr.id}" 
+                                                        class="btn btn-copy" 
+                                                        onclick="copiarAlPortapapeles('${numeroCuenta.replace(/'/g, "\\'")}', 'btn-copy-${qr.id}')"
+                                                        title="Copiar número">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        ${(info.titular || info.banco || info.tipo || info.nit) ? `
+                                            <div class="account-details">
+                                                ${info.titular ? `<div class="account-detail-item"><strong>Titular:</strong> ${info.titular}</div>` : ''}
+                                                ${info.banco ? `<div class="account-detail-item"><strong>Banco:</strong> ${info.banco}</div>` : ''}
+                                                ${info.tipo || info.tipo_cuenta ? `<div class="account-detail-item"><strong>Tipo:</strong> ${info.tipo || info.tipo_cuenta}</div>` : ''}
+                                                ${info.nit ? `<div class="account-detail-item"><strong>NIT:</strong> ${info.nit}</div>` : ''}
+                                            </div>
+                                        ` : qr.texto_cuenta ? `
+                                            <div class="account-details">
+                                                <div class="account-detail-item" style="white-space: pre-line; font-size: 0.875rem;">${qr.texto_cuenta}</div>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        ${tieneQR ? `
+                                            <div class="account-qr-section">
+                                                <img src="${qr.qr_image_url}" 
+                                                     alt="QR ${qr.titulo}" 
+                                                     class="account-qr-image"
+                                                     onclick="ampliarQR('${qr.qr_image_url}', '${qr.titulo}')"
+                                                     title="Haz clic para ampliar">
+                                                <button 
+                                                    class="btn btn-sm btn-outline-primary mt-2" 
+                                                    onclick="downloadQR('${qr.qr_image_url}', '${qr.titulo.replace(/'/g, "\\'")}')"
+                                                    title="Descargar QR">
+                                                    <i class="fas fa-download me-2"></i>
+                                                    Descargar QR
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
                                     
-                                    <button class="btn btn-primary btn-sm" onclick="downloadQR('${qr.qr_image_url}', '${qr.titulo}')">
-                                        <i class="fas fa-download me-2"></i>Descargar QR
-                                    </button>
+                                    <!-- Botón de Confirmación WhatsApp -->
+                                    <div class="account-card-footer">
+                                        <button 
+                                            class="btn btn-success" 
+                                            onclick="confirmarDonacionWhatsApp(${qr.id}, '${qr.titulo.replace(/'/g, "\\'")}', '${(numeroCuenta || '').replace(/'/g, "\\'")}')">
+                                            <i class="fab fa-whatsapp me-2"></i>
+                                            Confirmar por WhatsApp
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 }
             } catch (error) {
-                console.error('Error al cargar QR:', error);
-                container.innerHTML = `
+                console.error('Error al cargar cuentas:', error);
+                cuentasContainer.innerHTML = `
                     <div class="col-12 text-center py-5">
                         <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
                         <p class="text-muted">No se pudieron cargar las opciones de donación.</p>
-                        <button class="btn btn-primary btn-sm" onclick="loadQRDonaciones()">
+                        <button class="btn btn-primary btn-sm" onclick="loadCuentasDonaciones()">
                             <i class="fas fa-redo me-2"></i>Reintentar
                         </button>
                     </div>
@@ -482,14 +700,49 @@
             }
         }
 
+        // Mantener función anterior para compatibilidad (carga QR si es necesario)
+        async function loadQRDonaciones() {
+            await loadCuentasDonaciones();
+        }
+
         // Descargar QR
-        function downloadQR(url, nombre) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `QR-${nombre.replace(/\s+/g, '-')}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        async function downloadQR(url, nombre) {
+            try {
+                // Normalizar la URL
+                let imageUrl = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
+                    // Convertir ruta relativa a absoluta
+                    if (!url.startsWith('/')) {
+                        imageUrl = '../' + url;
+                    }
+                }
+                
+                // Descargar la imagen usando fetch
+                const response = await fetch(imageUrl);
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar la imagen');
+                }
+                
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // Crear link de descarga
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `QR-${nombre.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Limpiar el objeto URL
+                window.URL.revokeObjectURL(blobUrl);
+                
+                // Feedback visual
+                toastSuccess('QR descargado correctamente');
+            } catch (error) {
+                console.error('Error al descargar QR:', error);
+                toastError('No se pudo descargar el QR. Intenta hacer clic derecho sobre la imagen y "Guardar imagen como..."');
+            }
         }
 
         // Ampliar QR (modal)
@@ -504,6 +757,110 @@
                 padding: '2rem',
                 html: `<p class="mt-3 text-muted">Escanea este código QR con tu aplicación de pago</p>`
             });
+        }
+
+        // Confirmar donación vía WhatsApp
+        function confirmarDonacionWhatsApp(cuentaId, cuentaTitulo, numeroCuenta) {
+            if (!donacionId || !datosDonante) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se encontraron los datos de la donación. Por favor, vuelve al paso anterior.',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            // Construir mensaje para WhatsApp
+            const nombre = datosDonante.tipo === 'personal' 
+                ? datosDonante.nombre_completo 
+                : datosDonante.nombre_empresa;
+            const email = datosDonante.tipo === 'personal' 
+                ? datosDonante.email 
+                : datosDonante.email_contacto;
+            const telefono = datosDonante.telefono;
+            const ciudad = datosDonante.ciudad;
+            const monto = datosDonante.monto ? `$${parseInt(datosDonante.monto).toLocaleString('es-CO')}` : 'No especificado';
+            const mensajeDonante = datosDonante.mensaje || 'Sin mensaje adicional';
+
+            let mensaje = `¡Hola! Quiero confirmar mi donación:\n\n`;
+            mensaje += `👤 *Datos del Donante:*\n`;
+            mensaje += `• Nombre: ${nombre}\n`;
+            mensaje += `• Email: ${email}\n`;
+            mensaje += `• Teléfono: ${telefono}\n`;
+            mensaje += `• Ciudad: ${ciudad}\n`;
+            mensaje += `• Monto estimado: ${monto}\n\n`;
+            mensaje += `💳 *Cuenta Seleccionada:*\n`;
+            mensaje += `• Método: ${cuentaTitulo}\n`;
+            if (numeroCuenta) {
+                mensaje += `• Número de cuenta: ${numeroCuenta}\n`;
+            }
+            mensaje += `\n💬 *Mensaje:*\n${mensajeDonante}\n\n`;
+            mensaje += `📋 ID de solicitud: ${donacionId}\n\n`;
+            mensaje += `¿Podrían confirmar la recepción de mi donación? ¡Gracias! 😊`;
+
+            // Obtener número de WhatsApp desde CONFIG
+            const whatsappNumber = CONFIG?.whatsappNumber || '573219951293';
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+
+            // Abrir WhatsApp
+            window.open(whatsappUrl, '_blank');
+
+            // Mostrar resumen y cambiar a paso 3
+            mostrarResumenDonacion(nombre, email, telefono, ciudad, monto, cuentaTitulo, numeroCuenta, mensajeDonante);
+            
+            // Cambiar a paso 3
+            document.getElementById('paso-2').style.display = 'none';
+            document.getElementById('paso-3').style.display = 'block';
+            document.getElementById('paso-3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Mostrar mensaje de éxito
+            toastSuccess('¡Mensaje enviado! Revisa WhatsApp para completar tu donación.');
+        }
+
+        // Mostrar resumen de donación
+        function mostrarResumenDonacion(nombre, email, telefono, ciudad, monto, cuenta, numeroCuenta, mensaje) {
+            const resumenHTML = `
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <strong>Nombre:</strong> ${nombre}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Email:</strong> ${email}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Teléfono:</strong> ${telefono}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Ciudad:</strong> ${ciudad}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Monto estimado:</strong> ${monto}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Método de pago:</strong> ${cuenta}
+                    </div>
+                    ${numeroCuenta ? `
+                        <div class="col-12 mb-2">
+                            <strong>Número de cuenta:</strong> ${numeroCuenta}
+                        </div>
+                    ` : ''}
+                    ${mensaje && mensaje !== 'Sin mensaje adicional' ? `
+                        <div class="col-12 mb-2">
+                            <strong>Mensaje:</strong> ${mensaje}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.getElementById('resumen-donacion').innerHTML = resumenHTML;
+        }
+
+        // Volver al paso 2
+        function volverPaso2() {
+            document.getElementById('paso-2').style.display = 'block';
+            document.getElementById('paso-3').style.display = 'none';
+            document.getElementById('paso-2').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     </script>
 </body>

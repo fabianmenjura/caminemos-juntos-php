@@ -16,11 +16,22 @@ class Response {
     }
 
     public static function error($message, $statusCode = 400, $details = null) {
-        self::json([
+        // Asegurar que siempre devolvamos JSON
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        
+        $response = [
             'success' => false,
-            'error' => $message,
-            'details' => $details
-        ], $statusCode);
+            'message' => $message,
+            'error' => $message  // Mantener compatibilidad con ambos campos
+        ];
+        
+        if ($details !== null) {
+            $response['details'] = $details;
+        }
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     public static function notFound($message = 'Recurso no encontrado') {

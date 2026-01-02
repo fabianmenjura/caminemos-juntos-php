@@ -37,15 +37,35 @@ class QRDonacionesController {
     public function index() {
         try {
             $qrs = $this->db->fetchAll(
-                "SELECT id, titulo, descripcion, qr_image_url, texto_cuenta, orden
+                "SELECT id, titulo, descripcion, qr_image_url, texto_cuenta, 
+                        numero_cuenta, titular, banco, tipo_cuenta, nit, orden
                  FROM qr_donaciones 
                  WHERE activo = 1 AND deleted = 0
                  ORDER BY orden ASC, id ASC"
             );
 
+            // Procesar y estructurar los datos
+            $qrsProcessed = array_map(function($qr) {
+                return [
+                    'id' => $qr['id'],
+                    'titulo' => $qr['titulo'],
+                    'descripcion' => $qr['descripcion'] ?? '',
+                    'qr_image_url' => $qr['qr_image_url'] ?? '',
+                    'texto_cuenta' => $qr['texto_cuenta'] ?? '',
+                    'cuenta' => [
+                        'numero' => $qr['numero_cuenta'] ?? '',
+                        'titular' => $qr['titular'] ?? '',
+                        'banco' => $qr['banco'] ?? '',
+                        'tipo' => $qr['tipo_cuenta'] ?? '',
+                        'nit' => $qr['nit'] ?? ''
+                    ],
+                    'orden' => $qr['orden'] ?? 0
+                ];
+            }, $qrs);
+
             http_response_code(200);
             header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'data' => ['qrs' => $qrs]]);
+            echo json_encode(['success' => true, 'data' => ['qrs' => $qrsProcessed]]);
             exit;
         } catch (Exception $e) {
             Logger::error("Error al obtener QR donaciones", ['error' => $e->getMessage()]);
@@ -62,15 +82,35 @@ class QRDonacionesController {
     public function getAll() {
         try {
             $qrs = $this->db->fetchAll(
-                "SELECT id, titulo, descripcion, qr_image_url, texto_cuenta, activo, orden, created_at
+                "SELECT id, titulo, descripcion, qr_image_url, texto_cuenta, 
+                        numero_cuenta, titular, banco, tipo_cuenta, nit, activo, orden, created_at
                  FROM qr_donaciones 
                  WHERE deleted = 0
                  ORDER BY orden ASC, id ASC"
             );
 
+            // Procesar y estructurar los datos
+            $qrsProcessed = array_map(function($qr) {
+                return [
+                    'id' => $qr['id'],
+                    'titulo' => $qr['titulo'],
+                    'descripcion' => $qr['descripcion'] ?? '',
+                    'qr_image_url' => $qr['qr_image_url'] ?? '',
+                    'texto_cuenta' => $qr['texto_cuenta'] ?? '',
+                    'numero_cuenta' => $qr['numero_cuenta'] ?? '',
+                    'titular' => $qr['titular'] ?? '',
+                    'banco' => $qr['banco'] ?? '',
+                    'tipo_cuenta' => $qr['tipo_cuenta'] ?? '',
+                    'nit' => $qr['nit'] ?? '',
+                    'activo' => $qr['activo'] ?? 0,
+                    'orden' => $qr['orden'] ?? 0,
+                    'created_at' => $qr['created_at'] ?? ''
+                ];
+            }, $qrs);
+
             http_response_code(200);
             header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'data' => ['qrs' => $qrs]]);
+            echo json_encode(['success' => true, 'data' => ['qrs' => $qrsProcessed]]);
             exit;
         } catch (Exception $e) {
             Logger::error("Error al obtener QR (admin)", ['error' => $e->getMessage()]);
@@ -104,14 +144,20 @@ class QRDonacionesController {
                 exit;
             }
 
-            $sql = "INSERT INTO qr_donaciones (titulo, descripcion, qr_image_url, texto_cuenta, activo, orden) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO qr_donaciones (titulo, descripcion, qr_image_url, texto_cuenta, 
+                        numero_cuenta, titular, banco, tipo_cuenta, nit, activo, orden) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $params = [
                 $data['titulo'],
                 $data['descripcion'] ?? '',
                 $data['qr_image_url'],
                 $data['texto_cuenta'] ?? '',
+                $data['numero_cuenta'] ?? '',
+                $data['titular'] ?? '',
+                $data['banco'] ?? '',
+                $data['tipo_cuenta'] ?? '',
+                $data['nit'] ?? '',
                 $data['activo'] ?? 1,
                 $data['orden'] ?? 0
             ];
@@ -146,7 +192,8 @@ class QRDonacionesController {
             }
 
             $sql = "UPDATE qr_donaciones 
-                    SET titulo = ?, descripcion = ?, qr_image_url = ?, texto_cuenta = ?, activo = ?, orden = ?
+                    SET titulo = ?, descripcion = ?, qr_image_url = ?, texto_cuenta = ?, 
+                        numero_cuenta = ?, titular = ?, banco = ?, tipo_cuenta = ?, nit = ?, activo = ?, orden = ?
                     WHERE id = ? AND deleted = 0";
             
             $this->db->execute($sql, [
@@ -154,6 +201,11 @@ class QRDonacionesController {
                 $data['descripcion'] ?? '',
                 $data['qr_image_url'],
                 $data['texto_cuenta'] ?? '',
+                $data['numero_cuenta'] ?? '',
+                $data['titular'] ?? '',
+                $data['banco'] ?? '',
+                $data['tipo_cuenta'] ?? '',
+                $data['nit'] ?? '',
                 $data['activo'] ?? 1,
                 $data['orden'] ?? 0,
                 $id

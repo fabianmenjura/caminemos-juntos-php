@@ -127,21 +127,27 @@ class AuthController {
     }
     
     public static function requireAuth() {
-        $authService = new AuthService();
-        $controller = new AuthController();
-        $token = $controller->getAuthToken();
-        
-        if (!$token) {
-            Response::error('No autorizado', null, 401);
+        try {
+            $authService = new AuthService();
+            $controller = new AuthController();
+            $token = $controller->getAuthToken();
+            
+            if (!$token) {
+                Response::error('No autorizado', 401);
+                exit;
+            }
+            
+            $user = $authService->getUserByToken($token);
+            if (!$user) {
+                Response::error('Sesión inválida', 401);
+                exit;
+            }
+            
+            return $user;
+        } catch (Exception $e) {
+            error_log("requireAuth exception: " . $e->getMessage());
+            Response::error('Error de autenticación: ' . $e->getMessage(), 500);
             exit;
         }
-        
-        $user = $authService->getUserByToken($token);
-        if (!$user) {
-            Response::error('Sesión inválida', null, 401);
-            exit;
-        }
-        
-        return $user;
     }
 }

@@ -14,9 +14,26 @@ class UploadController {
     private $user;
     
     public function __construct() {
-        // Requiere autenticación
-        $this->user = AuthController::requireAuth();
-        $this->uploader = new ImageUploader();
+        // Asegurar headers JSON desde el inicio
+        header('Content-Type: application/json; charset=utf-8');
+        
+        try {
+            // Requiere autenticación
+            $this->user = AuthController::requireAuth();
+            $this->uploader = new ImageUploader();
+        } catch (Exception $e) {
+            Logger::error("UploadController construct error", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            Response::error('Error de autenticación: ' . $e->getMessage(), 401);
+        } catch (Error $e) {
+            header('Content-Type: application/json; charset=utf-8');
+            error_log("UploadController fatal error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+            Response::error('Error fatal de autenticación', 500);
+        }
     }
     
     /**
@@ -24,12 +41,16 @@ class UploadController {
      */
     public function uploadImage() {
         try {
+            // Asegurar que siempre se devuelva JSON
+            header('Content-Type: application/json');
+            
             Logger::debug("uploadImage: Iniciando upload");
             
             // Verificar que se envió un archivo
             if (!isset($_FILES['image'])) {
                 Logger::error("uploadImage: No se encontró el archivo 'image'");
-                return Response::error('No se envió ningún archivo', null, 400);
+                Response::error('No se envió ningún archivo', 400);
+                return;
             }
             
             $file = $_FILES['image'];
@@ -50,24 +71,28 @@ class UploadController {
                     'path' => $result['path']
                 ]);
                 
-                return Response::success([
+                Response::success([
                     'url' => $result['path'],
                     'filename' => $result['filename'],
                     'size' => $result['size']
                 ], 'Imagen subida y optimizada exitosamente');
+                return;
             } else {
                 Logger::error("uploadImage: Error", ['error' => $result['error']]);
-                return Response::error($result['error'], null, 400);
+                Response::error($result['error'], 400);
+                return;
             }
             
         } catch (Exception $e) {
             Logger::error("uploadImage: Excepción", [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
             
-            return Response::error('Error al subir la imagen: ' . $e->getMessage(), null, 500);
+            Response::error('Error al subir la imagen: ' . $e->getMessage(), 500);
+            return;
         }
     }
     
@@ -76,21 +101,32 @@ class UploadController {
      */
     public function deleteImage($filename) {
         try {
+            header('Content-Type: application/json');
+            
             // Solo admin puede eliminar
             if ($this->user['rol'] !== 'admin' && $this->user['rol'] !== 'super_admin') {
-                return Response::error('Permisos insuficientes', null, 403);
+                Response::error('Permisos insuficientes', 403);
+                return;
             }
             
             $result = $this->uploader->delete($filename);
             
             if ($result['success']) {
-                return Response::success(null, 'Imagen eliminada');
+                Response::success(null, 'Imagen eliminada');
+                return;
             } else {
-                return Response::error($result['error'], null, 400);
+                Response::error($result['error'], 400);
+                return;
             }
             
         } catch (Exception $e) {
-            return Response::error('Error al eliminar imagen', null, 500);
+            Logger::error("deleteImage: Excepción", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            Response::error('Error al eliminar imagen: ' . $e->getMessage(), 500);
+            return;
         }
     }
 }

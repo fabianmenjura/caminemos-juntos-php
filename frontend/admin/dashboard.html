@@ -82,7 +82,16 @@
     <script src="assets/js/admin-api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            // Verificar autenticación primero
+            const isAuth = await adminAuth.requireAuth();
+            if (!isAuth) {
+                return; // Ya redirigió a login
+            }
+            
+            // Inicializar componentes
             await initAdminComponents('dashboard');
+            
+            // Cargar dashboard solo si está autenticado
             loadDashboard();
         });
         

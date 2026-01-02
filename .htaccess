@@ -2,10 +2,14 @@ RewriteEngine On
 
 # Redirigir /api a la carpeta api (que redirige al backend)
 # IMPORTANTE: Esta regla debe ir ANTES de las otras
+# Pasar el header Authorization
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
 RewriteCond %{REQUEST_URI} ^/api/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^api/(.*)$ api/index.php?route=$1 [L,QSA]
+RewriteRule ^api/(.*)$ api/index.php?route=$1 [L,QSA,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 # Servir archivos del frontend desde la raíz
 # Si la petición es para un archivo o directorio que existe en frontend/, servirlo

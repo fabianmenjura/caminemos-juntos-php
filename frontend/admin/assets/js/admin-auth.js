@@ -3,6 +3,7 @@ class AdminAuth {
     constructor() {
         // Detectar automáticamente la base URL de la API
         const path = window.location.pathname;
+        const hostname = window.location.hostname;
         
         // Si estamos en un subdirectorio (ej: /caminemos-juntos-php/admin/)
         if (path.includes('caminemos-juntos-php')) {
@@ -11,12 +12,22 @@ class AdminAuth {
             // Extraer la ruta base antes de /admin/
             const basePath = path.substring(0, path.indexOf('/admin/'));
             this.apiBase = window.location.origin + basePath + '/api';
+        } else if (hostname.includes('.test') || hostname.includes('localhost')) {
+            // Para Laragon con dominio .test
+            const pathParts = path.split('/').filter(p => p);
+            if (pathParts.length > 0 && pathParts[0] !== 'admin') {
+                this.apiBase = window.location.origin + '/' + pathParts[0] + '/api';
+            } else {
+                this.apiBase = window.location.origin + '/api';
+            }
         } else {
             // Raíz del dominio
             this.apiBase = window.location.origin + '/api';
         }
         
-        console.log('API Base URL:', this.apiBase);
+        console.log('AdminAuth - API Base URL:', this.apiBase);
+        console.log('AdminAuth - Path:', path);
+        console.log('AdminAuth - Hostname:', hostname);
         
         this.token = this.getToken();
         this.user = this.getUser();
@@ -118,10 +129,18 @@ class AdminAuth {
     }
     
     getAuthHeaders() {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.token}`
+        const headers = {
+            'Content-Type': 'application/json'
         };
+        
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+            console.log('AdminAuth.getAuthHeaders - Token presente:', this.token.substring(0, 20) + '...');
+        } else {
+            console.warn('AdminAuth.getAuthHeaders - No hay token disponible');
+        }
+        
+        return headers;
     }
 }
 

@@ -1,10 +1,36 @@
 <?php
 // Router principal de la API
+// Capturar cualquier salida inesperada
+ob_start();
+
+// Desactivar mostrar errores como HTML, solo log
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 // Establecer zona horaria de Colombia
 date_default_timezone_set('America/Bogota');
+
+// Establecer headers JSON por defecto
+header('Content-Type: application/json; charset=utf-8');
+
+// Asegurar que el header Authorization esté disponible
+if (!isset($_SERVER['HTTP_AUTHORIZATION']) && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $_SERVER['HTTP_AUTHORIZATION'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+}
+
+// También desde getallheaders() si está disponible
+if (!isset($_SERVER['HTTP_AUTHORIZATION']) && function_exists('getallheaders')) {
+    $headers = getallheaders();
+    if (isset($headers['Authorization'])) {
+        $_SERVER['HTTP_AUTHORIZATION'] = $headers['Authorization'];
+    } elseif (isset($headers['authorization'])) {
+        $_SERVER['HTTP_AUTHORIZATION'] = $headers['authorization'];
+    }
+}
+
+// Limpiar cualquier salida previa
+ob_clean();
 
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
@@ -13,7 +39,7 @@ require_once __DIR__ . '/helpers/Response.php';
 // Headers CORS
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Auth-Token');
 
 // Manejar OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -301,15 +327,27 @@ try {
 
     // Rutas de upload
     if ($segments[0] === 'upload') {
-        require_once __DIR__ . '/controllers/UploadController.php';
-        $controller = new UploadController();
+        try {
+            require_once __DIR__ . '/controllers/UploadController.php';
+            $controller = new UploadController();
 
-        if ($method === 'POST' && $segments[1] === 'image') {
-            // POST /api/upload/image
-            $controller->uploadImage();
-        } elseif ($method === 'DELETE' && $segments[1] === 'image' && isset($segments[2])) {
-            // DELETE /api/upload/image/{filename}
-            $controller->deleteImage($segments[2]);
+            if ($method === 'POST' && isset($segments[1]) && $segments[1] === 'image') {
+                // POST /api/upload/image
+                $controller->uploadImage();
+            } elseif ($method === 'DELETE' && isset($segments[1]) && $segments[1] === 'image' && isset($segments[2])) {
+                // DELETE /api/upload/image/{filename}
+                $controller->deleteImage($segments[2]);
+            } else {
+                Response::error('Ruta no válida', 404);
+            }
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            error_log("Upload route error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+            Response::error('Error al procesar la solicitud de upload: ' . $e->getMessage(), 500);
+        } catch (Error $e) {
+            header('Content-Type: application/json');
+            error_log("Upload route fatal error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+            Response::error('Error fatal al procesar la solicitud de upload', 500);
         }
         exit;
     }

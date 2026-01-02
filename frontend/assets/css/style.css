@@ -869,6 +869,303 @@ textarea.form-control {
 }
 
 /* ============================================
+   ACCOUNT CARDS - DONACIONES
+   ============================================ */
+.account-card {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: var(--transition-base);
+  border: 1px solid #e8ecef;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(234, 163, 58, 0.15);
+  transform: translateY(-2px);
+}
+
+.account-card-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.account-title-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-title {
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+.account-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.account-card-body {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-number-section {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e8ecef;
+}
+
+.account-number-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.account-number-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #e8ecef;
+}
+
+.account-number {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.btn-copy {
+  padding: 0.4rem 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.btn-copy:hover {
+  background: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.btn-copy.btn-success {
+  background: #28a745;
+}
+
+.account-details {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.account-detail-item {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.account-detail-item strong {
+  color: var(--primary-color);
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
+/* QR Image dentro de la card */
+.account-qr-section {
+  margin: 1rem 0;
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: var(--radius-sm);
+}
+
+.account-qr-image {
+  max-width: 180px;
+  width: 100%;
+  height: auto;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-base);
+  background: white;
+  padding: 0.5rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.account-qr-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(234, 163, 58, 0.3);
+}
+
+.account-qr-section .btn {
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-base);
+}
+
+.account-qr-section .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón de confirmación WhatsApp en cards de cuenta */
+.account-card-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e8ecef;
+}
+
+.account-card .btn-success {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
+  width: 100%;
+}
+
+.account-card .btn-success:hover {
+  background: linear-gradient(135deg, #128c7e, #0d6e5f);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);
+  color: white;
+}
+
+.account-card .btn-success:active {
+  transform: translateY(0);
+}
+
+/* Paso 3 - Confirmación */
+#paso-3 .card {
+  border: 2px solid #28a745;
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.2);
+}
+
+.success-icon {
+  animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#resumen-donacion {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+
+#resumen-donacion strong {
+  color: var(--primary-color);
+  margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .account-card {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .account-card-header {
+    padding: 1rem 1.25rem;
+  }
+  
+  .account-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+  
+  .account-title {
+    font-size: 1rem;
+  }
+  
+  .account-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .account-card-body {
+    padding: 1.25rem;
+  }
+  
+  .account-number {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .account-number-display {
+    flex-wrap: wrap;
+  }
+  
+  .btn-copy {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+/* ============================================
    VOLUNTARIOS SECTION
    ============================================ */
 .section-voluntarios {
@@ -1630,6 +1927,24 @@ textarea.form-control {
   background: rgba(52, 152, 219, 0.1);
   color: #2980b9;
   border-left: 4px solid #3498db;
+}
+
+/* ============================================
+   DONACIÓN - PASO 3 - CONFIRMACIÓN
+   ============================================ */
+.success-icon {
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* ============================================

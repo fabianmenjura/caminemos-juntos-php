@@ -63,7 +63,7 @@
         <div class="login-header">
             <i class="fas fa-user-shield"></i>
             <h1>Panel Administrativo</h1>
-            <p>Caminemos Juntos Colombia</p>
+            <p>Caminemos Juntos | Chiquinquirá, Boyacá.</p>
         </div>
         
         <div class="login-body">
@@ -114,13 +114,26 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Iniciando...';
             
             try {
-                const response = await fetch(adminAuth.apiBase + '/auth/login', {
+                const apiUrl = adminAuth.apiBase + '/auth/login';
+                console.log('Intentando login en:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
                 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Login response:', data);
                 
                 if (data.success) {
                     adminAuth.saveSession(data.data.token, data.data.user, remember);
