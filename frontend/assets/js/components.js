@@ -1,6 +1,6 @@
 /**
  * Componentes Reutilizables - Caminemos Juntos
- * Header, Footer y WhatsApp Button
+ * Header, Footer, WhatsApp Button, Head Tags y Scripts
  */
 
 // Configuración (se carga dinámicamente desde la API)
@@ -14,6 +14,113 @@ let CONFIG = {
     whatsappMensaje: '¡Hola! Me gustaría obtener más información sobre Caminemos Juntos.',
     redesSociales: []
 };
+
+/**
+ * Genera el head común con meta tags, favicon y CDN links
+ * @param {Object} options - Opciones de configuración
+ * @param {string} options.title - Título de la página
+ * @param {string} options.description - Meta description
+ * @param {string} options.keywords - Meta keywords
+ * @param {string} options.canonical - URL canónica
+ * @param {string} options.ogImage - Imagen Open Graph
+ * @param {boolean} options.includeAOS - Incluir AOS (default: true)
+ * @param {boolean} options.includeSweetAlert - Incluir SweetAlert2 (default: true)
+ * @param {string} options.customCSS - CSS personalizado adicional
+ * @returns {string} HTML del head
+ */
+function generateHead(options = {}) {
+    const {
+        title = 'Caminemos Juntos Chiquinquirá',
+        description = 'Fundación en Chiquinquirá dedicada al acompañamiento de adultos mayores',
+        keywords = 'adultos mayores chiquinquirá, fundación boyacá',
+        canonical = '',
+        ogImage = 'https://caminemosjuntos.org/assets/images/elderly-colombian-woman-smiling-warm.jpg',
+        includeAOS = true,
+        includeSweetAlert = true,
+        customCSS = ''
+    } = options;
+
+    const logoPath = CONFIG.logo || 'assets/images/placeholder-logo.png';
+    const canonicalUrl = canonical || window.location.href;
+    
+    return `
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="${logoPath}">
+    <link rel="shortcut icon" type="image/png" href="${logoPath}">
+    <link rel="apple-touch-icon" href="${logoPath}">
+    
+    <!-- SEO -->
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <meta name="keywords" content="${keywords}">
+    <link rel="canonical" href="${canonicalUrl}">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="${title}">
+    <meta property="og:description" content="${description}">
+    <meta property="og:url" content="${canonicalUrl}">
+    <meta property="og:image" content="${ogImage}">
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    ${includeAOS ? '<!-- AOS Animation -->\n    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">' : ''}
+    ${includeSweetAlert ? '<!-- SweetAlert2 -->\n    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">' : ''}
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    ${customCSS}
+    `;
+}
+
+/**
+ * Genera los scripts comunes al final del body
+ * @param {Object} options - Opciones de configuración
+ * @param {boolean} options.includeBootstrap - Incluir Bootstrap JS (default: true)
+ * @param {boolean} options.includeAOS - Incluir AOS (default: true)
+ * @param {boolean} options.includeSweetAlert - Incluir SweetAlert2 (default: true)
+ * @param {boolean} options.includeComponents - Incluir components.js (default: true)
+ * @param {boolean} options.includeAPI - Incluir api.js (default: false)
+ * @param {boolean} options.includeApp - Incluir app.js (default: false)
+ * @param {string} options.customScripts - Scripts personalizados adicionales
+ * @returns {string} HTML de los scripts
+ */
+function generateScripts(options = {}) {
+    const {
+        includeBootstrap = true,
+        includeAOS = true,
+        includeSweetAlert = true,
+        includeComponents = true,
+        includeAPI = false,
+        includeApp = false,
+        customScripts = ''
+    } = options;
+
+    return `
+    ${includeBootstrap ? '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>' : ''}
+    ${includeAOS ? '<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>' : ''}
+    ${includeSweetAlert ? '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>' : ''}
+    ${includeComponents ? '<script src="assets/js/components.js"></script>' : ''}
+    ${includeAPI ? '<script src="assets/js/api.js"></script>' : ''}
+    ${includeApp ? '<script src="assets/js/app.js"></script>' : ''}
+    ${customScripts}
+    `;
+}
 
 // Cargar configuración desde la API
 async function loadConfig() {
@@ -281,6 +388,100 @@ function loadGlobalSpinner() {
     const spinnerContainer = document.getElementById('spinner-container');
     if (spinnerContainer) {
         spinnerContainer.innerHTML = spinner;
+    }
+}
+
+/**
+ * Hero Section Component
+ * @param {Object} options - Opciones de configuración
+ * @param {string} options.title - Título principal
+ * @param {string} options.subtitle - Subtítulo
+ * @param {string} options.image - URL de la imagen de fondo
+ * @param {string} options.imageAlt - Texto alternativo de la imagen
+ * @param {Array} options.buttons - Array de botones [{text, href, class, icon}]
+ * @param {string} options.containerId - ID del contenedor (default: 'hero-container')
+ * @param {number} options.minHeight - Altura mínima en px (default: 500)
+ */
+function loadHeroSection(options = {}) {
+    const {
+        title = 'Bienvenido',
+        subtitle = '',
+        image = 'assets/images/elderly-colombian-woman-smiling-warm.jpg',
+        imageAlt = 'Hero image',
+        buttons = [],
+        containerId = 'hero-container',
+        minHeight = 500
+    } = options;
+
+    const buttonsHTML = buttons.map(btn => {
+        const icon = btn.icon ? `<i class="${btn.icon} me-2"></i>` : '';
+        return `<a href="${btn.href || '#'}" class="btn ${btn.class || 'btn-primary'} btn-lg">${icon}${btn.text}</a>`;
+    }).join('\n                        ');
+
+    const heroHTML = `
+    <section class="hero-section">
+        <div class="hero-image-container">
+            <img src="${image}" 
+                 alt="${imageAlt}" 
+                 class="hero-bg-image">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="row align-items-center" style="min-height: ${minHeight}px;">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="hero-title" data-aos="fade-up">${title}</h1>
+                    ${subtitle ? `<p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">${subtitle}</p>` : ''}
+                    ${buttons.length > 0 ? `
+                    <div class="d-flex gap-3 justify-content-center flex-wrap mt-4" data-aos="fade-up" data-aos-delay="200">
+                        ${buttonsHTML}
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    </section>
+    `;
+
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = heroHTML;
+    } else {
+        console.warn(`Hero container with ID "${containerId}" not found`);
+    }
+}
+
+/**
+ * Inyecta el head común en el documento
+ * Nota: Esto debe llamarse ANTES de que el DOM esté completamente cargado
+ * @param {Object} options - Opciones para generateHead
+ */
+function injectHead(options = {}) {
+    if (document.head) {
+        const headHTML = generateHead(options);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = headHTML;
+        
+        // Mover todos los nodos al head
+        while (tempDiv.firstChild) {
+            document.head.appendChild(tempDiv.firstChild);
+        }
+    }
+}
+
+/**
+ * Inyecta los scripts comunes al final del body
+ * @param {Object} options - Opciones para generateScripts
+ */
+function injectScripts(options = {}) {
+    if (document.body) {
+        const scriptsHTML = generateScripts(options);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = scriptsHTML;
+        
+        // Mover todos los nodos al body
+        while (tempDiv.firstChild) {
+            document.body.appendChild(tempDiv.firstChild);
+        }
     }
 }
 

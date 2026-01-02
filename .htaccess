@@ -1,7 +1,11 @@
 RewriteEngine On
 
-# Redirigir /api a la carpeta backend (mantener URL /api)
-RewriteRule ^api/(.*)$ backend/index.php/$1 [L,QSA]
+# Redirigir /api a la carpeta api (que redirige al backend)
+# IMPORTANTE: Esta regla debe ir ANTES de las otras
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php?route=$1 [L,QSA]
 
 # Servir archivos del frontend desde la raíz
 # Si la petición es para un archivo o directorio que existe en frontend/, servirlo

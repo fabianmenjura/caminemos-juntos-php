@@ -23,19 +23,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Obtener la ruta
 $requestUri = $_SERVER['REQUEST_URI'];
-$scriptName = dirname($_SERVER['SCRIPT_NAME']);
-$path = str_replace($scriptName, '', $requestUri);
-$path = parse_url($path, PHP_URL_PATH);
+$scriptName = $_SERVER['SCRIPT_NAME'];
+
+// Si viene como parámetro GET (desde .htaccess con ?route=)
+if (isset($_GET['route']) && !empty($_GET['route'])) {
+    $path = $_GET['route'];
+} else {
+    // Extraer la ruta de la URI
+    $path = parse_url($requestUri, PHP_URL_PATH);
+    
+    // Si la ruta viene de /api/, extraer la parte después de /api/
+    if (strpos($path, '/api/') !== false) {
+        $path = substr($path, strpos($path, '/api/') + 5);
+    } elseif (strpos($path, '/backend/index.php/') !== false) {
+        // Si viene redirigido desde .htaccess como backend/index.php/...
+        $path = substr($path, strpos($path, '/backend/index.php/') + 19);
+    } elseif (strpos($path, 'index.php/') !== false) {
+        // Si viene como index.php/...
+        $path = substr($path, strpos($path, 'index.php/') + 10);
+    } else {
+        // Intentar extraer desde el script name
+        $basePath = dirname($scriptName);
+        if ($basePath !== '/' && strpos($path, $basePath) === 0) {
+            $path = substr($path, strlen($basePath));
+        }
+    }
+}
+
+// Limpiar la ruta
 $path = trim($path, '/');
 
 // Separar ruta y parámetros
 $segments = explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Debug (solo en desarrollo)
+if (defined('APP_DEBUG') && APP_DEBUG === 'true') {
+    error_log("API Request Debug:");
+    error_log("  REQUEST_URI: $requestUri");
+    error_log("  SCRIPT_NAME: $scriptName");
+    error_log("  Path extracted: $path");
+    error_log("  Segments: " . json_encode($segments));
+}
+
 try {
     // Rutas de la API
-    if (empty($segments[0])) {
-        Response::json(['message' => 'API Caminemos Juntos Colombia', 'version' => '1.0']);
+    if (empty($segments[0]) || $segments[0] === 'index.php') {
+        Response::json([
+            'message' => 'API Caminemos Juntos Colombia', 
+            'version' => '1.0',
+            'debug' => [
+                'request_uri' => $requestUri,
+                'script_name' => $scriptName,
+                'path' => $path,
+                'segments' => $segments
+            ]
+        ]);
     }
 
     // Health check
@@ -43,7 +86,13 @@ try {
         Response::success([
             'status' => 'OK',
             'message' => 'API funcionando correctamente',
-            'timestamp' => date('c')
+            'timestamp' => date('c'),
+            'debug' => [
+                'request_uri' => $requestUri,
+                'script_name' => $scriptName,
+                'path' => $path,
+                'segments' => $segments
+            ]
         ]);
     }
 
@@ -431,6 +480,19 @@ try {
 
 } catch (Exception $e) {
     error_log("Error en router: " . $e->getMessage());
-    Response::serverError('Error interno del servidor');
+    error_log("Stack trace: " . $e->getTraceAsString());
+    
+    // En modo debug, mostrar más información
+    if (defined('APP_DEBUG') && APP_DEBUG === 'true') {
+        Response::json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => explode("\n", $e->getTraceAsString())
+        ], 500);
+    } else {
+        Response::serverError('Error interno del servidor');
+    }
 }
 ?>
