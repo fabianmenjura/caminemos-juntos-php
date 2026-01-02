@@ -35,10 +35,10 @@ mysql -u root caminemos_juntos < database/INSTALAR_BD_COMPLETA.sql
 # O alternativamente: database/ejecutar-todos-los-scripts.sql
 
 # 3. Configurar .env
-cp api/config.example.env api/.env
+cp backend/config.example.env backend/.env
 
 # 4. Abrir en el navegador
-http://localhost/caminemos-juntos-php/index.html
+http://localhost/caminemos-juntos-php/
 ```
 
 ### Acceso al Admin
@@ -48,6 +48,27 @@ URL: http://localhost/caminemos-juntos-php/admin/login.html
 Usuario: admin
 Contraseña: Admin123!
 ```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+caminemos-juntos-php/
+├── frontend/          # 🎨 Frontend (HTML, CSS, JS)
+│   ├── index.html
+│   ├── admin/        # Panel de administración
+│   └── assets/       # Recursos estáticos
+├── backend/           # ⚙️ Backend (PHP API)
+│   ├── controllers/
+│   ├── services/
+│   └── config/
+├── database/          # Scripts SQL
+├── docs/              # Documentación
+└── logs/              # Logs del sistema
+```
+
+**Nota:** Las URLs públicas mantienen `/api/` pero físicamente el código está en `backend/`.
 
 ---
 

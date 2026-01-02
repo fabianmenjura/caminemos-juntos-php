@@ -35,7 +35,7 @@ git remote add origin https://github.com/fabianmenjura/caminemos-juntos-php.git
 Asegúrate de que `.gitignore` incluye:
 ```
 .env
-api/.env
+backend/.env
 *.log
 tmp/
 vendor/
@@ -160,7 +160,7 @@ git reset --hard origin/production
 ### 3.4 Crear el archivo .env en Hostinger
 
 ```bash
-cd ~/public_html/api
+cd ~/public_html/backend
 nano .env
 ```
 
@@ -200,7 +200,7 @@ find . -type f -exec chmod 644 {} \;
 find . -type d -exec chmod 755 {} \;
 
 # .env más seguro: 600
-chmod 600 api/.env
+chmod 600 backend/.env
 
 # Asegurar que .htaccess es ejecutable
 chmod 644 .htaccess
@@ -246,15 +246,15 @@ git reset --hard origin/production
 echo "🔧 Verificando configuración..."
 
 # Verificar que .env existe
-if [ ! -f "api/.env" ]; then
-    echo "⚠️ ADVERTENCIA: Falta api/.env - Debes crearlo manualmente"
+if [ ! -f "backend/.env" ]; then
+    echo "⚠️ ADVERTENCIA: Falta backend/.env - Debes crearlo manualmente"
 fi
 
 # Configurar permisos
 echo "🔐 Configurando permisos..."
 find . -type f -exec chmod 644 {} \;
 find . -type d -exec chmod 755 {} \;
-chmod 600 api/.env 2>/dev/null
+chmod 600 backend/.env 2>/dev/null
 
 echo "✅ Despliegue completado!"
 echo "🌐 Verifica tu sitio: https://tudominio.com"
@@ -395,7 +395,7 @@ git status
 # Si ves .env, ¡NO HAGAS PUSH!
 # Agregarlo al .gitignore:
 echo ".env" >> .gitignore
-echo "api/.env" >> .gitignore
+echo "backend/.env" >> .gitignore
 git add .gitignore
 git commit -m "Add .env to gitignore"
 ```
@@ -405,7 +405,7 @@ git commit -m "Add .env to gitignore"
 ```bash
 # Remover del historial
 git rm --cached .env
-git rm --cached api/.env
+git rm --cached backend/.env
 git commit -m "Remove .env from repository"
 git push origin production --force
 ```

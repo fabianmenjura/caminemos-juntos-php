@@ -63,12 +63,13 @@ Antes de empezar, necesitas:
 Tu carpeta debe verse así:
 ```
 C:\laragon\www\caminemos-juntos-php\
-├── api/
-├── assets/
+├── frontend/
+│   ├── index.html
+│   ├── donar.html
+│   ├── admin/
+│   └── assets/
+├── backend/
 ├── database/
-├── donacion/
-├── index.html
-├── donar.html
 └── .htaccess
 ```
 
@@ -132,10 +133,10 @@ C:\laragon\www\caminemos-juntos-php\
 
 ## ⚙️ Paso 4: Configurar el Archivo .env
 
-### 4.1 Navegar a la Carpeta api
+### 4.1 Navegar a la Carpeta backend
 
 1. Abre el Explorador de Windows
-2. Ve a: `C:\laragon\www\caminemos-juntos-php\api`
+2. Ve a: `C:\laragon\www\caminemos-juntos-php\backend`
 
 ### 4.2 Crear el Archivo .env
 

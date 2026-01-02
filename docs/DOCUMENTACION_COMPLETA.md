@@ -104,9 +104,9 @@ SOURCE C:/laragon/www/caminemos-juntos-php/database/crear-triggers-notificacione
 #### 3. Configurar Variables de Entorno
 ```bash
 # Copiar archivo de ejemplo
-cp api/config.example.env api/.env
+cp backend/config.example.env backend/.env
 
-# Editar api/.env con tus credenciales
+# Editar backend/.env con tus credenciales
 DB_HOST=localhost
 DB_NAME=caminemos_juntos
 DB_USER=root
@@ -159,7 +159,7 @@ cd caminemos-juntos-php
 #### 3. Configurar Base de Datos
 - Crear base de datos desde el panel de Hostinger
 - Importar todos los archivos SQL desde phpMyAdmin
-- Actualizar `api/.env` con credenciales de producción
+- Actualizar `backend/.env` con credenciales de producción
 
 #### 4. Configurar .htaccess
 El `.htaccess` ya está configurado para detectar automáticamente si está en local o producción.

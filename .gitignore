@@ -3,7 +3,7 @@
 # =====================================================
 
 # Configuración local
-api/.env
+backend/.env
 .env
 
 # Logs
@@ -11,8 +11,8 @@ logs/*.log
 !logs/.gitkeep
 
 # Imágenes subidas por usuarios
-assets/images/uploads/*
-!assets/images/uploads/.gitkeep
+frontend/assets/images/uploads/*
+!frontend/assets/images/uploads/.gitkeep
 
 # Archivos temporales de PHP
 *.tmp
