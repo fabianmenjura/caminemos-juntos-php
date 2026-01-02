@@ -191,6 +191,16 @@ img {
   width: 60%;
 }
 
+.nav-link.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  background-color: var(--bg-light);
+}
+
+.nav-link.active::after {
+  width: 60%;
+}
+
 .btn-donate {
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   border: none;

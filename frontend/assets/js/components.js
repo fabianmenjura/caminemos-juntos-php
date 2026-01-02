@@ -166,77 +166,68 @@ function getApiBase() {
 
 /**
  * Header Component
+ * Navbar unificado para todas las páginas - mismo diseño y estructura
  */
 function loadHeader(currentPage = '') {
-    // Header especial para index con botón Donar
-    const isIndex = currentPage === 'index';
+    // Determinar si estamos en la página index
+    const isIndex = currentPage === 'index' || 
+                    window.location.pathname.includes('index.html') || 
+                    window.location.pathname === '/' || 
+                    window.location.pathname.endsWith('/');
     
-    const header = isIndex ? `
+    // Navbar unificado - mismo estilo y estructura en todas las páginas
+    // Solo cambia el fondo si NO es index (para que se vea sobre el hero)
+    const header = `
     <header class="main-header fixed-top">
-        <nav class="navbar navbar-expand-lg navbar-light">
+        <nav class="navbar navbar-expand-lg navbar-light ${isIndex ? '' : 'bg-white shadow-sm'}">
             <div class="container">
                 <a class="navbar-brand" href="index.html">
                     <img src="${CONFIG.logo}" 
                          alt="Logo Caminemos Juntos Chiquinquirá - Acompañamiento adultos mayores Boyacá" 
                          class="logo"
-                         width="50"
-                         height="50">
+                         width="45"
+                         height="45">
                     <span class="brand-text">${CONFIG.siteName}</span>
                 </a>
                 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link" href="#acerca">Acerca de</a></li>
-                        <li class="nav-item"><a class="nav-link" href="abuelos.html">Adultos Mayores</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#donar">Donar</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
                         <li class="nav-item">
+                            <a class="nav-link ${currentPage === 'index' || isIndex ? 'active' : ''}" 
+                               href="${isIndex ? '#acerca' : 'index.html#acerca'}">
+                                Acerca de
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link ${currentPage === 'abuelos' ? 'active' : ''}" 
+                               href="${isIndex ? '#abuelos' : 'abuelos.html'}">
+                                Adultos Mayores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link ${currentPage === 'donar' ? 'active' : ''}" 
+                               href="donar.html">
+                                Donar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html#voluntarios">
+                                Voluntariado
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${isIndex ? '#contacto' : 'index.html#contacto'}">
+                                Contacto
+                            </a>
+                        </li>
+                        <li class="nav-item ms-2">
                             <a href="donar.html" class="btn btn-primary btn-donate">
                                 <i class="fas fa-heart me-2"></i>Donar Ahora
                             </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    ` : `
-    <header class="main-header fixed-top">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="index.html">
-                    <img src="${CONFIG.logo}" 
-                         alt="Logo Caminemos Juntos Chiquinquirá" 
-                         class="logo"
-                         width="40"
-                         height="40">
-                    <span class="brand-text">${CONFIG.siteName}</span>
-                </a>
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link ${currentPage === 'index' ? 'active' : ''}" href="index.html">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link ${currentPage === 'abuelos' ? 'active' : ''}" href="abuelos.html">Adultos Mayores</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link ${currentPage === 'donar' ? 'active' : ''}" href="donar.html">Donar</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html#voluntarios">Voluntariado</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html#contacto">Contacto</a>
                         </li>
                     </ul>
                 </div>
@@ -248,7 +239,118 @@ function loadHeader(currentPage = '') {
     const headerContainer = document.getElementById('header-container');
     if (headerContainer) {
         headerContainer.innerHTML = header;
+        
+        // Inicializar scroll spy solo en index.html
+        if (isIndex) {
+            initScrollSpy();
+        }
     }
+}
+
+/**
+ * Scroll Spy - Actualiza el enlace activo según la sección visible
+ */
+function initScrollSpy() {
+    // Esperar a que el DOM esté completamente cargado
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setupScrollSpy();
+        });
+    } else {
+        setupScrollSpy();
+    }
+}
+
+function setupScrollSpy() {
+    const sections = [
+        { id: 'acerca', selector: '#acerca' },
+        { id: 'abuelos', selector: '#abuelos' },
+        { id: 'donar', selector: '#donar' },
+        { id: 'voluntarios', selector: '#voluntarios' },
+        { id: 'contacto', selector: '#contacto' }
+    ];
+    
+    // Función para actualizar el enlace activo
+    function updateActiveLink() {
+        const navLinks = document.querySelectorAll('#navbarNav .nav-link');
+        if (!navLinks.length) return;
+        
+        const scrollPosition = window.scrollY + 200; // Offset para activar antes
+        let activeSection = null;
+        let minDistance = Infinity;
+        
+        // Buscar qué sección está más cerca del viewport
+        sections.forEach(section => {
+            const element = document.querySelector(section.selector);
+            if (element) {
+                const rect = element.getBoundingClientRect();
+                const elementTop = window.scrollY + rect.top;
+                const elementBottom = elementTop + rect.height;
+                
+                // Si la sección está visible en el viewport
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    const distance = Math.abs(rect.top);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        activeSection = section.id;
+                    }
+                }
+                
+                // Si estamos antes de la sección pero cerca
+                if (scrollPosition >= elementTop - 100 && scrollPosition < elementBottom) {
+                    activeSection = section.id;
+                }
+            }
+        });
+        
+        // Actualizar clases activas
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            
+            const href = link.getAttribute('href');
+            if (!href) return;
+            
+            // Verificar si el enlace corresponde a la sección activa
+            if (activeSection) {
+                // Verificar si el href contiene el ID de la sección activa
+                const isActive = href.includes(activeSection) || 
+                                href === `#${activeSection}` || 
+                                (href === 'abuelos.html' && activeSection === 'abuelos') ||
+                                (href.includes('abuelos') && activeSection === 'abuelos');
+                
+                if (isActive) {
+                    link.classList.add('active');
+                }
+            } else {
+                // Si no hay sección activa y estamos en el top, activar "Acerca de"
+                if (window.scrollY < 300 && (href === '#acerca' || href.includes('#acerca'))) {
+                    link.classList.add('active');
+                }
+            }
+        });
+    }
+    
+    // Ejecutar al cargar
+    setTimeout(updateActiveLink, 100);
+    
+    // Ejecutar al hacer scroll (con throttling para mejor rendimiento)
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                updateActiveLink();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+    
+    // También actualizar cuando se hace click en un enlace (para smooth scroll)
+    document.querySelectorAll('#navbarNav .nav-link[href^="#"]').forEach(link => {
+        link.addEventListener('click', () => {
+            setTimeout(updateActiveLink, 500); // Esperar a que termine el smooth scroll
+        });
+    });
 }
 
 /**
