@@ -50,3 +50,4 @@ backup/
 
 # Documentación temporal
 *.tmp.md
+/assets/images

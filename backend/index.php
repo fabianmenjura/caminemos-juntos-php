@@ -224,6 +224,18 @@ try {
         exit;
     }
 
+    // Rutas de galería (público)
+    if ($segments[0] === 'galeria') {
+        require_once __DIR__ . '/controllers/GaleriaController.php';
+        $controller = new GaleriaController();
+
+        if ($method === 'GET') {
+            // GET /api/galeria
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de mensajes de cumpleaños
     if ($segments[0] === 'cumpleanos') {
         require_once __DIR__ . '/controllers/MensajesCumpleanosController.php';
@@ -450,6 +462,8 @@ try {
                 $controller->getAcercaDe();
             } elseif ($segments[1] === 'trabajo-social') {
                 $controller->getTrabajoSocial();
+            } elseif ($segments[1] === 'galeria') {
+                $controller->getGaleria();
             } elseif ($segments[1] === 'configuracion') {
                 $controller->getConfiguracion();
             }
@@ -460,6 +474,8 @@ try {
                 $controller->createHeroSlide();
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->createPatrocinador();
+            } elseif ($segments[1] === 'galeria') {
+                $controller->createImagenGaleria();
             } elseif ($segments[1] === 'categorias-voluntariado') {
                 $controller->createCategoriaVoluntariado();
             } elseif ($segments[1] === 'acerca-de' && isset($segments[2])) {
@@ -493,6 +509,8 @@ try {
                 $controller->updateHeroSlide($segments[2]);
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->updatePatrocinador($segments[2]);
+            } elseif ($segments[1] === 'galeria') {
+                $controller->updateImagenGaleria($segments[2]);
             } elseif ($segments[1] === 'mensajes-cumpleanos' && isset($segments[3]) && $segments[3] === 'aprobar') {
                 // PUT /api/admin/mensajes-cumpleanos/{id}/aprobar
                 $controller->aprobarMensajeCumpleanos($segments[2]);
@@ -516,6 +534,8 @@ try {
                 $controller->deleteHeroSlide($segments[2]);
             } elseif ($segments[1] === 'patrocinadores') {
                 $controller->deletePatrocinador($segments[2]);
+            } elseif ($segments[1] === 'galeria') {
+                $controller->deleteImagenGaleria($segments[2]);
             } elseif ($segments[1] === 'mensajes-cumpleanos') {
                 $controller->deleteMensajeCumpleanos($segments[2]);
             } elseif ($segments[1] === 'categorias-voluntariado') {

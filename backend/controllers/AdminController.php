@@ -747,6 +747,152 @@ class AdminController {
         }
     }
     
+    // ===== GALERÍA =====
+    
+    public function getGaleria() {
+        try {
+            $imagenes = $this->db->fetchAll(
+                "SELECT * FROM galeria WHERE deleted = 0 ORDER BY orden ASC, id DESC"
+            );
+            
+            Logger::debug("getGaleria: Encontradas " . count($imagenes) . " imágenes");
+            return Response::success(['imagenes' => $imagenes, 'total' => count($imagenes)]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener galería", ['error' => $e->getMessage()]);
+            return Response::error('Error al obtener galería', null, 500);
+        }
+    }
+    
+    public function createImagenGaleria() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (!$data) {
+                return Response::error('Datos inválidos', null, 400);
+            }
+            
+            $tipo = $data['tipo'] ?? 'imagen';
+            
+            if ($tipo === 'video') {
+                if (empty($data['video_url'])) {
+                    return Response::error('La URL del video es requerida', null, 400);
+                }
+                // Para videos, imagen_url puede ser NULL
+                $imagen_url = null;
+                $video_url = $data['video_url'];
+            } else {
+                if (empty($data['imagen_url'])) {
+                    return Response::error('La URL de la imagen es requerida', null, 400);
+                }
+                $imagen_url = $data['imagen_url'];
+                $video_url = null;
+            }
+            
+            // Verificar que la tabla tenga los campos necesarios
+            try {
+                $this->db->execute(
+                    "INSERT INTO galeria (titulo, descripcion, tipo, imagen_url, video_url, orden, activo, categoria) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    [
+                        $data['titulo'] ?? null,
+                        $data['descripcion'] ?? null,
+                        $tipo,
+                        $imagen_url,
+                        $video_url,
+                        $data['orden'] ?? 0,
+                        $data['activo'] ?? 1,
+                        $data['categoria'] ?? null
+                    ]
+                );
+            } catch (PDOException $dbError) {
+                // Si falla porque falta el campo tipo o video_url, o imagen_url no es nullable
+                $errorMsg = $dbError->getMessage();
+                Logger::error("Error de BD al insertar en galería", [
+                    'error' => $errorMsg,
+                    'code' => $dbError->getCode()
+                ]);
+                
+                if (strpos($errorMsg, "Unknown column 'tipo'") !== false || 
+                    strpos($errorMsg, "Unknown column 'video_url'") !== false) {
+                    return Response::error('Por favor ejecuta primero el script SQL: database/add-video-support-galeria.sql para agregar soporte de videos', null, 500);
+                } elseif (strpos($errorMsg, "Column 'imagen_url' cannot be null") !== false || 
+                          strpos($errorMsg, "cannot be null") !== false) {
+                    return Response::error('El campo imagen_url no permite NULL. Por favor ejecuta primero: ALTER TABLE galeria MODIFY COLUMN imagen_url VARCHAR(500) DEFAULT NULL;', null, 500);
+                }
+                
+                return Response::error('Error en la base de datos: ' . $errorMsg, null, 500);
+            } catch (Exception $dbError) {
+                // Otras excepciones
+                Logger::error("Error al insertar en galería", [
+                    'error' => $dbError->getMessage(),
+                    'trace' => $dbError->getTraceAsString()
+                ]);
+                return Response::error('Error: ' . $dbError->getMessage(), null, 500);
+            }
+            
+            $id = $this->db->lastInsertId();
+            $this->authService->logActivity($this->user['id'], 'CREAR_IMAGEN_GALERIA', 'galeria', $id);
+            
+            Logger::debug("createImagenGaleria: Item #$id creado (tipo: $tipo)");
+            return Response::success(['id' => $id], $tipo === 'video' ? 'Video agregado a la galería' : 'Imagen agregada a la galería');
+        } catch (Exception $e) {
+            Logger::error("Error al crear item galería", [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return Response::error('Error al crear: ' . $e->getMessage(), null, 500);
+        }
+    }
+    
+    public function updateImagenGaleria($id) {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $updates = [];
+            $params = [];
+            
+            $allowedFields = ['titulo', 'descripcion', 'tipo', 'imagen_url', 'video_url', 'orden', 'activo', 'categoria'];
+            
+            foreach ($allowedFields as $field) {
+                if (isset($data[$field])) {
+                    $updates[] = "$field = ?";
+                    $params[] = $data[$field];
+                }
+            }
+            
+            if (empty($updates)) {
+                return Response::error('No hay campos para actualizar', null, 400);
+            }
+            
+            $params[] = $id;
+            $sql = "UPDATE galeria SET " . implode(', ', $updates) . " WHERE id = ? AND deleted = 0";
+            
+            $this->db->execute($sql, $params);
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_IMAGEN_GALERIA', 'galeria', $id);
+            
+            Logger::debug("updateImagenGaleria: Imagen #$id actualizada");
+            return Response::success(null, 'Imagen actualizada');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar imagen galería", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
+    public function deleteImagenGaleria($id) {
+        try {
+            $this->db->execute("UPDATE galeria SET deleted = 1 WHERE id = ?", [$id]);
+            $this->authService->logActivity($this->user['id'], 'ELIMINAR_IMAGEN_GALERIA', 'galeria', $id);
+            
+            Logger::debug("deleteImagenGaleria: Imagen #$id eliminada");
+            return Response::success(null, 'Imagen eliminada');
+        } catch (Exception $e) {
+            Logger::error("Error al eliminar imagen galería", ['error' => $e->getMessage()]);
+            return Response::error('Error al eliminar', null, 500);
+        }
+    }
+    
     // ===== MENSAJES DE CUMPLEAÑOS =====
     
     public function getMensajesCumpleanos() {

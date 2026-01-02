@@ -701,6 +701,221 @@ section {
 }
 
 /* ============================================
+   GALERÍA SECTION - CAROUSEL
+   ============================================ */
+.section-galeria {
+  background: white;
+  padding: 6rem 0;
+}
+
+.gallery-carousel-wrapper {
+  position: relative;
+  padding: 0 60px;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.gallery-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery-carousel-track {
+  display: flex;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.gallery-item {
+  position: relative;
+  flex: 0 0 25%;
+  min-width: 25%;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+.gallery-item:hover img {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Video items en galería */
+.gallery-item-video {
+  position: relative;
+}
+
+.video-wrapper {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.video-wrapper {
+  height: 100%;
+}
+
+.video-wrapper img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  transition: var(--transition-base);
+  display: block;
+}
+
+.video-play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 0, 0, 0.9);
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-base);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.video-wrapper:hover .video-play-button {
+  background: #ff0000;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.video-play-button i {
+  color: white;
+  font-size: 2.5rem;
+  margin-left: 4px;
+}
+
+.gallery-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.gallery-carousel-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery-carousel-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.gallery-carousel-prev {
+  left: 0;
+}
+
+.gallery-carousel-next {
+  right: 0;
+}
+
+.gallery-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.gallery-carousel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dee2e6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.gallery-carousel-dot:hover {
+  background: var(--primary-color);
+  transform: scale(1.2);
+}
+
+.gallery-carousel-dot.active {
+  background: var(--primary-color);
+  width: 32px;
+  border-radius: 6px;
+}
+
+/* Lightbox */
+#galeria-lightbox .modal-content {
+  background: rgba(0, 0, 0, 0.95);
+  border: none;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: var(--transition-base);
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-prev {
+  left: 20px;
+}
+
+.lightbox-next {
+  right: 20px;
+}
+
+.lightbox-nav i {
+  font-size: 1.2rem;
+  color: white;
+}
+
+/* ============================================
    DONATION SECTION
    ============================================ */
 .section-donation {
@@ -2022,8 +2237,22 @@ textarea.form-control {
   .section-contact,
   .section-testimonios,
   .section-voluntarios,
-  .section-patrocinadores {
+  .section-patrocinadores,
+  .section-galeria {
     padding: 4rem 0;
+  }
+
+  .lightbox-nav {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .lightbox-prev {
+    left: 10px;
+  }
+  
+  .lightbox-next {
+    right: 10px;
   }
 
   .volunteer-category-image {

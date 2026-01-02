@@ -671,6 +671,41 @@
         </div>
     </section>
 
+    <!-- Galería Section -->
+    <section id="galeria" class="section-galeria">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="section-label">Galería</span>
+                <h2 class="section-title">Momentos Compartidos</h2>
+                <p class="section-description">Capturas especiales de nuestro trabajo y los momentos que compartimos</p>
+            </div>
+            
+            <div id="galeria-loading" class="text-center py-5">
+                <div class="custom-spinner">
+                    <div class="spinner-border"></div>
+                    <p class="mt-3">Cargando galería...</p>
+                </div>
+            </div>
+            
+            <div id="galeria-container" class="gallery-carousel-wrapper" style="display: none;">
+                <button class="gallery-carousel-btn gallery-carousel-prev" onclick="changeGallerySlide(-1)" aria-label="Anterior">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="gallery-carousel">
+                    <div class="gallery-carousel-track" id="galeria-track">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+                <button class="gallery-carousel-btn gallery-carousel-next" onclick="changeGallerySlide(1)" aria-label="Siguiente">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="gallery-carousel-dots" id="galeria-dots">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Patrocinadores Section -->
     <section id="patrocinadores" class="section-patrocinadores">
         <div class="container">
@@ -685,6 +720,28 @@
             </div>
         </div>
     </section>
+
+    <!-- Lightbox Galería -->
+    <div class="modal fade" id="galeria-lightbox" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 position-relative">
+                    <img id="lightbox-image" src="" alt="" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
+                    <button class="btn btn-light lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-light lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="modal-footer bg-dark border-0" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
 
      <!-- Modal Testimonio  -->
     <div class="modal fade" id="testimonioModal" tabindex="-1">

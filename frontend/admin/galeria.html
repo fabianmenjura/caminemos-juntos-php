@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    <link rel="shortcut icon" type="image/png" href="../assets/images/placeholder-logo.png">
+    
+    <title>Galería - Panel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <style>
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            aspect-ratio: 1;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .gallery-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .gallery-item:hover .gallery-item-overlay {
+            opacity: 1;
+        }
+        
+        .gallery-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .gallery-item-actions .btn {
+            padding: 8px 12px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--color-primary);
+            background: #fff;
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--color-primary);
+            background: rgba(234, 163, 58, 0.1);
+        }
+        
+        .badge-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main -->
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1><i class="fas fa-images me-2"></i>Galería de Imágenes</h1>
+                <p class="text-muted mb-0 small">Las imágenes se mostrarán en la página principal</p>
+            </div>
+        </div>
+        
+        <div class="content-wrapper">
+            <!-- Área de subida -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Agregar Contenido a la Galería</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Tabs para elegir tipo -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="imagen-tab" data-bs-toggle="tab" data-bs-target="#imagen-panel" type="button" role="tab">
+                                <i class="fas fa-image me-2"></i>Imágenes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video-panel" type="button" role="tab">
+                                <i class="fab fa-youtube me-2"></i>Videos de YouTube
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Panel de Imágenes -->
+                        <div class="tab-pane fade show active" id="imagen-panel" role="tabpanel">
+                            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h5>Arrastra imágenes aquí o haz clic para seleccionar</h5>
+                                <p class="text-muted mb-0">Formatos: JPG, PNG, GIF, WEBP (máx. 5MB por imagen)</p>
+                                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                            </div>
+                        </div>
+                        
+                        <!-- Panel de Videos -->
+                        <div class="tab-pane fade" id="video-panel" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fab fa-youtube me-2 text-danger"></i>URL del Video de YouTube
+                                </label>
+                                <input type="url" class="form-control form-control-lg" id="youtubeUrl" 
+                                       placeholder="https://www.youtube.com/watch?v=VIDEO_ID o https://youtu.be/VIDEO_ID">
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Pega la URL completa del video de YouTube
+                                </small>
+                            </div>
+                            <button class="btn btn-danger btn-lg w-100" onclick="addYouTubeVideo()">
+                                <i class="fab fa-youtube me-2"></i>Agregar Video
+                            </button>
+                        </div>
+                    </div>
+                    <div id="uploadProgress" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <p class="text-center text-muted mt-2 mb-0">Subiendo imágenes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grid de imágenes -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-images me-2"></i>Imágenes en la Galería</h5>
+                    <span class="badge bg-primary" id="imageCount">0 imágenes</span>
+                </div>
+                <div class="card-body">
+                    <div id="loading" class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="text-muted mt-2">Cargando imágenes...</p>
+                    </div>
+                    
+                    <div id="galleryGrid" class="gallery-grid" style="display: none;">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                    
+                    <div id="noImages" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-images fa-4x text-muted mb-3"></i>
+                        <p class="text-muted">No hay imágenes en la galería</p>
+                        <p class="text-muted small">Sube imágenes usando el área de arriba</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/admin-components.js"></script>
+    <script src="assets/js/admin-auth.js"></script>
+    <script src="assets/js/admin-api.js"></script>
+    <script>
+        let imagenes = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await requireAuth();
+            await initAdminComponents('galeria');
+            loadGaleria();
+            
+            // Drag and drop
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+                if (files.length > 0) {
+                    uploadImages(files);
+                }
+            });
+        });
+
+        async function loadGaleria() {
+            try {
+                const response = await adminAPI.get('admin/galeria');
+                if (response.success) {
+                    imagenes = response.data.imagenes;
+                    renderGaleria();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudieron cargar las imágenes', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Función para extraer ID de video de YouTube y generar thumbnail
+        function getYouTubeThumbnail(url) {
+            if (!url) return '';
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            const videoId = (match && match[2].length === 11) ? match[2] : null;
+            if (videoId) {
+                return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            }
+            return '';
+        }
+
+        function renderGaleria() {
+            const grid = document.getElementById('galleryGrid');
+            const noImages = document.getElementById('noImages');
+            const imageCount = document.getElementById('imageCount');
+            
+            imageCount.textContent = `${imagenes.length} item${imagenes.length !== 1 ? 's' : ''}`;
+            
+            if (imagenes.length === 0) {
+                grid.style.display = 'none';
+                noImages.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noImages.style.display = 'none';
+            
+            grid.innerHTML = imagenes.map(img => {
+                const isVideo = img.tipo === 'video';
+                const thumbnail = isVideo ? getYouTubeThumbnail(img.video_url) : `../${img.imagen_url || ''}`;
+                
+                return `
+                <div class="gallery-item">
+                    ${isVideo ? `
+                        <div style="position: relative; width: 100%; height: 100%;">
+                            <img src="${thumbnail}" alt="Video de YouTube" loading="lazy" style="object-fit: cover;">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,0,0,0.8); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fab fa-youtube text-white" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    ` : `
+                        <img src="${thumbnail}" alt="${img.titulo || 'Imagen galería'}" loading="lazy">
+                    `}
+                    <span class="badge badge-status ${img.activo ? 'bg-success' : 'bg-secondary'}">
+                        ${img.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                    ${isVideo ? `<span class="badge bg-danger position-absolute top-0 start-0 m-2"><i class="fab fa-youtube me-1"></i>Video</span>` : ''}
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-actions">
+                            <button class="btn btn-sm btn-light" onclick="toggleActivo(${img.id}, ${img.activo})" title="${img.activo ? 'Desactivar' : 'Activar'}">
+                                <i class="fas fa-${img.activo ? 'eye-slash' : 'eye'}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarImagen(${img.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            if (files.length > 0) {
+                uploadImages(files);
+            }
+            event.target.value = '';
+        }
+
+        async function addYouTubeVideo() {
+            const videoUrl = document.getElementById('youtubeUrl').value.trim();
+            
+            if (!videoUrl) {
+                Swal.fire('Error', 'Por favor ingresa la URL del video', 'error');
+                return;
+            }
+            
+            // Validar que sea una URL de YouTube
+            const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+            if (!youtubeRegex.test(videoUrl)) {
+                Swal.fire('Error', 'Por favor ingresa una URL válida de YouTube', 'error');
+                return;
+            }
+            
+            try {
+                Swal.fire({
+                    title: 'Agregando video...',
+                    html: 'Por favor espera',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const response = await adminAPI.post('admin/galeria', {
+                    tipo: 'video',
+                    video_url: videoUrl,
+                    activo: 1,
+                    orden: imagenes.length
+                });
+                
+                Swal.close();
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Video agregado!',
+                        text: 'El video se ha agregado correctamente a la galería',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    document.getElementById('youtubeUrl').value = '';
+                    loadGaleria();
+                } else {
+                    Swal.fire('Error', response.message || 'No se pudo agregar el video', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.close();
+                Swal.fire('Error', 'Hubo un error al agregar el video', 'error');
+            }
+        }
+
+        async function uploadImages(files) {
+            const validFiles = files.filter(file => {
+                if (!file.type.startsWith('image/')) {
+                    Swal.fire('Error', `El archivo ${file.name} no es una imagen`, 'error');
+                    return false;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire('Error', `La imagen ${file.name} es demasiado grande (máx. 5MB)`, 'error');
+                    return false;
+                }
+                return true;
+            });
+            
+            if (validFiles.length === 0) return;
+            
+            document.getElementById('uploadProgress').style.display = 'block';
+            
+            try {
+                let uploaded = 0;
+                for (const file of validFiles) {
+                    try {
+                        // Subir imagen
+                        const uploadResult = await adminAPI.uploadImage(file);
+                        
+                        if (uploadResult.success) {
+                            // Crear registro en galería
+                            await adminAPI.post('admin/galeria', {
+                                tipo: 'imagen',
+                                imagen_url: uploadResult.data.url,
+                                titulo: file.name.replace(/\.[^/.]+$/, ''),
+                                activo: 1,
+                                orden: imagenes.length + uploaded
+                            });
+                            uploaded++;
+                        }
+                    } catch (error) {
+                        console.error(`Error al subir ${file.name}:`, error);
+                    }
+                }
+                
+                document.getElementById('uploadProgress').style.display = 'none';
+                
+                if (uploaded > 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: `${uploaded} imagen${uploaded !== 1 ? 'es' : ''} subida${uploaded !== 1 ? 's' : ''} correctamente`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    loadGaleria();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('uploadProgress').style.display = 'none';
+                Swal.fire('Error', 'Hubo un error al subir las imágenes', 'error');
+            }
+        }
+
+        async function toggleActivo(id, currentStatus) {
+            try {
+                const response = await adminAPI.put(`admin/galeria/${id}`, {
+                    activo: currentStatus ? 0 : 1
+                });
+                
+                if (response.success) {
+                    loadGaleria();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'No se pudo cambiar el estado', 'error');
+            }
+        }
+
+        async function eliminarImagen(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar imagen?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    const response = await adminAPI.delete(`admin/galeria/${id}`);
+                    
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Eliminada',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        loadGaleria();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'No se pudo eliminar la imagen', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+

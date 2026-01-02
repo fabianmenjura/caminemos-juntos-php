@@ -57,6 +57,9 @@ function loadAdminSidebar(currentPage = '') {
             <a href="patrocinadores.html" class="menu-item ${currentPage === 'patrocinadores' ? 'active' : ''}">
                 <i class="fas fa-handshake"></i><span>Patrocinadores</span>
             </a>
+            <a href="galeria.html" class="menu-item ${currentPage === 'galeria' ? 'active' : ''}">
+                <i class="fas fa-images"></i><span>Galería</span>
+            </a>
             <a href="mensajes-cumpleanos.html" class="menu-item ${currentPage === 'mensajes-cumpleanos' ? 'active' : ''}">
                 <i class="fas fa-birthday-cake"></i><span>Felicitaciones</span>
             </a>
