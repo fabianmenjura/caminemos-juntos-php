@@ -46,7 +46,7 @@ NUEVOS ARCHIVOS:
   📄 admin/testimonios.html
   📄 database/nuevas-funcionalidades.sql
   📄 NUEVAS_FUNCIONALIDADES.md
-  📄 NUEVAS_SECCIONES.html (archivo de referencia)
+  📄 archive/NUEVAS_SECCIONES.html (archivo de referencia - movido a archive/)
 
 ARCHIVOS MODIFICADOS:
   ✏️  index.html (agregadas 3 nuevas secciones)

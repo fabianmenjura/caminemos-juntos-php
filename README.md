@@ -31,7 +31,8 @@ git clone [URL] caminemos-juntos-php
 cd caminemos-juntos-php
 
 # 2. Importar base de datos
-mysql -u root caminemos_juntos < database/ejecutar-todos-los-scripts.sql
+mysql -u root caminemos_juntos < database/INSTALAR_BD_COMPLETA.sql
+# O alternativamente: database/ejecutar-todos-los-scripts.sql
 
 # 3. Configurar .env
 cp api/config.example.env api/.env
@@ -130,18 +131,24 @@ Contraseña: Admin123!
 
 ```
 caminemos-juntos-php/
-├── index.html              # Página principal
+├── README.md              # Documentación principal
+├── .htaccess              # Configuración Apache
+├── sitemap.xml            # SEO
+├── robots.txt             # SEO
+├── index.html             # Página principal
 ├── abuelos.html           # Galería de abuelos
 ├── donar.html             # Donaciones con QR
+├── donacion/              # Páginas de resultado de donación
 ├── admin/                 # Panel de administración (15 páginas)
 ├── api/                   # Backend PHP (17 controladores)
 ├── assets/                # CSS, JS, imágenes
-├── database/              # Scripts SQL (13 archivos)
+├── database/              # Scripts SQL (ver database/README.md)
 ├── docs/                  # Documentación completa
-├── logs/                  # Archivos de log
-├── .htaccess             # Configuración Apache
-└── README.md             # Este archivo
+├── archive/               # Archivos de referencia histórica
+└── logs/                  # Archivos de log
 ```
+
+Para más detalles sobre la estructura, consulta [docs/ESTRUCTURA_PROYECTO.md](docs/ESTRUCTURA_PROYECTO.md)
 
 ---
 

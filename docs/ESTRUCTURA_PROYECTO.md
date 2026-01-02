@@ -9,8 +9,6 @@
 ```
 caminemos-juntos-php/
 ├── README.md                    # 👈 LEE ESTO PRIMERO
-├── DOCUMENTACION_COMPLETA.md    # Documentación unificada
-├── INSTALAR_BD_COMPLETA.sql     # Script maestro de instalación
 ├── .htaccess                    # Configuración Apache
 ├── .gitignore                   # Archivos a ignorar en Git
 ├── index.html                   # 🏠 Página principal del sitio
@@ -18,7 +16,12 @@ caminemos-juntos-php/
 ├── donar.html                   # 💝 Página de donaciones con QR
 ├── robots.txt                   # SEO - Directivas para crawlers
 ├── sitemap.xml                  # SEO - Mapa del sitio
-└── ESTRUCTURA_PROYECTO.md       # 📁 Este archivo
+├── database/                    # Scripts SQL (ver database/README.md)
+│   └── INSTALAR_BD_COMPLETA.sql # Script maestro de instalación
+├── docs/                        # Documentación completa
+│   ├── DOCUMENTACION_COMPLETA.md # Documentación unificada
+│   └── ESTRUCTURA_PROYECTO.md   # 📁 Este archivo
+└── archive/                     # Archivos de referencia histórica
 ```
 
 ---
@@ -128,7 +131,7 @@ database/
 
 **Total:** 13 scripts SQL
 
-**Orden de ejecución:** Usar `INSTALAR_BD_COMPLETA.sql` en la raíz
+**Orden de ejecución:** Usar `database/INSTALAR_BD_COMPLETA.sql` (ver `database/README.md` para detalles)
 
 ---
 
@@ -137,7 +140,8 @@ database/
 ```
 docs/
 ├── README.md                    # Índice de documentación
-├── DOCUMENTACION_COMPLETA.md    # ⭐ Todo en uno
+├── docs/
+│   └── DOCUMENTACION_COMPLETA.md # ⭐ Todo en uno
 ├── INSTALACION_LOCAL.md
 ├── INSTALACION_HOSTINGER.md
 ├── GUIA_PANEL_ADMIN.md
@@ -281,7 +285,7 @@ Base de Datos:
 **1. Setup Inicial:**
 ```bash
 git clone [repo]
-mysql < INSTALAR_BD_COMPLETA.sql
+mysql < database/INSTALAR_BD_COMPLETA.sql
 cp api/config.example.env api/.env
 ```
 
