@@ -1158,6 +1158,67 @@ class AdminController {
         }
     }
     
+    // ===== SECCIÓN INFORMACIÓN INSTITUCIONAL =====
+    
+    public function getInformacionInstitucional() {
+        try {
+            $contenido = [];
+            
+            try {
+                $rows = $this->db->fetchAll("SELECT clave, contenido FROM seccion_informacion_institucional");
+                
+                foreach ($rows as $row) {
+                    $contenido[$row['clave']] = $row['contenido'];
+                }
+            } catch (Exception $dbError) {
+                Logger::warning("Tabla seccion_informacion_institucional no existe o error de BD", ['error' => $dbError->getMessage()]);
+                $contenido = [];
+            }
+            
+            Logger::debug("getInformacionInstitucional: Contenido obtenido");
+            return Response::success([
+                'titulo' => $contenido['titulo'] ?? 'Información Institucional',
+                'subtitulo' => $contenido['subtitulo'] ?? 'Conoce más sobre nuestra organización',
+                'descripcion' => $contenido['descripcion'] ?? '',
+                'imagen' => $contenido['imagen'] ?? 'assets/images/informacion-institucional-placeholder.jpg'
+            ]);
+        } catch (Exception $e) {
+            Logger::error("Error al obtener información institucional", ['error' => $e->getMessage()]);
+            return Response::success([
+                'titulo' => 'Información Institucional',
+                'subtitulo' => 'Conoce más sobre nuestra organización',
+                'descripcion' => '',
+                'imagen' => 'assets/images/informacion-institucional-placeholder.jpg'
+            ]);
+        }
+    }
+    
+    public function updateInformacionInstitucionalContenido() {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $campos = ['titulo', 'subtitulo', 'descripcion', 'imagen'];
+            
+            foreach ($campos as $campo) {
+                if (isset($data[$campo])) {
+                    $this->db->execute(
+                        "INSERT INTO seccion_informacion_institucional (clave, contenido) VALUES (?, ?) 
+                         ON DUPLICATE KEY UPDATE contenido = ?",
+                        [$campo, $data[$campo], $data[$campo]]
+                    );
+                }
+            }
+            
+            $this->authService->logActivity($this->user['id'], 'ACTUALIZAR_INFORMACION_INSTITUCIONAL', 'seccion_informacion_institucional', 0);
+            
+            Logger::debug("updateInformacionInstitucionalContenido: Contenido actualizado");
+            return Response::success(null, 'Contenido actualizado');
+        } catch (Exception $e) {
+            Logger::error("Error al actualizar información institucional", ['error' => $e->getMessage()]);
+            return Response::error('Error al actualizar', null, 500);
+        }
+    }
+    
     // ===== SECCIÓN ACERCA DE =====
     
     public function getAcercaDe() {

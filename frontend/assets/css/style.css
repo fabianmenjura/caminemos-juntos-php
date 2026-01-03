@@ -642,6 +642,49 @@ section {
   padding: 6rem 0;
 }
 
+.section-informacion-institucional {
+  background: var(--bg-cream);
+  padding: 6rem 0;
+}
+
+.section-informacion-institucional .section-label {
+  color: var(--primary-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.info-content {
+  background: white;
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.info-description {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-gray);
+  margin: 0;
+  text-align: justify;
+}
+
+.section-informacion-institucional img {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: var(--transition-base);
+  width: 100%;
+  height: auto;
+}
+
+.section-informacion-institucional img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
 .section-trabajo-social {
   background: var(--bg-cream);
   padding: 6rem 0;

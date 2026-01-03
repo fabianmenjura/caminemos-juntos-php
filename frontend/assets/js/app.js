@@ -754,6 +754,53 @@ async function loadCategoriasVoluntariado() {
     }
 }
 
+// Cargar sección "Información Institucional"
+async function loadInformacionInstitucional() {
+    try {
+        const response = await api.get('informacion-institucional');
+        
+        if (response.success) {
+            const loadingEl = document.getElementById('info-institucional-loading');
+            const contentEl = document.getElementById('info-institucional-content');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            // Título y subtítulo
+            const tituloEl = document.getElementById('info-titulo');
+            const subtituloEl = document.getElementById('info-subtitulo');
+            if (tituloEl && response.data.titulo) tituloEl.textContent = response.data.titulo;
+            if (subtituloEl && response.data.subtitulo) subtituloEl.textContent = response.data.subtitulo;
+            
+            // Descripción
+            const descripcionEl = document.getElementById('info-descripcion');
+            if (descripcionEl && response.data.descripcion) {
+                descripcionEl.textContent = response.data.descripcion;
+            }
+            
+            // Imagen
+            const imagenEl = document.getElementById('info-imagen');
+            const imageContainerEl = document.getElementById('info-image-container');
+            if (imagenEl && response.data.imagen) {
+                const imageUrl = fixImagePath(response.data.imagen);
+                imagenEl.src = imageUrl;
+                imagenEl.alt = response.data.titulo || 'Información Institucional';
+                imagenEl.onerror = function() {
+                    this.src = 'assets/images/placeholder.jpg';
+                };
+                if (imageContainerEl) imageContainerEl.style.display = 'block';
+            }
+            
+            if (contentEl) contentEl.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error al cargar información institucional:', error);
+        const loadingEl = document.getElementById('info-institucional-loading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        const contentEl = document.getElementById('info-institucional-content');
+        if (contentEl) contentEl.style.display = 'block';
+    }
+}
+
 // Cargar sección "Trabajo Social"
 async function loadTrabajoSocial() {
     try {
@@ -863,6 +910,7 @@ async function loadAcercaDe() {
 document.addEventListener('DOMContentLoaded', () => {
     loadHeroSlider();
     loadAcercaDe();
+    loadInformacionInstitucional();
     loadAbuelos();
     loadTrabajoSocial();
     loadTestimonios();

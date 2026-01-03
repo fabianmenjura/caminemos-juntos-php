@@ -287,6 +287,18 @@ try {
         exit;
     }
 
+    // Rutas de "Información Institucional" (público)
+    if ($segments[0] === 'informacion-institucional') {
+        require_once __DIR__ . '/controllers/InformacionInstitucionalController.php';
+        $controller = new InformacionInstitucionalController();
+
+        if ($method === 'GET') {
+            // GET /api/informacion-institucional
+            $controller->index();
+        }
+        exit;
+    }
+
     // Rutas de configuración general (público)
     if ($segments[0] === 'configuracion') {
         require_once __DIR__ . '/controllers/ConfiguracionController.php';
@@ -462,6 +474,8 @@ try {
                 $controller->getAcercaDe();
             } elseif ($segments[1] === 'trabajo-social') {
                 $controller->getTrabajoSocial();
+            } elseif ($segments[1] === 'informacion-institucional') {
+                $controller->getInformacionInstitucional();
             } elseif ($segments[1] === 'galeria') {
                 $controller->getGaleria();
             } elseif ($segments[1] === 'configuracion') {
@@ -486,6 +500,8 @@ try {
                 }
             } elseif ($segments[1] === 'trabajo-social' && isset($segments[2]) && $segments[2] === 'contenido') {
                 $controller->updateTrabajoSocialContenido();
+            } elseif ($segments[1] === 'informacion-institucional' && isset($segments[2]) && $segments[2] === 'contenido') {
+                $controller->updateInformacionInstitucionalContenido();
             } elseif ($segments[1] === 'configuracion') {
                 if (isset($segments[2]) && $segments[2] === 'redes-sociales') {
                     $controller->createRedSocial();

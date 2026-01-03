@@ -42,6 +42,9 @@ function loadAdminSidebar(currentPage = '') {
             <a href="acerca-de.html" class="menu-item ${currentPage === 'acerca-de' ? 'active' : ''}">
                 <i class="fas fa-info-circle"></i><span>Acerca de</span>
             </a>
+            <a href="informacion-institucional.html" class="menu-item ${currentPage === 'informacion-institucional' ? 'active' : ''}">
+                <i class="fas fa-building"></i><span>Información Institucional</span>
+            </a>
             <a href="trabajo-social.html" class="menu-item ${currentPage === 'trabajo-social' ? 'active' : ''}">
                 <i class="fas fa-hands-helping"></i><span>Trabajo Social</span>
             </a>
